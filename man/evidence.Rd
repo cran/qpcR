@@ -4,7 +4,7 @@
 \title{Evidence ratio for model comparison with AIC or AICc}
 
 \description{
- The evidence ratio \eqn{\frac{1}{exp(-0.5 * (AIC2 - AIC1))}} is calculated for fitted models either from two 'drc' objects or two numerical values.
+ The evidence ratio \deqn{\frac{1}{exp(-0.5 * (AIC2 - AIC1))}} is calculated for fitted models either from two 'drc' objects or two numerical values.
  Models can be compared that are not nested and where the f-test on residual-sum-of-squares is not applicable.
 }
 

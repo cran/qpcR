@@ -1,10 +1,11 @@
 \name{Rsq}
 \alias{Rsq}
 
-\title{R-square of a sigmoidal fit}
+\title{R-square value of a fitted model}
 
 \description{
-  Calculates the R-square value of a sigmoidal fit.
+  Calculates the R-square value for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
+ or any other models where \code{\link{fitted}} and \code{\link{residuals}} can be extacted.
 }
 
 \usage{
@@ -12,15 +13,15 @@
 }
 
 \arguments{
-  \item{object}{an object of class 'drc'.}
+  \item{object}{a fitted model.}
  }
 
 \value{
-The R-square value from the sigmoidal fit.
+The R-square value of the fit.
 }
 
 \author{
-  Christian Ritz
+  Andrej-Nikolai Spiess
 }
 
 

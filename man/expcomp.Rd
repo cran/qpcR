@@ -4,18 +4,18 @@
 \title{Comparison of several sigmodal models by RMSE within the exponential region}
 
 \description{
-  The exponential region of the qPCR data is identified by the studentized outlier method, as in \link{expfit2}.
+  The exponential region of the qPCR data is identified by the studentized outlier method, as in \link{expfit}.
   The root-mean-squared-errors of 14 different sigmoidal models within this region are then calculated.
   The result of the fits are plotted and the models are returned in order of ascending RMSE.
 }
 
 \usage{
-  expcomp(object, fitcyc = 5)
+  expcomp(object, ...)
 }
 
 \arguments{
   \item{object}{a 'drc' object.} 
-  \item{fitcyc}{the number of cycles used for exponential fitting.} 
+  \item{...}{other parameters to be passed to \code{expfit}.} 
 }
 
 \details{

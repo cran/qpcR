@@ -1,66 +1,68 @@
-expfit <- function (object, fitcyc = 5, plot = TRUE, crit = "resVar", start = 5, maxeff = 2, mineff = 1.5) 
+expfit <- function(
+object,
+method = c("outlier", "midpoint", "ERBCP"),
+### outlier
+pval = 0.05,
+n.outl = 3,
+### midpoint
+n.ground = 10,
+### ERBCP
+corfact = 1,
+### all methods
+fix = c("top", "bottom", "middle"),
+nfit = 5,
+plot = TRUE,
+...
+)
 {
-    crit <- match.arg(crit, c("resVar", "AIC"))
-    rv <- vector()
-    Eff <- vector()
-    aic <- vector()
-    rmse <- vector()
-    reseff <- efficiency(object, plot = FALSE)
-    cpD1 <- reseff$cpD1
-    cpD2 <- reseff$cpD2
-    effgood <- vector()
-    
-    for (i in start:cpD1) {
-        expMod <- update(object, data = object$data[i:(i + fitcyc - 
-            1), ], fct = expGrowth())
-        coeftemp <- as.numeric(coef(expMod)[2])
-   	   rv[i] <- round(resVar(expMod), 8)
-        aic[i] <- round(AIC(expMod), 2)
-        rmse[i] <- round(RMSE(expMod), 5)
-        Eff[i] <- round(exp(coeftemp), 3)
-        
-        if (Eff[i] < mineff || Eff[i] > maxeff) {
-		  COL <- 2 
-		  effgood[i] <- F
-	   }
-	   else {
-		  COL <- 3
-		  effgood[i] <- T
-        }	
-          
-	   mtext <- paste("resVar:", rv[i], "\n", "AIC:", aic[i], 
-            "\n", "Eff:", Eff[i], "\n")
+      method <- match.arg(method)
+      fix <- match.arg(fix)
+      cyc <- object$data[, 1]
+      fluo <- object$data[, 2]
+                  
+      ### outlier method
+      if (method == "outlier") {
+            result <- outlier(object, pval = pval, nsig = n.outl)
+            OUTLIER <- result$outl
+            CYCS <- OUTLIER:(OUTLIER + nfit - 1)
+      }
+      
+      ### midpoint method
+      if (method == "midpoint") {
+            result <- midpoint(object, first.cyc = n.ground)
+            midpoint <- result$mp
+            MIDPOINT <- round(midpoint)
+            if (fix == "top") CYCS <- (MIDPOINT - nfit + 1):MIDPOINT
+            if (fix == "bottom") CYCS <- MIDPOINT:(MIDPOINT + nfit - 1)
+            if (fix == "middle") CYCS <- (MIDPOINT - (round(nfit/2 - 1))):(MIDPOINT + (round(nfit/2)))
+      }
+      
+      ### ERBCP (Exponential Region By Crossing Points) method
+      if (method == "ERBCP") {
+            result <- efficiency(object, plot = FALSE)
+            cpD1 <- result$cpD1
+            cpD2 <- result$cpD2
+            expreg <- cpD2 - corfact * (cpD1 - cpD2)
+            EXPREG <- round(expreg)
+            if (fix == "top") CYCS <- (EXPREG - nfit + 1):EXPREG
+            if (fix == "bottom") CYCS <- EXPREG:(EXPREG + nfit - 1)
+            if (fix == "middle") CYCS <- (EXPREG - (round(nfit/2 - 1))):(EXPREG + (round(nfit/2)))
+      }
+      
+      ### calculate exponential model
+      expMod <- update(object, data = object$data[CYCS, ], fct = qpcR:::expGrowth())
+      EFF <- exp(as.numeric(coef(expMod)[2]))
+      
+      POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)	
 
-        if (plot) 
-            pcrplot(object, main = mtext, cex.main = 0.9, xlab = "Cycles", 
-                ylab = "raw fluorescence")
-        if (plot) 
-            pcrplot(expMod, add = TRUE, col = COL, lwd = 2)
-    }
-            
-    if (crit == "resVar") {
-	   rv[effgood != TRUE] <- NA
-        cyc.best <- which.min(rv)
-        cyc.all <- cyc.best:(cyc.best + fitcyc - 1)
-    }
-    if (crit == "AIC") {
-        aic[effgood != TRUE] <- NA
-        cyc.best <- which.min(aic)
-        cyc.all <- cyc.best:(cyc.best + fitcyc - 1)
-    }
-    
-    EFF.curve1 <- object$data[cyc.all[-1], 2]
-    EFF.curve2 <- object$data[cyc.all[-length(cyc.all)], 2]
-    EFF.curve <- EFF.curve1/EFF.curve2
-    expMod <- update(object, data = object$data[cyc.best:(cyc.best + 
-        fitcyc - 1), ], fct = expGrowth())
+      if (plot) {
+            pcrplot(object, xlab = "Cycles", ylab = "raw fluorescence", ...)
+            pcrplot(expMod, add = TRUE, col = 3, lwd = 2)
+            points(POINT, pcrpred(object, POINT, "y"), col = 2, pch = 16)
+      }
 
-    if (plot) {
-        pcrplot(object)
-        pcrplot(expMod, add = TRUE, col = 3, lwd = 2)
-    }
-    return(list(cyc.best = cyc.all, Eff.fit = exp(as.numeric(coef(expMod)[2])), 
-        Eff.curve = EFF.curve, resVar = rv[cyc.best], AIC = aic[cyc.best], 
-	   RMSE = rmse[cyc.best], init = as.numeric(coef(expMod)[1]),
-        mod = expMod))
+      return(list(point = POINT, cycles = CYCS, eff = as.numeric(exp(coef(expMod)[2])),
+            eff.cycles = object$data[CYCS, 2]/object$data[CYCS - 1, 2],
+            AIC = AIC(expMod), resVar = resVar(expMod), RMSE = RMSE(expMod),
+            init = as.numeric(coef(expMod)[1]), mod = expMod))
 }

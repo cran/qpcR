@@ -6,7 +6,7 @@
 \title{Batch calculation of qPCR efficiency and several other important qPCR parameters with different methods}
 
 \description{
-This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}}, \code{\link{expfit}} and \code{\link{expfit2}} on a dataframe containing many qPCR runs.
+This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}}, and \code{\link{expfit}} on a dataframe containing many qPCR runs.
 The output is a dataframe with the estimated parameters and model description.
 Very easy to use on datasheets containing many qPCR runs, i.e. as can be imported from Excel.  
 The data is automatically copied to the clipboard.
@@ -14,7 +14,8 @@ The data is automatically copied to the clipboard.
 
 \usage{
 pcrbatch(x, cols = 2:ncol(x), group = NULL, model = l4(), type = "cpD2", 
-opt = TRUE, smooth = "tukey", norm = FALSE, fact = 1, ave = "mean", plot = FALSE) 
+	 opt = FALSE, smooth = c("none", "tukey", "lowess"), norm = FALSE, fact = 1, 
+	 ave = c("mean", "median"), plot = FALSE, retPar = FALSE) 
 }
 
 \arguments{
@@ -29,6 +30,7 @@ opt = TRUE, smooth = "tukey", norm = FALSE, fact = 1, ave = "mean", plot = FALSE
   \item{fact}{a constant multiplication factor for the raw qPCR data.}
   \item{ave}{averaging method for replicates. Defaults to "mean", another option is "median".}
   \item{plot}{logical. If \code{TRUE}, a graphical analysis of the qPCR data is displayed, otherwise (default) a simple console output is displayed.}
+  \item{retPar}{logical. Should the parameters from the fit be included in the output?}
 }
 
 \details{
@@ -60,8 +62,8 @@ Larionov et al., \emph{BMC Bioinformatics}, \bold{6}: 62.
 temp <- pcrbatch(reps)
 }
 
-## first 4 runs
-temp <- pcrbatch(reps, 2:4)
+## first 4 runs and return parameters of fit
+temp <- pcrbatch(reps, 2:4, retPar = TRUE)
 
 ##  first 8 runs, with 4 replicates each
 temp <- pcrbatch(reps, 2:9, c(1,1,1,1,2,2,2,2))

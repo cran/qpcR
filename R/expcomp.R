@@ -1,4 +1,4 @@
-expcomp <- function(object, fitcyc = 5)
+expcomp <- function(object, ...)
 {
 	obj <- object
 	modList <- list()
@@ -15,9 +15,9 @@ expcomp <- function(object, fitcyc = 5)
 		modList[[i]] <- newmod
 	}
 
-	EXP <- expfit2(object, fitcyc = fitcyc)
+	EXP <- expfit(object, plot = FALSE, ...)
 	expMod <- EXP$mod
-	expReg <- EXP$outlier:(EXP$outlier + fitcyc - 1)
+	expReg <- EXP$cycles
 
 	rmses <- sapply(modList, function(x) RMSE(x, which = expReg))
 	rmses <- c(rmses, EXP$RMSE)

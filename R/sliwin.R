@@ -16,8 +16,7 @@ sliwin <- function (object, wsize = 5, border = 7, plot = TRUE)
             next
         fit.sum <- summary(fit)
         r.squared <- fit.sum$r.squared
-        r <- sqrt(r.squared)
-        rtable[i] <- r
+        rtable[i] <- r.squared
         slope <- fit.sum$coefficients[2, 1]
         slopetable[i] <- slope
     }
@@ -33,7 +32,7 @@ sliwin <- function (object, wsize = 5, border = 7, plot = TRUE)
         par(mar = c(5.1, 4.5, 3.0, 2.1))
         par(mfrow = c(3, 1))
         plot(x[1:(length(x) - wsize)], rtable, ylim = c(0.9, 
-            1), xlab = "Cycles", ylab = "RegCoeff", cex.axis = 1.3, 
+            1), xlab = "Cycles", ylab = "R-squared", cex.axis = 1.3,
             cex.lab = 1.5)
         points(xmin + crmax - 1, rmax, col = 4, cex = 2)
         plot(x[1:(length(x) - wsize)], efftable, xlab = "Cycles", 

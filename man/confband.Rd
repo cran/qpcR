@@ -33,7 +33,7 @@ The confidence intervals are based on asymptotic normality.
 }
 
 \seealso{
-Is also implemented in the \code{\link{pcrplot}} function for plotting the confidence bands.
+Also implemented in the \code{\link{pcrplot}} function for plotting the confidence bands.
 }
 
 \examples{

@@ -1,7 +1,7 @@
 \name{pcropt1}
 \alias{pcropt1}
 
-\title{Optimization of efficiency and F0 estimation by combinatorial cycle elimination of plateau and ground phase cycles}
+\title{Combinatorial elimination of plateau and ground phase cycles}
 
 \description{
   The estimation of PCR efficiency and calculation of initial fluorescence (F0) is analyzed by refitting the (optimized) model on subsets of the data,

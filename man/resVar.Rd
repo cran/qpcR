@@ -1,10 +1,11 @@
 \name{resVar}
 \alias{resVar}
 
-\title{Residual variance of a sigmoidal fit}
+\title{Residual variance of a fitted model}
 
 \description{
-  Calculates the residual variance of a sigmoidal fit.
+  Calculates the residual variance for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
+ or any other models where \code{\link{coef}} and \code{\link{residuals}} can be extacted.
 }
 
 \usage{
@@ -12,15 +13,15 @@
 }
 
 \arguments{
-  \item{object}{an object of class 'drc'.}
+  \item{object}{a fitted model.}
  }
 
 \value{
-The residual variance from the sigmoidal fit.
+The residual variance of the fit.
 }
 
 \author{
-  Christian Ritz
+  Andrej-Nikolai Spiess
 }
 
 

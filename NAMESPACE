@@ -3,11 +3,12 @@ export(
 
 efficiency, mchoice, repform,
 sliwin, Rsq, resVar, pcrplot, confband, eff,
-expfit, expfit2, pcrbatch, RMSE, calib,
+expfit, pcrbatch, RMSE, calib,
 pcrpred, pcrGOF, expcomp, pcrimport, pcrfit,
-AICc, evidence, modlist, pcropt1
-
+AICc, evidence, modlist, pcropt1, propagate,
+ratiocalc
 )
 
-
 ## S3 methods
+
+

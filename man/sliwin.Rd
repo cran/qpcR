@@ -29,8 +29,8 @@ The initial template fluorescence (F0) is thus calculated by \eqn{F0 = exp(inter
 \value{
  A list with the following components:
   \item{effmax}{the maximal PCR efficiency.}
-  \item{rmax}{the maximum regression coefficient.}
-  \item{init}{the initial template fluorescence, i.e. 'F0'.}  
+  \item{rmax}{the maximum R-squared.}
+  \item{init}{the initial template fluorescence F0.}  
 }
 
 \author{

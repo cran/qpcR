@@ -4,9 +4,10 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         "expR" & !is.numeric(type)) {
         stop("invalid estimation type")
     }
+
     if (!is.null(amount) && !is.numeric(amount)) 
         stop("amount must be numeric!")
-    par(mar = c(5, 4, 4, 4))
+   
     rv <- summary(object)$resVar
     aicc <- AICc(object)
     cyc.col <- which(colnames(object$data) == all.vars(object$call)[2])
@@ -19,12 +20,15 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         byrow = TRUE)
     res.grad <- object$fct$derivx(sequence, pMat)
     obj.fun <- qpcR:::typeid(object)
+    
     if (obj.fun == "l5" || obj.fun == "l4" || obj.fun == "l3") {
         res.hess <- deriv2.l(sequence, pMat, obj.fun)
     }
+
     if (obj.fun == "b5" || obj.fun == "b4" || obj.fun == "b3") {
         res.hess <- deriv2.b(sequence, pMat, obj.fun)
     }
+
     E1res <- effcurve$eff.y
     maxD2 <- which.max(res.hess)
     cycmaxD2 <- sequence[maxD2]
@@ -40,11 +44,13 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         CYC <- cycmaxD2 + shift 
 	   if (shift != 0) shiftCyc <- cycmaxD2 + shift       
     }
+
     if (type == "cpD1") {
         maxE1 <- E1res[maxD1 + (100 * shift)]
   	   CYC <- cycmaxD1 + shift
         if (shift != 0) shiftCyc <- cycmaxD1 + shift        
     }
+
     if (type == "maxE") {
         maxE <- which.max(E1res)
         maxE1 <- E1res[maxE + (100 * shift)]
@@ -52,12 +58,14 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         CYC <- cycmaxE1 + shift
         if (shift != 0) shiftCyc <- cycmaxE1 + shift             
     }
+
     if (is.numeric(type)) {
         type.cyc <- which(sequence == type)
         maxE1 <- E1res[type.cyc]
         if (shift != 0) shiftCyc <- type + shift
         CYC <- type + shift
     }
+
     if (type == "expR") {
         expR <- maxD2 - (maxD1 - maxD2)
         exp.cyc <- sequence[expR]
@@ -65,12 +73,15 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         if (shift != 0) shiftCyc <- exp.cyc + shift
         CYC <- exp.cyc + shift
     }
+
     fluo <- pcrpred(object, "y", newdata = CYC)
     init <- fluo/(maxE1^CYC)
     if (is.numeric(amount)) 
         CF <- amount/init
     else CF <- NA
+
     if (plot) {
+        par(mar = c(5, 4, 4, 4))
         pcrplot(object, lwd = 1.5, type = "all", main = NA, cex.main = 0.9)
         aT <- axTicks(side = 4)
         cF <- max(aT/1)
@@ -118,6 +129,7 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         mtext(paste("Model:", obj.fun), line = 3, col = 1, adj = 0.5, 
             cex = 0.9)
     }
+    
     return(list(eff = maxE1, resVar = round(summary(object)$resVar, 
         digits = 8), AICc = AICc(object), AIC = AIC(object), 
         Rsq = Rsq(object), cpD1 = cycmaxD1, cpD2 = cycmaxD2, 

@@ -1,18 +1,24 @@
-modlist <- function(x, cyc = 1, fluo = 2:ncol(x), fct = l5())
+modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE) 
 {
-      modList <- NULL
-      counter <- 1
-
-      mc <- match.call()
-      cL <- as.list(mc)
-      if (is.null(cL$fct)) cL$fct <- l5()
-
-      for (i in fluo) {
-            cat("Making model for", names(x)[i], "\n")
-            Cycles <- x[, cyc]
-            Fluo <- x[, i]
-            modList[[counter]] <- eval(as.call(list(multdrc, Fluo ~ Cycles, fct = cL$fct)))
-            counter <- counter + 1
-      }
-      invisible(modList)
+    modList <- NULL
+    counter <- 1
+    mc <- match.call()
+    cL <- as.list(mc)
+    if (is.null(cL$fct)) 
+        cL$fct <- l5()
+    for (i in fluo) {
+        Cycles <- x[, cyc]
+        Fluo <- x[, i]
+        Names <- colnames(x[i])
+        m <- eval(as.call(list(multdrc, Fluo ~ Cycles, fct = cL$fct)))
+        if (opt) {
+        	  m <- try(mchoice(m, verbose = FALSE), silent = TRUE)
+        }
+        cat("Making model for ", names(x)[i], " (", qpcR:::typeid(m), ")\n", sep= "")
+        modList[[counter]] <- m
+        modList[[counter]]$names <- Names
+        counter <- counter + 1
+    }
+    class(modList) <- "modlist"
+    invisible(modList)
 }

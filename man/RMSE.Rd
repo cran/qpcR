@@ -1,10 +1,11 @@
 \name{RMSE}
 \alias{RMSE}
 
-\title{Root-mean-squared-error of a sigmoidal fit}
+\title{Root-mean-squared-error of a fitted model}
 
 \description{
-  Calculates the root-mean-squared-error (RMSE) of the fit or a region of the fit.
+  Calculates the root-mean-squared-error (RMSE) for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
+ or any other models where \code{\link{residuals}} can be extacted. 
 }
 
 \usage{
@@ -12,16 +13,16 @@
 }
 
 \arguments{
-  \item{object}{an object of class 'drc'.}
+  \item{object}{a fitted model.}
   \item{which}{the part of the curve to be used for RMSE calculation. If not defined, the complete curve is used.}
  }
 
 \value{
-The root-mean-squared-error from the sigmoidal fit or a part thereof.
+The root-mean-squared-error from the fit or a part thereof.
 }
 
 \author{
-  Christian Ritz
+  Andrej-Nikolai Spiess
 }
 
 
