@@ -1,0 +1,13 @@
+## functions
+export(
+
+efficiency, mchoice, repform,
+sliwin, Rsq, resVar, pcrplot, confband, eff,
+expfit, expfit2, pcrbatch, RMSE, calib,
+pcrpred, pcrGOF, expcomp, pcrimport, pcrfit,
+AICc, evidence, modlist, pcropt1
+
+)
+
+
+## S3 methods

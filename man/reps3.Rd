@@ -1,0 +1,39 @@
+\name{reps3}
+\alias{reps3}
+
+\title{A qPCR dilution experiment with replicates (Stratagene MXPro3000P)}
+
+\description{
+A high quality dilution experiment with six 4-fold dilutions of the cDNA, and three replicates for each dilution.
+}
+
+\usage{
+data(reps3)
+}
+
+\format{
+A data frame with the PCR cycles and 21 qPCR runs with three replicates of six 4-fold dilutions.
+The replicates are defined by FX.Y (X = dilution number, Y = replicate number).  
+}
+
+\details{
+The real-time PCR was conducted with primers for the S27a housekeeping gene in a MXPro3000P instrument (Stratagene).
+Data was ROX-normalized, but without smoothing.
+}
+
+\source{
+Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital Hamburg-Eppendorf.
+}
+
+\examples{
+data(reps3)### on single data
+m1 <- multdrc(F1.1 ~ Cycles, data = reps3, fct = l4())
+pcrplot(m1)
+### on replicated data
+repData <- repform(reps3[,1:4], c(0,1,1,1))
+m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+pcrplot(m2, type = "all")
+}
+
+\keyword{models}
+\keyword{nonlinear}
