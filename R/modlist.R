@@ -1,4 +1,4 @@
-modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE) 
+modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm = FALSE)
 {
     modList <- NULL
     counter <- 1
@@ -9,6 +9,7 @@ modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE)
     for (i in fluo) {
         Cycles <- x[, cyc]
         Fluo <- x[, i]
+        if (norm) Fluo <- Fluo/max(Fluo, na.rm = TRUE)
         Names <- colnames(x[i])
         m <- eval(as.call(list(multdrc, Fluo ~ Cycles, fct = cL$fct)))
         if (opt) {

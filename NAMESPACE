@@ -6,9 +6,10 @@ sliwin, Rsq, resVar, pcrplot, confband, eff,
 expfit, pcrbatch, RMSE, calib,
 pcrpred, pcrGOF, expcomp, pcrimport, pcrfit,
 AICc, evidence, modlist, pcropt1, propagate,
-ratiocalc
+ratiocalc, ratioplot, curvemean
 )
 
 ## S3 methods
+
 
 

@@ -17,13 +17,12 @@ Package: \tab qpcR\cr
 Type: \tab Package\cr
 LazyLoad: \tab yes\cr
 LazyData: \tab yes\cr
-Version: \tab 1.1-1\cr
-Date: \tab 2008-05-13\cr
+Version: \tab 1.1-3\cr
 License: \tab GNU GPL (version 2 or any later version)\cr
 Depends: \tab R (>= 2.0.0), drc\cr
 URL: \tab http://www.dr-spiess.de; http://www.r-project.org; http://www.bioassay.dk \cr
-Packaged: \tab Mon May 13 2008; spiess\cr
-Built: \tab R 2.7.0; ; 2008-05-13; windows\cr
+Packaged: \tab Mon Jun 09 2008; spiess\cr
+Built: \tab R 2.7.0; ; 2008-06-09; windows\cr
 }
 
 package:
@@ -53,7 +52,9 @@ Functions:\cr
 \link{modlist} Create nonlinear models from a dataframe and coerce them into a list.\cr
 \link{pcropt1} Combinatorial elimination of plateau and ground phase cycles.\cr
 \link{propagate} General error propagation function using covariates and Monte Carlo simulations.\cr
-\link{ratiocalc} Calculation of ratios and propagated errors for all combinations of qPCR runs with or without reference data.\cr
+\link{ratiocalc} Calculation of ratios/propagated errors/t-statistics for all permutations/combinations of qPCR runs with or without reference data.\cr
+\link{ratioplot} Plot method for data of class 'ratiocalc' which displays barplots of ratios with error bars.\cr
+\link{curvemean} Building a model which averages a batch of qPCR curves.\cr
 
 Datasets:\cr
 \link{reps} qPCR dilution experiment with replicates (Roche Lightcycler).\cr

@@ -1,8 +1,21 @@
-ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1", "2-2"), ...)
+ratiocalc.modlist <- function(data, group = NULL, ratio = c("ind", "first"),
+                              iter = c("combs", "perms"), rep.all = TRUE, ttest = c("cp", "Ecp"), ...)
 {
       require(gtools, quietly = TRUE)
       if (class(data) != "modlist") stop("data is not of class 'modlist'!")
-      ratio.fun <- match.arg(ratio.fun)
+      
+      if (!is.numeric(ratio))   {
+            ratio <- match.arg(ratio)
+            RATIO <- NULL
+      }
+
+      else {
+            if (ratio < 1 || ratio > 2) stop("Efficiency should be between 1 and 2!")
+            RATIO <- ratio
+            ratio <- "NUMERIC"
+      }
+      iter <- match.arg(iter)
+      ttest <- match.arg(ttest)
 
       if (!is.null(group)) {
             if (is.factor(group)) group <- as.numeric(group)
@@ -21,6 +34,7 @@ ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1"
             exp <- 1:length(data)
             CONYES <- FALSE
             EXP <- as.factor(exp)
+            group <- as.factor(exp)
       }
 
       EXP.eff <- sapply(data[exp], function(x) efficiency(x, plot = FALSE)$eff)
@@ -49,7 +63,6 @@ ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1"
       expEff <- as.data.frame(lapply(EXP.eff, function(x) x <- c(x, rep(NA, mlen - length(x)))))
       expCp <- as.data.frame(lapply(EXP.cp, function(x) x <- c(x, rep(NA, mlen - length(x)))))
 
-
       if (CONYES) {
             conEff <- as.data.frame(lapply(CON.eff, function(x) x <- c(x, rep(NA, mlen - length(x)))))
             conCp <- as.data.frame(lapply(CON.cp, function(x) x <- c(x, rep(NA, mlen - length(x)))))
@@ -58,16 +71,49 @@ ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1"
             conCp <- NA
       }
 
-
       effDat <- cbind(expEff, conEff)
       cpDat <- cbind(expCp, conCp)
       
-      COMBS <- combinations(ncol(expEff), 2)
-
+      if (iter == "combs") COMBS <- combinations(ncol(expEff), 2, repeats.allowed = rep.all)
+            else COMBS <- permutations(ncol(expEff), 2, repeats.allowed = rep.all)
+            
       OUT <- NULL
       listNAMES <- sapply(data, function(x) x$names)
+      groupNAMES <- split(listNAMES, as.factor(group))
       allNAMES <- NULL
       PROPLIST <- list()
+      n <- NULL
+      
+      EXPRESSIONS <- list(
+                        EXPR1 = expression((E2^cp2)/(E1^cp1)),
+                        EXPR2 = expression(((E2^cp2)/(E1^cp1))/((E4^cp4)/(E3^cp3))),
+                        EXPR3 = expression((E1^cp2)/(E1^cp1)),
+                        EXPR4 = expression(((E1^cp2)/(E1^cp1))/((E3^cp4)/(E3^cp3))),
+                        EXPR5 = as.expression(as.list(substitute(expression((val^cp2)/(val^cp1)), list(val = RATIO)))[-1]),
+                        EXPR6 = as.expression(as.list(substitute(expression(((val^cp2)/(val^cp1))/(val^cp4)/(val^cp3)), list(val = RATIO)))[-1])
+      )
+
+      HTESTS <- list(
+                  HTEST1 = expression(t.test(cp1, cp2, ...)),
+                  HTEST2 = expression(t.test(cp1 - cp3, cp2 - cp4, ...)),
+                  HTEST3 = expression(t.test(E1^cp1, E2^cp2, ...)),
+                  HTEST4 = expression(t.test((E1^cp1) - (E2^cp2), (E3^cp3) - (E4^cp4), ...)),
+                  HTEST5 = expression(t.test(E1^cp1, E1^cp2, ...)),
+                  HTEST6 = expression(t.test((E1^cp1) - (E1^cp2), (E3^cp3) - (E3^cp4), ...)),
+                  HTEST7 = as.expression(as.list(substitute(expression(t.test(val^cp1, val^cp2, ...)), list(val = RATIO)))[-1]),
+                  HTEST8 = as.expression(as.list(substitute(expression(t.test((val^cp1) - (val^cp2), (val^cp3) - (val^cp4), ...)) ,list(val = RATIO)))[-1])
+       )
+       
+      CHOICES <- expand.grid(ratio = c("ind", "first", "NUMERIC"), CONYES = c(FALSE, TRUE), ttest = c("cp", "Ecp"))
+      expr <- c(1, 3, 5, 2, 4, 6, 1, 3, 5, 2, 4, 6)
+      htest <- c(1, 1, 1, 2, 2, 2, 3, 5, 7, 4, 6, 8)
+      CHOICE <- c(ratio, CONYES, ttest)
+      WHICH <- sapply(CHOICE, function(x) which(x == CHOICES, arr.ind = TRUE)[, 1])
+      TABLE <- as.data.frame(table(unlist(WHICH)))
+      IND <- as.numeric(as.vector(TABLE$Var1[TABLE$Freq == length(WHICH)]))
+
+      EXPR <- EXPRESSIONS[[expr[IND]]]
+      HTEST <- HTESTS[[htest[IND]]]
       
       for (i in 1:nrow(COMBS)) {
             whichcol <- COMBS[i, ]
@@ -77,7 +123,7 @@ ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1"
             cp2 <- expCp[, whichcol[2]]
             expFrame <- cbind(E1, E2, cp1, cp2)
             expconFrame <- expFrame
-            
+
             if (CONYES)  {
                   E3 <- conEff[, whichcol[1]]
                   E4 <- conEff[, whichcol[2]]
@@ -87,27 +133,25 @@ ratiocalc.modlist <- function(data, group = NULL, ratio.fun = c("E1-E2", "E1-E1"
                   expconFrame <- cbind(expFrame, conFrame)
             }
 
-            if (ratio.fun == "E1-E2") {
-                  if (!CONYES) PROP <- propagate((E2^cp2)/(E1^cp1), vals = expconFrame, type = "raw", ...)
-                  if (CONYES) PROP <- propagate(((E2^cp2)/(E1^cp1))/((E4^cp4)/(E3^cp3)), vals = expconFrame, type = "raw", ...)
-            }
-            if (ratio.fun == "E1-E1") {
-                  if (!CONYES) PROP <- propagate((E1^cp1)/(E1^cp2), vals = expconFrame, type = "raw", ...)
-                  if (CONYES) PROP <- propagate(((E1^cp1)/(E1^cp2))/((E3^cp3)/(E3^cp4)), vals = expconFrame, type = "raw", ...)
-            }
-            if (ratio.fun == "2-2") {
-                  if (!CONYES) PROP <- propagate((2^cp1)/(2^cp2), vals = expconFrame, type = "raw", ...)
-                  if (CONYES) PROP <- propagate(((2^cp1)/(2^cp2))/((2^cp3)/(2^cp4)), vals = expconFrame, type = "raw", ...)
-            }
-            
-            OUTtemp <- unlist(PROP[c(2, 1, 4, 3)])
+            PROP <- propagate(EXPR, expconFrame, ...)
+            STAT <- try(eval(HTEST), silent = TRUE)
+            if (inherits(STAT, "try-error")) STAT <- list(p.value = -1)
+
+            OUTtemp <- unlist(PROP[1:6])
+            nobs <- nrow(expconFrame)
+            OUTtemp <- c(OUTtemp, n = nobs, t.test = STAT$p.value)
             OUT <- cbind(OUT, OUTtemp)
-            NAME <-  paste(listNAMES[COMBS[i, 1]], "/", listNAMES[COMBS[i, 2]], sep = "")
+            firstNAME <- groupNAMES[[COMBS[i, 1]]][1]
+            secondNAME <- groupNAMES[[COMBS[i, 2]]][1]
+            NAME <- paste(firstNAME, "/", secondNAME, sep = "")
             allNAMES <- c(allNAMES, NAME)
             PROPLIST[[i]] <- PROP
       }
+      
       colnames(OUT) <- allNAMES
       OUTclip <- cbind(rownames(OUT), OUT)
       write.table(OUTclip, file = "clipboard-64000", sep = "\t", row.names = FALSE)
-      invisible(list(ratios = OUT, propList = PROPLIST))
+      RET <- list(ratios = OUT, propList = PROPLIST, exp.ratio = EXPR, exp.htest = HTEST)
+      class(RET) <- "ratiocalc"
+      invisible(RET)
 }
