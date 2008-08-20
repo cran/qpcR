@@ -9,7 +9,7 @@
 }
 
 \usage{
-  modlist(x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm = FALSE)
+  modlist(x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm = FALSE, ...)
 }
 
 \arguments{
@@ -19,6 +19,7 @@
   \item{fct}{the function used for building the model, using the function lists from the 'drc' package.} 
   \item{opt}{logical. Should model optimization take place? If \code{TRUE}, model selection is applied.} 
   \item{norm}{logical. Should the raw data be normalized to within [0, 1] before model fitting?}
+  \item{...}{other parameters to be passed to \code{\link{mchoice}}.}
  }
 
 \details{
@@ -41,8 +42,8 @@ effs <- sapply(ml, function(x) efficiency(x)$eff)
 print(effs)
 
 ### 'crossing points' for the first 3 runs
-### using best model and normalization
-ml <- modlist(reps, fluo = 2:4, fct = l4(), opt = TRUE, norm = TRUE)
+### using best model from Akaike weights and normalization
+ml <- modlist(reps, fluo = 2:4, fct = l4(), opt = TRUE, norm = TRUE, crit = "weights")
 cps <- sapply(ml, function(x) efficiency(x)$cpD2)
 print(cps)
 

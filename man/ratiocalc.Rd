@@ -75,6 +75,13 @@ The propagated errors are calculated by \code{\link{propagate}} and often seem q
   Andrej-Nikolai Spiess
 }
 
+\note{
+When using a grouping regime, the column names in the \code{ratio} slot are always the names of the first run of each group.\cr
+Also, when using \code{ratio = "first"}, combinations of the same two runs will not necessarily give reciprocal values, because
+ different efficiencies are used for the calculation of the ratios. 
+If confusion exists about the different error types, see \code{\link{propagate}} or \url{www.dr-spiess.de/qpcR/errors.pdf}.
+}
+
 \references{
 Livak KJ \emph{et al.} (2001) Analysis of relative gene expression data using real-time quantitative PCR and the 2(-Delta Delta C(T)) method. \emph{Methods}, \bold{25}: 402-428.\cr
 Tichopad A \emph{et al.} (2003) Standardized determination of real-time PCR efficiency from a single reaction set-up. \emph{Nucleic Acids Res}, \bold{31}: e122.\cr

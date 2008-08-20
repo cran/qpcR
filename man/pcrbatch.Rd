@@ -15,7 +15,7 @@ The data is automatically copied to the clipboard.
 \usage{
 pcrbatch(x, cols = 2:ncol(x), group = NULL, model = l4(), type = "cpD2", 
 	 opt = FALSE, smooth = c("none", "tukey", "lowess"), norm = FALSE, fact = 1, 
-	 ave = c("mean", "median"), plot = FALSE, retPar = FALSE) 
+	 ave = c("mean", "median"), plot = FALSE, retPar = FALSE, ...) 
 }
 
 \arguments{
@@ -31,6 +31,7 @@ pcrbatch(x, cols = 2:ncol(x), group = NULL, model = l4(), type = "cpD2",
   \item{ave}{averaging method for replicates. Defaults to "mean", another option is "median".}
   \item{plot}{logical. If \code{TRUE}, a graphical analysis of the qPCR data is displayed, otherwise (default) a simple console output is displayed.}
   \item{retPar}{logical. Should the parameters from the fit be included in the output?}
+  \item{...}{other parameters to be passed to \code{\link{mchoice}}.}
 }
 
 \details{
@@ -47,6 +48,10 @@ Normalization has been described to improve certain qPCR analyses, but this has 
 
 \author{
   Andrej-Nikolai Spiess
+}
+
+\note{
+When subsequent use of \code{\link{ratiocalc}} is desired, use \code{pcrbatch} on the single run level with \code{group = NULL}.
 }
 
 \references{
@@ -68,8 +73,8 @@ temp <- pcrbatch(reps, 2:4, retPar = TRUE)
 ##  first 8 runs, with 4 replicates each
 temp <- pcrbatch(reps, 2:9, c(1,1,1,1,2,2,2,2))
 
-## using model selection on the first 4 runs, run 1+2 are replicates
-temp <- pcrbatch(reps, 2:5, c(1,1,2,3), opt = TRUE)
+## using model selection (likelihood ratio) on the first 4 runs, run 1+2 are replicates
+temp <- pcrbatch(reps, 2:5, c(1,1,2,3), opt = TRUE, crit = "ratio")
 }
 
 \keyword{models}

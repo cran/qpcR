@@ -1,4 +1,4 @@
-modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm = FALSE)
+modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm = FALSE, ...)
 {
     modList <- NULL
     counter <- 1
@@ -13,7 +13,7 @@ modlist <- function (x, cyc = 1, fluo = 2:ncol(x), fct = l5(), opt = FALSE, norm
         Names <- colnames(x[i])
         m <- eval(as.call(list(multdrc, Fluo ~ Cycles, fct = cL$fct)))
         if (opt) {
-        	  m <- try(mchoice(m, verbose = FALSE), silent = TRUE)
+        	  m <- try(mchoice(m, verbose = FALSE, ...), silent = TRUE)
         }
         cat("Making model for ", names(x)[i], " (", qpcR:::typeid(m), ")\n", sep= "")
         modList[[counter]] <- m

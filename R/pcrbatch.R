@@ -1,6 +1,6 @@
 pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "cpD2", 
     opt = FALSE, smooth = c("none", "tukey", "lowess"), norm = FALSE, 
-    fact = 1, ave = c("mean", "median"), plot = FALSE, retPar = FALSE) 
+    fact = 1, ave = c("mean", "median"), plot = FALSE, retPar = FALSE, ...) 
 {
     if (min(cols) == 1) 
         stop("Column 1 should be cycle column!")
@@ -40,7 +40,7 @@ pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "c
         if (opt) {
             assign("mat", mat, envir = .GlobalEnv)
             fct = paste(qpcR:::typeid(m), "()", sep = "")
-            m <- try(mchoice(m, verbose = FALSE), silent = TRUE)
+            m <- try(mchoice(m, verbose = FALSE, ...), silent = TRUE)
         }
         fct = paste(qpcR:::typeid(m), "()", sep = "")
         cat("Processing ", namevec[i], "...\n", sep = "")

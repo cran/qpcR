@@ -64,6 +64,10 @@ Depending on the input formula, the error propagation may result in an error tha
   Andrej-Nikolai Spiess
 }
 
+\note{
+A more elaborate description of the different error types can be found under \url{www.dr-spiess.de/qpcR/errors.pdf}.
+}
+
 \references{
 Error propagation (in general):\cr
 Taylor JR (1996). An Introduction to error analysis. University Science Books, New York.\cr 

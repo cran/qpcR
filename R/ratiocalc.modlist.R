@@ -85,23 +85,23 @@ ratiocalc.modlist <- function(data, group = NULL, ratio = c("ind", "first"),
       n <- NULL
       
       EXPRESSIONS <- list(
-                        EXPR1 = expression((E2^cp2)/(E1^cp1)),
-                        EXPR2 = expression(((E2^cp2)/(E1^cp1))/((E4^cp4)/(E3^cp3))),
-                        EXPR3 = expression((E1^cp2)/(E1^cp1)),
-                        EXPR4 = expression(((E1^cp2)/(E1^cp1))/((E3^cp4)/(E3^cp3))),
-                        EXPR5 = as.expression(as.list(substitute(expression((val^cp2)/(val^cp1)), list(val = RATIO)))[-1]),
-                        EXPR6 = as.expression(as.list(substitute(expression(((val^cp2)/(val^cp1))/(val^cp4)/(val^cp3)), list(val = RATIO)))[-1])
+                        EXPR1 = expression((E1^cp1)/(E2^cp2)),
+                        EXPR2 = expression(((E1^cp1)/(E2^cp2))/((E3^cp3)/(E4^cp4))),
+                        EXPR3 = expression((E1^cp1)/(E1^cp2)),
+                        EXPR4 = expression(((E1^cp1)/(E1^cp2))/((E3^cp3)/(E3^cp4))),
+                        EXPR5 = as.expression(as.list(substitute(expression((val^cp1)/(val^cp2)), list(val = RATIO)))[-1]),
+                        EXPR6 = as.expression(as.list(substitute(expression(((val^cp1)/(val^cp2))/((val^cp3)/(val^cp4))), list(val = RATIO)))[-1])
       )
 
       HTESTS <- list(
                   HTEST1 = expression(t.test(cp1, cp2, ...)),
                   HTEST2 = expression(t.test(cp1 - cp3, cp2 - cp4, ...)),
                   HTEST3 = expression(t.test(E1^cp1, E2^cp2, ...)),
-                  HTEST4 = expression(t.test((E1^cp1) - (E2^cp2), (E3^cp3) - (E4^cp4), ...)),
+                  HTEST4 = expression(t.test((E1^cp1) - (E3^cp3), (E2^cp2) - (E4^cp4), ...)),
                   HTEST5 = expression(t.test(E1^cp1, E1^cp2, ...)),
-                  HTEST6 = expression(t.test((E1^cp1) - (E1^cp2), (E3^cp3) - (E3^cp4), ...)),
+                  HTEST6 = expression(t.test((E1^cp1) - (E1^cp3), (E2^cp2) - (E2^cp4), ...)),
                   HTEST7 = as.expression(as.list(substitute(expression(t.test(val^cp1, val^cp2, ...)), list(val = RATIO)))[-1]),
-                  HTEST8 = as.expression(as.list(substitute(expression(t.test((val^cp1) - (val^cp2), (val^cp3) - (val^cp4), ...)) ,list(val = RATIO)))[-1])
+                  HTEST8 = as.expression(as.list(substitute(expression(t.test((val^cp1) - (val^cp3), (val^cp2) - (val^cp4), ...)), list(val = RATIO)))[-1])
        )
        
       CHOICES <- expand.grid(ratio = c("ind", "first", "NUMERIC"), CONYES = c(FALSE, TRUE), ttest = c("cp", "Ecp"))
@@ -132,7 +132,7 @@ ratiocalc.modlist <- function(data, group = NULL, ratio = c("ind", "first"),
                   conFrame <- cbind(E3, E4, cp3, cp4)
                   expconFrame <- cbind(expFrame, conFrame)
             }
-
+            
             PROP <- propagate(EXPR, expconFrame, ...)
             STAT <- try(eval(HTEST), silent = TRUE)
             if (inherits(STAT, "try-error")) STAT <- list(p.value = -1)
