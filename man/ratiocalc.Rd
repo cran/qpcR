@@ -92,13 +92,13 @@ Pfaffl M \emph{et al.} (2002) Relative expression software tool (REST) for group
 
 \examples{
 ## using 'modlist'
-DAT <- modlist(reps, fluo = c(2:9), fct = l5())
+DAT <- modlist(reps, 2:9, fct = l5())
 GROUP <- c(1, 1, 2, 2, 101, 101, 102, 102)
 res <-  ratiocalc(DAT, group = GROUP)
 print(res$ratio)
 
 ## using 'pcrbatch' and combinations
-DAT2 <- pcrbatch(reps, col = 2:9, model = l5())
+DAT2 <- pcrbatch(reps, 2:9, fct = l5())
 GROUP <- c(1, 1, 2, 2, 101, 101, 102, 102)
 res <-  ratiocalc(DAT2, group = GROUP, iter = "combs")
 print(res$ratio)
@@ -115,8 +115,6 @@ print(res$ratio)
 ## strong differences in calculated error and
 ## simulated error indicate non-normality of
 ## propagated error
-DAT <- modlist(reps, fluo = c(2:9), fct = l5())
-GROUP <- c(1, 1, 2, 2, 101, 101, 102, 102)
 res <-  ratiocalc(DAT, group = GROUP, do.sim = TRUE)
 print(res$ratio)
 

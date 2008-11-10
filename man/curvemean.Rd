@@ -13,7 +13,7 @@ Starting with a batch of qPCR curves from class \code{modlist}, the function bui
 
 \usage{
   curvemean(modlist, mean = c("amean", "gmean", "hmean"), 
-	    fct = l5(), which = 1)
+	    fct = l5(), which = 1, plot = TRUE)
 }
 
 \arguments{
@@ -21,6 +21,7 @@ Starting with a batch of qPCR curves from class \code{modlist}, the function bui
   \item{mean}{the averaging function, see 'Details'. Default is the arithmetic mean.}
   \item{fct}{the sigmoidal model to be used for the averaged curve.}  
   \item{which}{The position of the curve in the list which is used for defining the y-values. Defaults to the first curve.}  	
+  \item{plot}{Should the result be plotted?}
 }
 
 \details{
@@ -41,6 +42,8 @@ Harmonic mean:
 
 \value{
 A model of class \code{drc} from the averaged curve.  
+The points from the averaged curve (\code{mean.x}) and the standard deviation (\code{sd.x}) are
+ added as items.
 }
 
 \author{
@@ -55,12 +58,12 @@ Vandesompele et al., \emph{Genome Biology}, 2002, \bold{3}: research0034.1-0034.
 \examples{
 ## create arithmetic mean curve of four
 ## serial dilutions
-ml <- modlist(reps, 1, c(2, 6, 10, 14))
+ml <- modlist(reps, c(2, 6, 10, 14))
 curvemean(ml)
 
 ## effect of normalizing data to [0, 1]:
 ## more averaged datapoints
-ml <- modlist(reps, 1, c(2, 6, 10, 14), norm = TRUE)
+ml <- modlist(reps, c(2, 6, 10, 14), norm = TRUE)
 curvemean(ml)
 
 ## difference with geometric mean

@@ -1,7 +1,9 @@
 \name{mchoice}
 \alias{mchoice}
 
-\title{Selection of the best model by nested F-tests, likelihood ratios or Akaike weights}
+\encoding{latin1}
+
+\title{Selection of the best model by nested F-tests/likelihood ratios/Akaike weights}
 
 \description{
   Model selection by comparison of different models using\cr 

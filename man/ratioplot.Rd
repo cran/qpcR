@@ -56,7 +56,7 @@ The latter is more appealing and visually discriminates the up-/down-regulated s
 ## quick (but not dirty!) analysis of qPCR data!
 ## normal bar plot with standard error of mean
 ## and t-test on crossing points
-DAT <- modlist(reps, fluo = c(2:9), fct = l5())
+DAT <- modlist(reps, 2:9, fct = l5())
 GROUP <- c(1, 1, 2, 2, 3, 3, 4, 4)
 res <-  ratiocalc(DAT, group = GROUP, ttest = "cp")
 ratioplot(res, cex.names = 0.3, sem = TRUE, plot.t = "values")

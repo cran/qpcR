@@ -1,15 +1,30 @@
-pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "cpD2", 
+pcrbatch <- function (x, cols = NULL, fct = l4(), group = NULL, type = "cpD2", 
     opt = FALSE, smooth = c("none", "tukey", "lowess"), norm = FALSE, 
-    fact = 1, ave = c("mean", "median"), plot = FALSE, retPar = FALSE, ...) 
+    fact = 1, ave = c("mean", "median"), backsub = NULL, plot = FALSE, retPar = FALSE, ...) 
 {
-    if (min(cols) == 1) 
-        stop("Column 1 should be cycle column!")
+    if (class(x) != "modlist" && is.null(cols)) cols <- 2:ncol(x)
+    if (class(x) != "modlist" && names(x)[1] != "Cycles") stop("Column 1 should be 'Cycles'!")
     smooth <- match.arg(smooth)
-    ave <- match.arg(ave)
+    ave <- match.arg(ave)         
+    
+    if (!is.null(backsub) && !is.numeric(backsub)) 
+        stop("'backsub' must be either NULL or a numeric sequence!")
+    if (!is.null(cols) && min(cols) == 1) stop("'cols' must be > 1 because Column 1 must be 'Cycles'!")
+    
     resMat <- vector()
-    wdata <- x[, cols]
-    namevec <- colnames(x)[cols]
-    colnames(wdata) <- namevec
+    
+    if (class(x) == "modlist") {
+      wdata <- sapply(x, function(x) x$data[, 2])
+      namevec <- sapply(x, function(x) x$names)
+      colnames(wdata) <- namevec
+      Cycles <- x[[1]]$data[, 1]
+    } else {
+      wdata <- x[, cols]
+      namevec <- colnames(x)[cols]
+      colnames(wdata) <- namevec
+      Cycles <- x[, 1]
+    }
+           
     if (!is.null(group)) {
         group <- as.factor(group)
         if (length(group) != length(cols)) 
@@ -23,9 +38,10 @@ pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "c
             group, function(x) centre(x)))
         if (nlevels(group) > 1) 
             data.post <- t(data.post)
-        wdata <- data.post
+        wdata <- as.data.frame(data.post)
         namevec <- paste("group", 1:length(levels(group)), sep = "")
     }
+      
     for (i in 1:ncol(wdata)) {
         data <- wdata[, i] * fact
         if (smooth == "tukey") 
@@ -34,27 +50,40 @@ pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "c
             data <- lowess(data, f = 0.1)$y
         if (norm == TRUE) 
             data <- data/max(data, na.rm = TRUE)
-        mat <- data.frame(cbind(x[, 1], data))
-        m <- try(multdrc(data ~ V1, data = mat, fct = model), 
+        if (!is.null(backsub)) {
+            back <- mean(data[backsub], na.rm = TRUE)
+            data <- data - back
+        }    
+        
+        mat <- data.frame(cbind(Cycles, data))
+        m <- try(multdrc(data ~ Cycles, data = mat, fct = fct), 
             silent = TRUE)
+        
         if (opt) {
-            assign("mat", mat, envir = .GlobalEnv)
-            fct = paste(qpcR:::typeid(m), "()", sep = "")
+            assign("mat", mat, envir = .GlobalEnv)   
             m <- try(mchoice(m, verbose = FALSE, ...), silent = TRUE)
-        }
-        fct = paste(qpcR:::typeid(m), "()", sep = "")
-        cat("Processing ", namevec[i], "...\n", sep = "")
-        cat("   Building sigmoidal model ", fct, "...\n", sep = "")
+        }       
+        
+        fctName <-  paste(qpcR:::typeid(m), "()", sep = "")
+        
+        flush.console()       
+        cat("Processing ", namevec[i], "...\n", sep = "") 
+                
+        cat("   Building sigmoidal model ", fctName, "...\n", sep = "")
         out.eff <- try(efficiency(m, plot = plot, type = type)[-12], 
             silent = TRUE)
+            
         if (retPar) 
             out.eff <- c(out.eff, coef(m))
         if (is.null(out.eff$cpE)) 
             out.eff$cpE <- NA
+            
         VAL.eff <- paste("sig.", names(out.eff), sep = "")
+      
         cat("   Using window-of-linearity...\n")
         out.sli <- try(sliwin(m, plot = plot), silent = TRUE)
         VAL.sli <- paste("sli.", names(out.sli), sep = "")
+        
         cat("   Fitting exponential model...\n")
         out.exp <- try(expfit(m, plot = plot)[-c(2, 4, 9)], silent = TRUE)
         VAL.exp <- paste("exp.", names(out.exp), sep = "")
@@ -62,16 +91,19 @@ pcrbatch <- function (x, cols = 2:ncol(x), group = NULL, model = l4(), type = "c
         ul.eff <- as.vector(unlist(out.eff))
         ul.sli <- as.vector(unlist(out.sli))
         ul.exp <- as.vector(unlist(out.exp))
+        
         if (!is.null(group)) {
-            outall <- c(ul.eff, qpcR:::typeid(m), ul.sli, ul.exp)
+            outall <- c(ul.eff, fctName, ul.sli, ul.exp)
         }
         else {
-            outall <- c(ul.eff, qpcR:::typeid(m), ul.sli, ul.exp)
+            outall <- c(ul.eff, fctName, ul.sli, ul.exp)
         }
         resMat <- cbind(resMat, outall)
     }
+    
     colnames(resMat) <- namevec
     resMat <- cbind(VALS, resMat)
+   
     cat("Writing to clipboard...\n\n")
     write.table(resMat, file = "clipboard-64000", sep = "\t", 
         row.names = FALSE)

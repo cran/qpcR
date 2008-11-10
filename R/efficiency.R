@@ -1,7 +1,7 @@
 efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = NULL) 
 {
     if (type != "cpD2" & type != "cpD1" & type != "maxE" & type != 
-        "expR" & !is.numeric(type)) {
+        "expR" & type != "Cy0" & !is.numeric(type)) {
         stop("invalid estimation type")
     }
 
@@ -38,6 +38,7 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
     expR <- NA
     shiftCyc <- NA
     exp.cyc <- NA
+    Cy0reg <- NA
 
     if (type == "cpD2") {
         maxE1 <- E1res[maxD2 + (100 * shift)]
@@ -47,7 +48,7 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
 
     if (type == "cpD1") {
         maxE1 <- E1res[maxD1 + (100 * shift)]
-  	   CYC <- cycmaxD1 + shift
+  	    CYC <- cycmaxD1 + shift
         if (shift != 0) shiftCyc <- cycmaxD1 + shift        
     }
 
@@ -73,7 +74,14 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
         if (shift != 0) shiftCyc <- exp.cyc + shift
         CYC <- exp.cyc + shift
     }
-
+    
+    if (type == "Cy0") {
+        Cy0reg <- Cy0(object, plot = FALSE)
+        maxE1 <- E1res[100 * Cy0reg + (100 * shift) - 100]
+        if (shift != 0) shiftCyc <- Cy0reg + shift
+        CYC <- Cy0reg + shift          
+    }
+    
     fluo <- pcrpred(object, "y", newdata = CYC)
     init <- fluo/(maxE1^CYC)
     if (is.numeric(amount)) 
@@ -102,23 +110,28 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
             abline(v = cycmaxE1, lwd = 1.5, col = 4)
         if (type == "expR") 
             abline(v = exp.cyc, lwd = 1.5, col = 6)
+        if (type == "Cy0") 
+            abline(v = Cy0reg, lwd = 1.5, col = "darkviolet")     
         if (is.numeric(type)) 
             abline(v = type, lwd = 1.5, col = 6)
         abline(v = cycmaxD2, lwd = 1.5, col = 3)
         if (!is.null(shiftCyc)) 
             abline(v = shiftCyc, lwd = 1.5, col = 7)
-        mtext(paste("cpD2:", cycmaxD2), line = 0, col = 3, adj = 0.65, 
+        mtext(paste("cpD2:", round(cycmaxD2, 2)), line = 0, col = 3, adj = 0.65, 
             cex = 0.9)
-        mtext(paste("cpD1:", cycmaxD1), line = 0, col = 2, adj = 0.35, 
+        mtext(paste("cpD1:", round(cycmaxD1, 2)), line = 0, col = 2, adj = 0.35, 
             cex = 0.9)
         if (type == "maxE") 
-            mtext(paste("cpE:", cycmaxE1), line = 1, col = 4, 
+            mtext(paste("cpE:", round(cycmaxE1, 2)), line = 1, col = 4, 
                 adj = 0.65, cex = 0.9)
         if (type == "expR") 
-            mtext(paste("cpR:", exp.cyc), line = 1, col = 6, adj = 0.65, 
+            mtext(paste("cpR:", round(exp.cyc, 2)), line = 1, col = 6, adj = 0.65, 
                 cex = 0.9)
+        if (type == "Cy0") 
+            mtext(paste("Cy0:", round(Cy0reg, 2)), line = 1, col = "darkviolet", adj = 0.65, 
+                cex = 0.9)        
         if (is.numeric(type)) 
-            mtext(paste("ct:", type), line = 1, col = 6, adj = 0.65, 
+            mtext(paste("ct:", round(type, 2)), line = 1, col = 6, adj = 0.65, 
                 cex = 0.9)
         mtext(paste("Eff:", round(maxE1, digits = 3)), line = 1, 
             col = 4, adj = 0.35, cex = 0.9)
@@ -130,9 +143,8 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = 
             cex = 0.9)
     }
     
-    return(list(eff = maxE1, resVar = round(summary(object)$resVar, 
-        digits = 8), AICc = AICc(object), AIC = AIC(object), 
-        Rsq = Rsq(object), cpD1 = cycmaxD1, cpD2 = cycmaxD2, 
-        cpE = cycmaxE1, cpR = exp.cyc, fluo = fluo, init = init, 
+    return(list(eff = maxE1, resVar = round(summary(object)$resVar, 8), AICc = AICc(object), AIC = AIC(object), 
+        Rsq = Rsq(object), cpD1 = round(cycmaxD1, 2), cpD2 = round(cycmaxD2, 2), 
+        cpE = round(cycmaxE1, 2), cpR = round(exp.cyc, 2), Cy0 = round(Cy0reg, 2), fluo = fluo, init = init, 
         cf = CF))
 }

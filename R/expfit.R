@@ -50,7 +50,7 @@ plot = TRUE,
       }
       
       ### calculate exponential model
-      expMod <- update(object, data = object$data[CYCS, ], fct = qpcR:::expGrowth())
+      expMod <- update(object, data = object$data[CYCS, 1:2], fct = qpcR:::expGrowth())
       EFF <- exp(as.numeric(coef(expMod)[2]))
       
       POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)	

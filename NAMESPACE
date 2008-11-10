@@ -7,7 +7,7 @@ expfit, pcrbatch, RMSE, calib,
 pcrpred, pcrGOF, expcomp, pcrimport, pcrfit,
 AICc, evidence, modlist, pcropt1, propagate,
 ratiocalc, ratioplot, curvemean, PRESS, akaike.weights,
-LR, RSS, residplot
+LR, RSS, residplot, Cy0, maxRatio
 )
 
 ## S3 methods

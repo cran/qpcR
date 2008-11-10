@@ -17,12 +17,12 @@ Package: \tab qpcR\cr
 Type: \tab Package\cr
 LazyLoad: \tab yes\cr
 LazyData: \tab yes\cr
-Version: \tab 1.1-5\cr
+Version: \tab 1.1-7\cr
 License: \tab GNU GPL (version 2 or any later version)\cr
 Depends: \tab R (>= 2.0.0), drc\cr
 URL: \tab http://www.dr-spiess.de; http://www.r-project.org; http://www.bioassay.dk \cr
-Packaged: \tab Tue Jun 15 2008; spiess\cr
-Built: \tab R 2.7.1; ; 2008-08-20; windows\cr
+Packaged: \tab Nov 10 2008; spiess\cr
+Built: \tab R 2.8.0; ; 2008-11-10; windows\cr
 }
 
 package:
@@ -60,6 +60,9 @@ Functions:\cr
 \link{LR} Calculation of likelihood ratios for nested models.\cr
 \link{RSS} Residual sum-of-squares of a fitted model.\cr
 \link{residplot} A residuals bar-plot with colour-coded bars.\cr
+\link{Cy0} Cy0 alternative to crossing points/threshold cycles as in Guescini et al.\cr
+\link{maxRatio} The maxRatio method as in Shain et al.\cr
+
 
 Datasets:\cr
 \link{reps} qPCR dilution experiment with replicates (Roche Lightcycler).\cr

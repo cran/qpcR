@@ -1,6 +1,6 @@
 residplot <- function(object, ...)
 {
-      if (!is.numeric(object)) resid <- residuals(object) else resid <- object
+      if (!is.numeric(object)) resid <- as.numeric(residuals(object)) else resid <- object
       ORD <- order(abs(resid))
       COL <- vector()
 
