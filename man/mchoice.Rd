@@ -56,7 +56,7 @@
 
 
 \examples{
-m1 <- multdrc(F1.1 ~ Cycles, data = reps, fct = l3())
+m1 <- pcrfit(reps, 1, 2, l3())
 ### choose best model based on F-tests 
 ### on the corresponding nested models
 m2 <- mchoice(m1)

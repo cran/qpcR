@@ -37,16 +37,15 @@ data(reps)
 ### first column contains the cycle numbers,
 ###  the next four columns are replicates
 repData <- repform(reps[,1:5], c(0,1,1,1,1))
-m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
 pcrplot(m2, type = "errbar")
 
 ### take the first five columns of the dataframe, 
 ### first column contains the cycle numbers,
 ###  the next four columns are two pairs of replicates
 repData <- repform(reps[,1:5], c(0,1,1,2,2))
-m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
 pcrplot(m2, type = "all", col = 1:2)
-
 }
 
 \keyword{models}

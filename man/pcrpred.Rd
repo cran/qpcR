@@ -34,7 +34,7 @@ the inversion function of either the \code{llogistic} or \code{bolztmann} models
 
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 ### which raw fluorescence value at cycle number = 17?
 pcrpred(m, 17)
 ### cycle numbers 20:25?

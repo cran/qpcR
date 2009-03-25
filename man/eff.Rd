@@ -31,7 +31,7 @@ A list with the following components:
 
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 eff(m) #with default 100 points per cycle
 eff(m, sequence = seq(5, 35, by = 0.1)) #not all data and only 10 points per cycle
 }

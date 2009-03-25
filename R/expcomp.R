@@ -14,7 +14,7 @@ expcomp <- function(object, ...)
 		newmod <- update(obj, fct = fList[[i]])
 		modList[[i]] <- newmod
 	}
-
+	
 	EXP <- expfit(object, plot = FALSE, ...)
 	expMod <- EXP$mod
 	expReg <- EXP$cycles

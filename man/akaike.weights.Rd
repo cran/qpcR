@@ -61,7 +61,7 @@ Wagenmakers EJ, Farrell Simon. AIC model selection using Akaike weights (2004). 
 ### and analyze GOF statistics with Akaike weights
 ### on 9 different sigmoidal models 
 modList <- list(l5(), l4(), l3(), b5(), b4(), b3(), w4(), w3(), baro5())
-aics <- sapply(modList, function(x) AIC(multdrc(F1.1 ~ Cycles, data = reps, fct = x))) 
+aics <- sapply(modList, function(x) AIC(drmfit(F1.1 ~ Cycles, data = reps, fct = x))) 
 akaike.weights(aics)$weights 
 }
 

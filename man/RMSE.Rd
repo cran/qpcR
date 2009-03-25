@@ -28,7 +28,7 @@ The root-mean-squared-error from the fit or a part thereof.
 
 \examples{
 ### for a part of the curve
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 RMSE(m, 10:15)
 }
 

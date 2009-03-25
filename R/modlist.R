@@ -23,7 +23,7 @@ modlist <- function (x, cols = NULL, fct = l4(), opt = FALSE, norm = FALSE, back
             data <- data - back
         }           
         
-        m <- eval(as.call(list(multdrc, data ~ Cycles, fct = fct)))
+        m <- eval(as.call(list(drmfit, data ~ Cycles, fct = fct)))
         
         if (opt) {
         	  m <- try(mchoice(m, verbose = FALSE, ...), silent = TRUE)

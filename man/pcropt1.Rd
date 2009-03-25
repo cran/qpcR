@@ -47,11 +47,11 @@ Andrej-Nikolai Spiess
 \examples{
 \dontrun{
 ### Using one model throughout
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 temp <- pcropt1(m)
 edit(temp)
 ### Selecting the best model for each combination
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l4())
+m <- pcrfit(reps, 1, 2, l4())
 temp <- pcropt1(m, opt = TRUE)
 edit(temp)
 }

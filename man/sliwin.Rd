@@ -43,7 +43,7 @@ The initial template fluorescence (F0) is thus calculated by \eqn{F0 = exp(inter
 }
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 sliwin(m)
 }
 

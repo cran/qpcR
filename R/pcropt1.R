@@ -19,7 +19,7 @@ pcropt1 <- function (object, fact = 3, opt = FALSE, ...)
     upperseq <- nrow(object$data):(upper + 1)
     for (i in lowerseq) {
         for (j in upperseq) {
-            newData <- object$data[i:j, ]
+            newData <- object$data[i:j, 1:2]
             assign("newData", newData, envir = .GlobalEnv)
             newCurve <- update(object, data = newData)
  		  F0 <- pcrpred(newCurve, which = "y", newdata = 0)

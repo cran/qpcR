@@ -56,21 +56,22 @@
 }
 
 \examples{
-###define dilutions and values to be predicted###
+## define dilutions and values to be predicted
 dil <- c(100000, 10000, 1000, 100, 10, 1)
 pred <- c(17.2, 21.2, 26.4)
-###use reps data and single curves of each dilution###
-###(i.e. F1.1, F2.1, F3.1 ...)
-###threshold fluorescence is 0.2)
+## use reps data and single curves of each dilution
+## (i.e. F1.1, F2.1, F3.1 ...)
+## threshold fluorescence is 0.2)
 m1 <- calib(reps, f.col = c(2,6,10,14,18,22), groups = NULL, method = "var", 
 	thresh = 0.2, dil = dil, pred = pred, plot = TRUE)
 print(m1)
-###use replicates, and threshold fluorescence calculated from the first replicate group### 
+## use replicates, and threshold fluorescence calculated from the 
+## first replicate group### 
 dil <- c(100000, 10000, 1000)
 m2 <- calib(reps, f.col = 2:13, groups = c(1,1,1,1,2,2,2,2,3,3,3,3), method = "cpD2", 
 	thresh = 0.2, dil = dil, pred = pred, plot = TRUE)
 print(m2)
-###optimize the threshold cycle###
+## optimize the threshold cycle
 \dontrun{
 dil <- c(100000, 10000, 1000, 100, 10, 1)
 m1 <- calib(reps, f.col = c(2,6,10,14,18,22), groups = NULL, method = "cpD2", 

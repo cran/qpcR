@@ -26,12 +26,13 @@ Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital H
 }
 
 \examples{
-data(reps2)### on single data
-m1 <- multdrc(F1.1.1 ~ Cycles, data = reps2, fct = l3())
+### on single data
+data(reps2)
+m1 <- pcrfit(reps2, 1, 2, l3())
 pcrplot(m1)
 ### on replicated data
 repData <- repform(reps2[,1:4], c(0,1,1,1))
-m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
 pcrplot(m2)
 }
 

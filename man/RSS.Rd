@@ -26,7 +26,7 @@ The residual sum-of-squares from the fit.
 
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 RSS(m)
 }
 

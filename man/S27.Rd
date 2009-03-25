@@ -26,13 +26,8 @@ Andrej-Nikolai Spiess & Caroline Feig, Department of Andrology, University Hospi
 
 \examples{
 data(S27)
-### on single data
-m1 <- multdrc(F1 ~ Cycles, data = S27, fct = l5())
-pcrplot(m1)
-### defining 15 replicates
-repData <- repform(S27[,1:16], c(0, rep(1, 15)))
-m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
-pcrplot(m2, type = "all")
+m1 <- pcrfit(S27, 1, 2, l5())
+pcrplot(m1)     
 }
 
 \keyword{models}

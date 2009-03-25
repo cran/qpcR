@@ -36,9 +36,6 @@ A list containing the following items:
 Andrej-Nikolai Spiess
 }
 
-\references{
-
-}
 
 \seealso{
 \code{\link{AIC}}, \code{\link{logLik}}.

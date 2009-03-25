@@ -26,7 +26,7 @@ The R-square value of the fit.
 
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 Rsq(m)
 }
 

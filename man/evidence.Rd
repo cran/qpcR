@@ -35,8 +35,8 @@ Unfortunately, not yet a generic function, so works only with 'drc' objects.
 
 \examples{
 ### compare two models, four-parameter and five-parameter
-m1 <- multdrc(F1.1 ~ Cycles, data = reps, fct = l4())
-m2 <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m1 <- pcrfit(reps, 1, 2, l4())
+m2 <- pcrfit(reps, 1, 2, l5())
 evidence(m2, m1)
 ### ratio of two AIC's
 evidence(-120, -123)

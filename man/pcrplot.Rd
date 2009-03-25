@@ -73,7 +73,7 @@ Is an extension of the \code{plot.drc} function from the 'drc' package.
 
 \examples{
 repData <- repform(reps[,1:5], c(0,1,1,1,1))
-m <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+m <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
 ###plot the average
 pcrplot(m)
 ###all observations
@@ -81,7 +81,7 @@ pcrplot(m, type = "all")
 ###mean with errorbars
 pcrplot(m, type = "errbar")
 ###plot one curve and add 95 percent confidence band
-m2 <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m2 <- drmfit(F1.1 ~ Cycles, data = reps, fct = l5())
 pcrplot(m2, confband = 0.95)
 }
 

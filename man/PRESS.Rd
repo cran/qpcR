@@ -57,7 +57,7 @@ Second Edition (1990), Duxbury Press (PWS-KENT Publishing Company), 299-304.
 mod <- pcrfit(reps, 1, 2, l5())
 PRESS(mod)$stat
 ## or
-mod <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+mod <- drmfit(F1.1 ~ Cycles, data = reps, fct = l5())
 PRESS(mod)$stat
 
 ## compare PRESS statistic in models

@@ -56,7 +56,7 @@ pcrbatch <- function (x, cols = NULL, fct = l4(), group = NULL, type = "cpD2",
         }    
         
         mat <- data.frame(cbind(Cycles, data))
-        m <- try(multdrc(data ~ Cycles, data = mat, fct = fct), 
+        m <- try(drmfit(data ~ Cycles, data = mat, fct = fct), 
             silent = TRUE)
         
         if (opt) {

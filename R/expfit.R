@@ -22,14 +22,14 @@ plot = TRUE,
                   
       ### outlier method
       if (method == "outlier") {
-            result <- outlier(object, pval = pval, nsig = n.outl)
+            result <- qpcR:::outlier(object, pval = pval, nsig = n.outl)
             OUTLIER <- result$outl
             CYCS <- OUTLIER:(OUTLIER + nfit - 1)
       }
       
       ### midpoint method
       if (method == "midpoint") {
-            result <- midpoint(object, first.cyc = n.ground)
+            result <- qpcR:::midpoint(object, first.cyc = n.ground)
             midpoint <- result$mp
             MIDPOINT <- round(midpoint)
             if (fix == "top") CYCS <- (MIDPOINT - nfit + 1):MIDPOINT

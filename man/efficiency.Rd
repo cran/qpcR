@@ -83,12 +83,13 @@ This function calls the first derivatives from the 'drc' library and the interna
 
 \examples{
 ## Fitting initial model
-m1 <-  multdrc(F1.1 ~ Cycles, data = reps, fct = l4())
+m1 <-  pcrfit(reps, 1, 2, l4())
 efficiency(m1)
  
 ## of best model
+#uses type="cpD2"
 m2 <- mchoice(m1)
-efficiency(m2) #uses type="cpD2"
+efficiency(m2) 
 
 ## using "maxE" method, with calculation of PCR efficiency
 ## one cycle 'upstream' of the cycle of maximum efficiency
@@ -102,9 +103,8 @@ efficiency(m2, type = 15.32)
  
 ## using the first 30 cycles and a template amount
 ## (optical calibration)
-m3 <-  multdrc(F1.1 ~ Cycles, data = reps[1:30,], fct = l5())
-efficiency(m3, amount = 1E3)
-
+m3 <-  pcrfit(reps[1:30, ], 1, 2, l5())
+efficiency(m3, amount = 1E3)    
 }
 
 \keyword{models}

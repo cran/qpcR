@@ -62,7 +62,7 @@ Calls \code{outlier} and \code{studres} for calculation of the studentized resid
 }
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 ### using 'outlier' method
 expfit(m)
 ### 'midpoint' method and 7 cycle window

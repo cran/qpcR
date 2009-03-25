@@ -31,12 +31,11 @@ Supplemental data 1 to the paper.
 
 \examples{
 data(rutledge)
-### on single data
-m1 <- multdrc(X1.R1.1 ~ Cycles, data = rutledge, fct = l3())
+m1 <- pcrfit(rutledge, 1 , 2, l3())
 pcrplot(m1)
 ### on replicated data
 repData <- repform(rutledge[,1:5], c(0,1,1,1,1))
-m2 <- multdrc(values ~ Cycles, curve = Curve, data = repData, fct = l5())
+m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
 pcrplot(m2, type = "all")
 }
 

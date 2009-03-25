@@ -122,6 +122,7 @@ print(res$ratio)
 ## In ratio calculations based on (E1^cp1)/(E2^cp2),
 ## only 2\% error in each of the variables result in
 ## over 50\% propagated error!
+\dontrun{
 x <- NULL
 y <- NULL
 for (i in seq(0, 0.1, by = 0.01)) {
@@ -135,7 +136,7 @@ for (i in seq(0, 0.1, by = 0.01)) {
       y <- c(y, (res$errProp/res$evalExpr) * 100)
 }
 plot(x, y, xlim = c(0, 10), lwd = 2, xlab = "c.v. [\%]", ylab = "c.v. (prop) [\%]")
-
+}
 }
 
 

@@ -37,7 +37,7 @@ Also implemented in the \code{\link{pcrplot}} function for plotting the confiden
 }
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l5())
+m <- pcrfit(reps, 1, 2, l5())
 ###with 99 percent confidence interval
 ci <- confband(m, level = 0.99)
 print(ci)

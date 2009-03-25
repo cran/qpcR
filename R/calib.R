@@ -16,7 +16,7 @@ calib <- function (data, cyc.col = 1, f.col = 2:ncol(data), groups = NULL,
         y <- DATA[, i]
         x <- data[, cyc.col]
         frame <- as.data.frame(cbind(x, y))
-        m <- multdrc(y ~ x, data = frame, fct = fct)
+        m <- drm(y ~ x, data = frame, fct = fct)
         rl[[i]] <- m
     }
     cp <- efficiency(rl[[1]], plot = FALSE)$cpD2

@@ -32,7 +32,7 @@ A dataframe with names of the models and the respective RMSEs.
 }
 
 \examples{
-m <- multdrc(F1.1 ~ Cycles, data = reps, fct = l3())
+m <- pcrfit(reps, 1, 2, l5())
 expcomp(m)
 }
 

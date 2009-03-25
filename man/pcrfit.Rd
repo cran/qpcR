@@ -43,10 +43,12 @@ Ritz C & Streibig JC. Bioassay analysis using R. \emph{J Stat Soft} (2005), \bol
 
 \examples{
 ### simple l4() fit of F1.1 of the 'reps' dataset
-pcrfit(reps, 1, 2, l4())
+m <- pcrfit(reps, 1, 2, l4())
+pcrplot(m)
 
 ### same with five-parameter model
-pcrfit(reps, 1, 2)
+m2 <- pcrfit(reps, 1, 2)
+pcrplot(m2, add = TRUE, col = 2)
 }
 
 \keyword{models}
