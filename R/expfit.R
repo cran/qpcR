@@ -5,7 +5,7 @@ method = c("outlier", "midpoint", "ERBCP"),
 pval = 0.05,
 n.outl = 3,
 ### midpoint
-n.ground = 10,
+n.ground = 1:5,
 ### ERBCP
 corfact = 1,
 ### all methods
@@ -16,22 +16,19 @@ plot = TRUE,
 )
 {
       method <- match.arg(method)
-      fix <- match.arg(fix)
-      cyc <- object$data[, 1]
-      fluo <- object$data[, 2]
+      fix <- match.arg(fix)            
                   
       ### outlier method
       if (method == "outlier") {
-            result <- qpcR:::outlier(object, pval = pval, nsig = n.outl)
+            result <- outlier(object, pval = pval, nsig = n.outl)
             OUTLIER <- result$outl
             CYCS <- OUTLIER:(OUTLIER + nfit - 1)
       }
       
       ### midpoint method
       if (method == "midpoint") {
-            result <- qpcR:::midpoint(object, first.cyc = n.ground)
-            midpoint <- result$mp
-            MIDPOINT <- round(midpoint)
+            result <- midpoint(object, noise.cyc = n.ground)
+            MIDPOINT <- round(result$mp)            
             if (fix == "top") CYCS <- (MIDPOINT - nfit + 1):MIDPOINT
             if (fix == "bottom") CYCS <- MIDPOINT:(MIDPOINT + nfit - 1)
             if (fix == "middle") CYCS <- (MIDPOINT - (round(nfit/2 - 1))):(MIDPOINT + (round(nfit/2)))
@@ -49,20 +46,22 @@ plot = TRUE,
             if (fix == "middle") CYCS <- (EXPREG - (round(nfit/2 - 1))):(EXPREG + (round(nfit/2)))
       }
       
-      ### calculate exponential model
-      expMod <- update(object, data = object$data[CYCS, 1:2], fct = qpcR:::expGrowth())
-      EFF <- exp(as.numeric(coef(expMod)[2]))
+      ### calculate exponential model   
+      DATA <- cbind(object$DATA[, 1], object$DATA[, 2])
+      DATA <- DATA[CYCS, ]
+      expMod <- pcrfit(DATA, 1, 2, expGrowth)         
+      EFF <- exp(as.numeric(coef(expMod)[2]))     
       
-      POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)	
-
+      POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)  
+      
       if (plot) {
             pcrplot(object, xlab = "Cycles", ylab = "raw fluorescence", ...)
-            pcrplot(expMod, add = TRUE, col = 3, lwd = 2)
-            points(POINT, pcrpred(object, POINT, "y"), col = 2, pch = 16)
+            points(DATA[, 1], DATA[, 2], col = 2, pch = 16)
+            lines(DATA[, 1], fitted(expMod), col = 2, lwd = 2)
       }
 
       return(list(point = POINT, cycles = CYCS, eff = as.numeric(exp(coef(expMod)[2])),
-            eff.cycles = object$data[CYCS, 2]/object$data[CYCS - 1, 2],
+            eff.cycles = object$DATA[CYCS, 2]/object$DATA[CYCS - 1, 2],
             AIC = AIC(expMod), resVar = resVar(expMod), RMSE = RMSE(expMod),
             init = as.numeric(coef(expMod)[1]), mod = expMod))
 }

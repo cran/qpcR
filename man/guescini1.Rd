@@ -26,17 +26,14 @@ Supplemental data 1 to the paper.
 }
 
 \references{
- A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
- Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
+A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
+Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
 }
 
 \examples{
-\dontrun{
 data(guescini1)
-ml <- modlist(guescini1, fct = l5())
-pcrplot(ml[[1]])
-sapply(2:84, function(x) pcrplot(ml[[x]], add = TRUE))
-}
+ml <- modlist(guescini1, model = l4)
+pcrplot(ml) 
 }
 
 \keyword{models}

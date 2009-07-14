@@ -31,12 +31,8 @@ Supplemental data 1 to the paper.
 
 \examples{
 data(rutledge)
-m1 <- pcrfit(rutledge, 1 , 2, l3())
+m1 <- pcrfit(rutledge, 1 , 2, l5)
 pcrplot(m1)
-### on replicated data
-repData <- repform(rutledge[,1:5], c(0,1,1,1,1))
-m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
-pcrplot(m2, type = "all")
 }
 
 \keyword{models}

@@ -5,17 +5,17 @@
 
 \description{
  Calculates the second-order corrected Akaike Information Criterion for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
- or any other models where \code{\link{coefficients}} and \code{\link{residuals}} can be extacted.
+ or any other models from which \code{\link{coefficients}} and \code{\link{residuals}} can be extacted.
  This is a modified version of the original AIC which compensates for bias with small n.
  As qPCR data usually has n/par < 40 (see original reference), AICc was implemented to correct for this.
 }
 
 \usage{
-  AICc(object)
+AICc(object)
 }
 
 \arguments{
-  \item{object}{a fitted model.}
+    \item{object}{a fitted model.}
 }
 
 \details{
@@ -28,7 +28,7 @@ The second-order corrected AIC value.
 }
 
 \author{
-  Andrej-Nikolai Spiess
+Andrej-Nikolai Spiess
 }
 
 \references{
@@ -42,7 +42,7 @@ Hurvich CM & Tsai CL (1989). Regression and Time Series Model Selection in Small
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5())
+m <- pcrfit(reps, 1, 2, l5)
 AICc(m)
 }
 

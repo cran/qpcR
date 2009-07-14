@@ -26,14 +26,10 @@ Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital H
 }
 
 \examples{
-### on single data
+## on single data
 data(reps3)
-m1 <- pcrfit(reps3, 1, 2, l4())
-pcrplot(m1)
-### on replicated data
-repData <- repform(reps3[,1:4], c(0,1,1,1))
-m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
-pcrplot(m2, type = "all")
+m1 <- pcrfit(reps3, 1, 2, l5)
+pcrplot(m1)  
 }
 
 \keyword{models}

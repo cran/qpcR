@@ -4,45 +4,46 @@
 \title{Calculation of qPCR efficiency and several other important qPCR parameters}
 
 \description{
-  This function calculates the PCR efficiency of a fitted 'drc' or 'mchoice' model and additionally 
-  several other important values for qPCR quantification like the first and second derivatives and the 
-  corresponding maxima thereof (i.e. threshold cycles). These values can be subsequently used for the 
-  calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit.
-  Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC),
-  the residual variance and the R-square value.
-  For relative and absolute quantification, the initial fluorescence F(0) is calculated and can be used for
-  optical calibration if the template amount is defined (see 'Details'). 
+This function calculates the PCR efficiency of a model of class 'pcrfit' and several other 
+ important values for qPCR quantification like the first and second derivatives and the 
+ corresponding maxima thereof (i.e. threshold cycles). These values can be subsequently used for the 
+ calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit.
+Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC),
+ the residual variance and the R-square value.   
 }
 
 \usage{
-  efficiency(object, plot = TRUE, type = "cpD2", shift = 0, amount = NULL)
+efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL, 
+           shift = 0, amount = NULL)
 }
 
 \arguments{
-  \item{object}{an object of class 'drc' or 'mchoice' model.}
+  \item{object}{an object of class 'pcrfit'.}
   \item{plot}{logical. If TRUE, a graph is displayed. If FALSE, values are printed out.}
   \item{type}{the method of efficiency estimation. See 'Details'.}
-  \item{shift}{a user defined shift in cycles from the values defined by \code{type}. See Examples.}
+  \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
+  \item{shift}{a user defined shift in cycles from the values defined by \code{type}. See 'Examples'.}
   \item{amount}{the template amount or molecule number for quantitative calibration.}
 }
 
 \details{
 The efficiency is always calculated from the efficiency curve (in blue), which is calculated according to \eqn{E = \frac{F(n)}{F(n-1)}} from the 
-fitted curve, but taken from different points at the curve: 
+fitted curve, but taken from different points at the curve, as to be defined in \code{type}: 
 
 "cpD2"  taken from the maximum of the second derivative curve,\cr
 "cpD1"  taken from the maximum of the first derivative curve,\cr
 "maxE"  taken from the maximum of the efficiency curve,\cr
 "expR"  taken from the exponential region by \eqn{expR = cpD2-(cpD1-cpD2))},\cr
-"Cy0"   as calculated according to Guescini et al. or\cr
-a numeric value (taken from the threshold cycle output of the PCR software, i.e. 15.24).
+"CQ"    taken from the 20\% value of the fluorescence at "cpD2" as developed by Corbett Research (comparative quantification),\cr
+"Cy0"   the intersection of a tangent on the first derivative maximum with the abscissa as calculated according to Guescini et al. or\cr
+a numeric value taken from the threshold cycle output of the PCR software, i.e. 15.24  as defined in \code{type} or\cr
+a numeric value taken from the fluorescence threshold output of the PCR software as defined in \code{thresh}.
 
-The initial fluorescence F(0) for relative or absolute quantification is calculated by \eqn{F(0) = \frac{F(n)}{E(n)^{Cyc}}}, 
- with F(n) = raw fluorescence at the cycle number defined by \code{type}, E(n) = PCR efficiency at the cycle number defined by \code{type} and
- Cyc = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F(0)}} is given.
+The initial fluorescence F(0) for relative or absolute quantification is either calculated by setting x = 0 in the sigmoidal model of \code{object} giving \code{init1} or 
+ by calculating an exponential model down (\code{init2}) with \eqn{F(0) = \frac{F(n)}{E(n)^{Cyc}}}, with F(n) = raw fluorescence at the cycle number defined by \code{type}, 
+ E(n) = PCR efficiency at the cycle number defined by \code{type} and Cyc = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F(0)}} is given.
 The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. 
 First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
-This function calls the first derivatives from the 'drc' library and the internal functions \code{deriv2.b} and \code{deriv2.l} for the calculation of second derivatives.
 }
 
 \value{
@@ -52,58 +53,74 @@ This function calls the first derivatives from the 'drc' library and the interna
   \item{AICc}{the bias-corrected Akaike Information Criterion.}
   \item{AIC}{the Akaike Information Criterion.}
   \item{Rsq}{the R-square value.}
+  \item{Rsq.ad}{the adjusted R-square value.}
   \item{cpD1}{the first derivative maximum (point of inflection in 'l4' or 'b4' models, 
   can be used for defining the threshold cycle).}
   \item{cpD2}{the second derivative maximum (turning point of cpD1, more often used for defining 
   the threshold cycle).}
-  \item{cpE}{the PCR cycle with the highest efficiency, if "maxE" method is chosen.}
-  \item{cpR}{the PCR cycle within the exponential region calculated as under 'Details', if "expR" method is chosen.}
+  \item{cpE}{the PCR cycle with the highest efficiency.}
+  \item{cpR}{the PCR cycle within the exponential region calculated as under 'Details'.}
+  \item{cpT}{the PCR cycle corresponding to the fluorescence threshold as defined in \code{thresh}.}
   \item{Cy0}{the PCR threshold cycle 'Cy0' according to Guescini et al. See 'Details'.} 
-  \item{fluo}{the raw fluorescence value at the point defined by \code{type}.}
-  \item{init}{the initial template fluorescence, i.e. F(0), calculated as under 'Details'.}
+  \item{cpCQ}{the PCR cycle corresponding to the 20\% fluorescence value at 'cpD2'.}
+  \item{fluo}{the raw fluorescence value at the point defined by \code{type} or \code{thresh}.}
+  \item{init1}{the initial template fluorescence from the sigmoidal model, calculated as under 'Details'.}
+  \item{init2}{the initial template fluorescence from an exponential model, calculated as under 'Details'.}
   \item{cf}{the conversion factor between raw fluorescence and template amount, if the latter is defined.}
 }
 
 \author{
-  Andrej-Nikolai Spiess & Christian Ritz
+Andrej-Nikolai Spiess 
 }
 
 \references{
-  Weihong Liu and David A. Saint (2002) Validation of a quantitative method for real time PCR kinetics, 
-  \emph{BBRC}, \bold{294}, 347 - 353.
-  A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
-  Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.  
+Weihong Liu and David A. Saint (2002) Validation of a quantitative method for real time PCR kinetics, 
+\emph{BBRC}, \bold{294}, 347 - 353.
+A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
+Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.  
 }
 
 \note{
-  Three parameter models ('b3' or 'l3') do not work very well in calculating the PCR efficiency. 
-  It is advisable not to take too many cycles of the plateau phase prior to fitting the model as this has a strong 
-  effect on the validity of the efficiency estimates. 
+Three parameter models ('b3' or 'l3') do not work very well in calculating the PCR efficiency. 
+It is advisable not to take too many cycles of the plateau phase prior to fitting the model as this has a strong 
+ effect on the validity of the efficiency estimates. 
 }
 
 \examples{
 ## Fitting initial model
-m1 <-  pcrfit(reps, 1, 2, l4())
+m1 <-  pcrfit(reps, 1, 2, l4)
 efficiency(m1)
  
-## of best model
-#uses type="cpD2"
-m2 <- mchoice(m1)
-efficiency(m2) 
+## selection of best model
+## using one cycle 'downstream'
+## of second derivative max
+m2 <- mselect(m1)
+efficiency(m2, type = "cpD2", shift = -1)    
 
 ## using "maxE" method, with calculation of PCR efficiency
-## one cycle 'upstream' of the cycle of maximum efficiency
-efficiency(m2, type = "maxE", shift = 1)
+## 2 cycles 'upstream' from the cycle of max efficiency
+efficiency(m2, type = "maxE", shift = 2)
 
-##using the exponential region
+## using the exponential region
 efficiency(m2, type = "expR")
 
-## using threshold value (15.32) from PCR software
+## using threshold cycle (i.e. 15.32) 
+## from PCR software
 efficiency(m2, type = 15.32)
+
+## using Cy0 method from
+## Guescini et al. (2008),
+## add Cy0 tangent
+efficiency(m2, type = "Cy0")
+Cy0(m2, add = TRUE)
+
+## using a defined fluorescence
+## threshold value from PCR software
+efficiency(m2, thresh = 1)
  
 ## using the first 30 cycles and a template amount
 ## (optical calibration)
-m3 <-  pcrfit(reps[1:30, ], 1, 2, l5())
+m3 <-  pcrfit(reps[1:30, ], 1, 2, l5)
 efficiency(m3, amount = 1E3)    
 }
 

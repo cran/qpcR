@@ -4,51 +4,50 @@
 \title{Create nonlinear models from a dataframe and coerce them into a list}
 
 \description{
- Simple function to create a list of nonlinear models from the columns of a qPCR dataframe.
- Very handy if following functions should be applied to different qPCR models, i.e. by \code{\link{sapply}}.
+Essential function to create a list of nonlinear models from the columns of a qPCR dataframe.
+Very handy if following functions should be applied to different qPCR models, i.e. by \code{\link{sapply}}.
 }
 
 \usage{
-  modlist(x, cols = NULL, fct = l4(), opt = FALSE, norm = FALSE, 
-          backsub = NULL, ...)
+modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE, 
+        backsub = NULL, opt.method =  rep("Nelder", 5), nls.method = "port",
+        sig.level = 0.05, crit = "ftest", ...)
 }
 
 \arguments{
   \item{x}{a dataframe containing the qPCR data.}
-  \item{cols}{the columns (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
-  \item{fct}{the function used for building the model, using the function lists from the 'drc' package.} 
-  \item{opt}{logical. Should model optimization take place? If \code{TRUE}, model selection is applied.} 
-  \item{norm}{logical. Should the raw data be normalized to within [0, 1] before model fitting?}
-  \item{backsub}{background subtraction. If \code{NULL}, not applied. Otherwise, a numeric sequence such as \code{1:10}. See 'Details'.}
-  \item{...}{other parameters to be passed to \code{\link{mchoice}}.}
+  \item{cyc}{the column containing the cycle data. Defaults to first column.}
+  \item{fluo}{the column(s) (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
+  \item{model}{the model to be used.} 
+  \item{opt}{logical. Should model selection be applied?} 
+  \item{norm}{logical. Should the raw data be normalized within [0; 1] before model fitting?}
+  \item{backsub}{background subtraction. If \code{NULL}, not applied. Otherwise, a numeric sequence such as \code{1:10}. See 'Details' in \code{\link{pcrbatch}}.}
+  \item{opt.method}{see \code{\link{pcrfit}}.}
+  \item{nls.method}{see \code{\link{pcrfit}}.}
+  \item{sig.level}{see \code{\link{mselect}}.}
+  \item{crit}{see \code{\link{mselect}}.}
+  \item{...}{other parameters to be passed to \code{\link{pcrfit}} or \code{\link{mselect}}.}
  }
 
-\details{
-  For a more detailed description of the functions see 'l4()' and 'pcrbatch'.
-}
-
 \value{
-  A list with each item containing the model from each column. A 'names' attribute containing the column name is attached to each model.
+A list with each item containing the model from each column. A 'names' item containing the column name is attached to each model.
 }
 
 \author{
-  Andrej-Nikolai Spiess
+Andrej-Nikolai Spiess
 }
 
 \examples{
-### calculate efficiencies for each run in
-### the 'reps' data
-### subtract background using the first 8 cycles
-ml <- modlist(reps, fct = l5(), backsub = 1:8)
-effs <- sapply(ml, function(x) efficiency(x)$eff)
-print(effs)
+## calculate efficiencies for each run in
+## the 'reps' data
+## subtract background using the first 8 cycles
+ml <- modlist(reps, model = l5, backsub = 1:8)
+sapply(ml, function(x) efficiency(x, plot = FALSE)$eff)
 
-### 'crossing points' for the first 3 runs
-### using best model from Akaike weights and normalization
-ml <- modlist(reps, 2:4, fct = l4(), opt = TRUE, norm = TRUE, crit = "weights")
-cps <- sapply(ml, function(x) efficiency(x)$cpD2)
-print(cps)
-
+## 'crossing points' for the first 3 runs (normalized)
+##  and using best model from Akaike weights
+ml <- modlist(reps, 1, 2:4, model = l5, opt = TRUE, norm = TRUE, crit = "weights" )
+sapply(ml, function(x) efficiency(x, plot = FALSE)$cpD2)
 }
 
 \keyword{models}

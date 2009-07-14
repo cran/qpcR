@@ -4,12 +4,12 @@
 \title{Root-mean-squared-error of a fitted model}
 
 \description{
-  Calculates the root-mean-squared-error (RMSE) for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
- or any other models where \code{\link{residuals}} can be extacted. 
+Calculates the root-mean-squared-error (RMSE) for objects of class \code{nls}, \code{lm}, \code{glm}, \code{drc}
+ or any other models from which \code{\link{residuals}} can be extacted. 
 }
 
 \usage{
-  RMSE(object, which = NULL)
+RMSE(object, which = NULL)
 }
 
 \arguments{
@@ -22,13 +22,13 @@ The root-mean-squared-error from the fit or a part thereof.
 }
 
 \author{
-  Andrej-Nikolai Spiess
+Andrej-Nikolai Spiess
 }
 
 
 \examples{
-### for a part of the curve
-m <- pcrfit(reps, 1, 2, l5())
+## for a part of the curve
+m <- pcrfit(reps, 1, 2, l5)
 RMSE(m, 10:15)
 }
 

@@ -1,150 +1,178 @@
-efficiency <- function (object, plot = TRUE, type = "cpD2", shift = 0, amount = NULL) 
+efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift = 0, amount = NULL) 
 {
-    if (type != "cpD2" & type != "cpD1" & type != "maxE" & type != 
-        "expR" & type != "Cy0" & !is.numeric(type)) {
-        stop("invalid estimation type")
-    }
 
-    if (!is.null(amount) && !is.numeric(amount)) 
-        stop("amount must be numeric!")
-   
-    rv <- summary(object)$resVar
-    aicc <- AICc(object)
-    cyc.col <- which(colnames(object$data) == all.vars(object$call)[2])
-    cyc <- object$data[, cyc.col]
-    coefVec <- coef(object)
-    obj.fct <- object$fct$fct
-    effcurve <- eff(object)
-    sequence <- effcurve$eff.x
-    pMat <- matrix(coefVec, length(sequence), length(coefVec), 
-        byrow = TRUE)
-    res.grad <- object$fct$derivx(sequence, pMat)
-    obj.fun <- qpcR:::typeid(object)
+    if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ"))
+    if (is.numeric(type) && (type < min(object$DATA[, 1], na.rm = TRUE) || type > max(object$DATA[, 1], na.rm = TRUE)))
+      stop("'type' must be within Cycles range!")
+
+    if (!is.null(amount) && !is.numeric(amount))
+        stop("'amount' must be numeric!")
+
+    if (!is.null(thresh) && !is.numeric(thresh))
+        stop("'thresh' must be numeric!")
+    if (is.numeric(thresh) && (thresh < min(object$DATA[, 2], na.rm = TRUE) || thresh > max(object$DATA[, 2], na.rm = TRUE)))
+      stop("'thresh' must be within Fluorescence range!")
     
-    if (obj.fun == "l5" || obj.fun == "l4" || obj.fun == "l3") {
-        res.hess <- deriv2.l(sequence, pMat, obj.fun)
-    }
-
-    if (obj.fun == "b5" || obj.fun == "b4" || obj.fun == "b3") {
-        res.hess <- deriv2.b(sequence, pMat, obj.fun)
-    }
-
-    E1res <- effcurve$eff.y
-    maxD2 <- which.max(res.hess)
-    cycmaxD2 <- sequence[maxD2]
-    maxD1 <- which.max(res.grad)
-    cycmaxD1 <- sequence[maxD1]
-    cycmaxE1 <- NA
-    expR <- NA
-    shiftCyc <- NA
-    exp.cyc <- NA
-    Cy0reg <- NA
-
-    if (type == "cpD2") {
-        maxE1 <- E1res[maxD2 + (100 * shift)]
+    CYCS <- object$DATA[, 1]    
+    EFFobj<- eff(object)
+    SEQ <- EFFobj$eff.x      
+    D1seq <- object$MODEL$d1(SEQ, coef(object))
+    D2seq <- object$MODEL$d2(SEQ, coef(object))   
+    EFFseq <- EFFobj$eff.y    
+    
+    maxD1 <- which.max(D1seq) 
+    maxD2 <- which.max(D2seq)    
+    cycmaxD1 <- SEQ[maxD1]      
+    cycmaxD2 <- SEQ[maxD2]   
+    
+    ### cpD2 and CQ
+    if (type == "cpD2" || type == "CQ") {
+        maxEFF <- EFFseq[maxD2 + (100 * shift)]
         CYC <- cycmaxD2 + shift 
-	   if (shift != 0) shiftCyc <- cycmaxD2 + shift       
+        if (shift != 0) shiftCyc <- cycmaxD2 + shift
     }
-
+                 
+    ### cpD1
     if (type == "cpD1") {
-        maxE1 <- E1res[maxD1 + (100 * shift)]
+        maxEFF <- EFFseq[maxD1 + (100 * shift)]
   	    CYC <- cycmaxD1 + shift
         if (shift != 0) shiftCyc <- cycmaxD1 + shift        
     }
 
+    ### maxE
+    cycmaxEFF <- EFFobj$effmax.x              
     if (type == "maxE") {
-        maxE <- which.max(E1res)
-        maxE1 <- E1res[maxE + (100 * shift)]
-        cycmaxE1 <- sequence[maxE]
-        CYC <- cycmaxE1 + shift
-        if (shift != 0) shiftCyc <- cycmaxE1 + shift             
+        maxEFF <- EFFseq[(cycmaxEFF + shift - 1) * 100]        
+        CYC <- cycmaxEFF + shift
+        if (shift != 0) shiftCyc <- cycmaxEFF + shift             
     }
-
+                                
+    ### numeric threshold cycle
     if (is.numeric(type)) {
-        type.cyc <- which(sequence == type)
-        maxE1 <- E1res[type.cyc]
+        cycTYPE <- which(SEQ == round(type, 2))
+        maxEFF <- EFFseq[cycTYPE]
         if (shift != 0) shiftCyc <- type + shift
         CYC <- type + shift
     }
 
+    ### expR
+    expR <- maxD2 - (maxD1 - maxD2)
+    cycEXP <- SEQ[expR]
     if (type == "expR") {
-        expR <- maxD2 - (maxD1 - maxD2)
-        exp.cyc <- sequence[expR]
-        maxE1 <- E1res[expR + (100 * shift)]
-        if (shift != 0) shiftCyc <- exp.cyc + shift
-        CYC <- exp.cyc + shift
-    }
+        maxEFF <- EFFseq[expR + (100 * shift)]
+        if (shift != 0) shiftCyc <- cycEXP + shift
+        CYC <- cycEXP + shift
+    }          
     
+    ### Cy0
+    Cy0reg <- Cy0(object, plot = FALSE) 
     if (type == "Cy0") {
-        Cy0reg <- Cy0(object, plot = FALSE)
-        maxE1 <- E1res[100 * Cy0reg + (100 * shift) - 100]
+        maxEFF <- EFFseq[(Cy0reg + shift - 1) * 100]
         if (shift != 0) shiftCyc <- Cy0reg + shift
         CYC <- Cy0reg + shift          
     }
     
-    fluo <- pcrpred(object, "y", newdata = CYC)
-    init <- fluo/(maxE1^CYC)
+    ### numeric threshold fluorescence
+    if (!is.null(thresh)) {
+        cycF <- as.numeric(round(pcrpred(object, newdata = data.frame(Fluo = thresh), "x"), 2))         
+        maxEFF <- EFFseq[(cycF + shift - 1) * 100]
+        if (shift != 0) shiftCyc <- cycF + shift  
+        CYC <- cycF + shift        
+    } else cycF <- NA
+    
+    if (is.null(thresh)) fluo <- as.numeric(pcrpred(object, newdata = data.frame(Cycles = CYC))) else fluo <- thresh
+
+    ### CQ (comparative quantitation)
+    fluoCQ <- 0.2 * fluo
+    cycCQ <- as.numeric(round(pcrpred(object, newdata = data.frame(Fluo = fluoCQ), which = "x"), 2))
+    if (type == "CQ") {
+        maxEFF <- EFFseq[(cycCQ + shift - 1) * 100]
+        if (shift != 0) shiftCyc <- cycCQ + shift
+        CYC <- cycCQ + shift
+        fluo <- fluoCQ
+    }
+
+    init1 <- as.numeric(pcrpred(object, newdata = data.frame(Cycles = 0)))     
+    init2 <- fluo/(maxEFF^CYC)      
+        
     if (is.numeric(amount)) 
-        CF <- amount/init
+        CF <- amount/init1
     else CF <- NA
 
     if (plot) {
         par(mar = c(5, 4, 4, 4))
-        pcrplot(object, lwd = 1.5, type = "all", main = NA, cex.main = 0.9)
+        pcrplot(object, lwd = 1.5, main = NA, cex.main = 0.9)
         aT <- axTicks(side = 4)
         cF <- max(aT/1)
         axis(side = 4, at = aT, labels = round(aT/cF + 1, 2), 
             col = 4, col.axis = 4, las = 1, hadj = 0.3)
-        lines(sequence, (E1res * cF) - cF, col = 4, lwd = 1.5)
-        points(CYC, (maxE1 * cF) - cF, col = 4, pch = 16)
+        lines(SEQ, (EFFseq * cF) - cF, col = 4, lwd = 1.5)
+        points(CYC, (maxEFF * cF) - cF, col = 4, pch = 16)
         points(CYC, fluo, col = 1, pch = 16)
         mtext(side = 4, "Efficiency", line = 2, col = 4)
-        lines(sequence, res.grad, col = 2, lwd = 1.5)
-        lines(sequence, res.hess, col = 3, lwd = 1.5)
-        abline(h = (maxE1 * cF) - cF, lwd = 1.5, col = 4)
+        lines(SEQ, D1seq, col = 2, lwd = 1.5)
+        lines(SEQ, D2seq, col = 3, lwd = 1.5)
+        abline(h = (maxEFF * cF) - cF, lwd = 1.5, col = 4)
         abline(v = cycmaxD1, lwd = 1.5, col = 2)
         abline(h = fluo, col = 1)
         axis(side = 2, at = fluo, labels = round(fluo, 3), col = 1, 
             col.axis = 1, cex.axis = 0.7, las = 1)
+            
         if (type == "maxE") 
-            abline(v = cycmaxE1, lwd = 1.5, col = 4)
+            abline(v = cycmaxEFF, lwd = 1.5, col = 4)
+            
         if (type == "expR") 
-            abline(v = exp.cyc, lwd = 1.5, col = 6)
+            abline(v = cycEXP, lwd = 1.5, col = 6)
+            
         if (type == "Cy0") 
-            abline(v = Cy0reg, lwd = 1.5, col = "darkviolet")     
+            abline(v = Cy0reg, lwd = 1.5, col = "darkviolet") 
+
+        if (type == "CQ")
+            abline(v = cycCQ, lwd = 1.5, col = "darkviolet")
+                
         if (is.numeric(type)) 
             abline(v = type, lwd = 1.5, col = 6)
+            
+        if (!is.null(thresh))
+            abline(v = cycF, lwd = 1.5, col = 6)
+            
         abline(v = cycmaxD2, lwd = 1.5, col = 3)
-        if (!is.null(shiftCyc)) 
-            abline(v = shiftCyc, lwd = 1.5, col = 7)
-        mtext(paste("cpD2:", round(cycmaxD2, 2)), line = 0, col = 3, adj = 0.65, 
-            cex = 0.9)
-        mtext(paste("cpD1:", round(cycmaxD1, 2)), line = 0, col = 2, adj = 0.35, 
-            cex = 0.9)
+        
+        if (shift != 0) abline(v = shiftCyc, lwd = 1.5, col = 7)
+        
+        mtext(paste("cpD2:", round(cycmaxD2, 2)), line = 0, col = 3, adj = 0.65, cex = 0.9)
+        mtext(paste("cpD1:", round(cycmaxD1, 2)), line = 0, col = 2, adj = 0.35, cex = 0.9)
+        
         if (type == "maxE") 
-            mtext(paste("cpE:", round(cycmaxE1, 2)), line = 1, col = 4, 
-                adj = 0.65, cex = 0.9)
+            mtext(paste("cpE:", round(cycmaxEFF, 2)), line = 1, col = 4, adj = 0.65, cex = 0.9)
+            
         if (type == "expR") 
-            mtext(paste("cpR:", round(exp.cyc, 2)), line = 1, col = 6, adj = 0.65, 
-                cex = 0.9)
+            mtext(paste("cpR:", round(cycEXP, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)
+            
         if (type == "Cy0") 
-            mtext(paste("Cy0:", round(Cy0reg, 2)), line = 1, col = "darkviolet", adj = 0.65, 
-                cex = 0.9)        
+            mtext(paste("Cy0:", round(Cy0reg, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9) 
+
+        if (type == "CQ")
+            mtext(paste("cpCQ:", round(cycCQ, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
+                   
         if (is.numeric(type)) 
-            mtext(paste("ct:", round(type, 2)), line = 1, col = 6, adj = 0.65, 
-                cex = 0.9)
-        mtext(paste("Eff:", round(maxE1, digits = 3)), line = 1, 
+            mtext(paste("ct:", round(type, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)
+            
+        if (!is.null(thresh)) 
+            mtext(paste("cpT:", round(cycF, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)                       
+        
+        mtext(paste("Eff:", round(maxEFF, 3)), line = 1, 
             col = 4, adj = 0.35, cex = 0.9)
-        mtext(paste("resVar:", round(rv, digits = 5)), line = 2, 
+        mtext(paste("resVar:", round(resVar(object), 8)), line = 2,
             col = 1, adj = 0.35, cex = 0.9)
-        mtext(paste("AICc:", round(aicc, digits = 2)), line = 2, 
+        mtext(paste("AICc:", round(AICc(object), 2)), line = 2, 
             col = 1, adj = 0.65, cex = 0.9)
-        mtext(paste("Model:", obj.fun), line = 3, col = 1, adj = 0.5, 
+        mtext(paste("Model:", object$MODEL$name), line = 3, col = 1, adj = 0.5, 
             cex = 0.9)
     }
     
-    return(list(eff = maxE1, resVar = round(summary(object)$resVar, 8), AICc = AICc(object), AIC = AIC(object), 
-        Rsq = Rsq(object), cpD1 = round(cycmaxD1, 2), cpD2 = round(cycmaxD2, 2), 
-        cpE = round(cycmaxE1, 2), cpR = round(exp.cyc, 2), Cy0 = round(Cy0reg, 2), fluo = fluo, init = init, 
-        cf = CF))
+    return(list(eff = maxEFF, resVar = round(resVar(object), 8), AICc = AICc(object), AIC = AIC(object), 
+        Rsq = Rsq(object), Rsq.ad = Rsq.ad(object), cpD1 = round(cycmaxD1, 2), cpD2 = round(cycmaxD2, 2), 
+        cpE = round(cycmaxEFF, 2), cpR = round(cycEXP, 2), cpT = round(cycF, 2), Cy0 = round(Cy0reg, 2),
+        cpCQ = round(cycCQ, 2), fluo = fluo, init1 = init1, init2 = init2, cf = CF))
 }

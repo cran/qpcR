@@ -5,23 +5,23 @@
 
 \description{
 Starting with a batch of qPCR curves from class \code{modlist}, the function builds a sigmoidal model which averages
- the cycle numbers of the curves at every y-value (i.e. raw fluorescence). Thus, in contrast to existing qPCR
+ the cycle numbers of the curves at every y-value (raw fluorescence). Thus, in contrast to existing qPCR
  averaging methods, not only the efficiencies or threshold cycles (as can be obtained from multiple reference
  genes) are averaged, but the complete structure of the batch at every fluorescence value.
  Beware: This is curve averaging, NOT model averaging!  
 }
 
 \usage{
-  curvemean(modlist, mean = c("amean", "gmean", "hmean"), 
-	    fct = l5(), which = 1, plot = TRUE)
+curvemean(ml, mean = c("amean", "gmean", "hmean"), 
+          model = l4, which = 1, plot = TRUE)
 }
 
 \arguments{
-  \item{modlist}{a qPCR batch object obtained from \code{\link{modlist}}.}
+  \item{ml}{a qPCR batch object of class 'modlist'.}
   \item{mean}{the averaging function, see 'Details'. Default is the arithmetic mean.}
-  \item{fct}{the sigmoidal model to be used for the averaged curve.}  
-  \item{which}{The position of the curve in the list which is used for defining the y-values. Defaults to the first curve.}  	
-  \item{plot}{Should the result be plotted?}
+  \item{model}{the sigmoidal model to be used for the averaged curve.}  
+  \item{which}{the position of the curve in the list which is used for defining the y-values. Defaults to the first curve.}  	
+  \item{plot}{should results be plotted?}
 }
 
 \details{
@@ -41,7 +41,7 @@ Harmonic mean:
 }
 
 \value{
-A model of class \code{drc} from the averaged curve.  
+A model of class 'pcrfit' from the averaged curve.  
 The points from the averaged curve (\code{mean.x}) and the standard deviation (\code{sd.x}) are
  added as items.
 }
@@ -58,12 +58,12 @@ Vandesompele et al., \emph{Genome Biology}, 2002, \bold{3}: research0034.1-0034.
 \examples{
 ## create arithmetic mean curve of four
 ## serial dilutions
-ml <- modlist(reps, c(2, 6, 10, 14))
+ml <- modlist(reps, fluo = c(2, 6, 10, 14))
 curvemean(ml)
 
 ## effect of normalizing data to [0, 1]:
 ## more averaged datapoints
-ml <- modlist(reps, c(2, 6, 10, 14), norm = TRUE)
+ml <- modlist(reps, fluo = c(2, 6, 10, 14), norm = TRUE)
 curvemean(ml)
 
 ## difference with geometric mean

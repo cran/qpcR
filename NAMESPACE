@@ -1,16 +1,47 @@
 ## functions
 export(
 
-efficiency, mchoice, sliwin, Rsq, resVar, 
-pcrplot, confband, eff, repform,
-expfit, pcrbatch, RMSE, calib,
-pcrpred, pcrGOF, expcomp, pcrimport, pcrfit,
-AICc, evidence, modlist, pcropt1, propagate,
-ratiocalc, ratioplot, curvemean, PRESS, akaike.weights,
-LR, RSS, residplot, Cy0, maxRatio, REST, drmfit, calib2
+AICc,
+akaike.weights,
+calib,
+calib2,
+curvemean,
+Cy0,
+eff,
+efficiency,
+expcomp,
+expfit,
+evidence,
+LR,
+maxRatio,
+midpoint,
+modlist,
+mselect,
+outlier,
+pcrbatch,
+pcrfit,
+pcrGOF,
+pcrimport,
+pcropt1,
+pcropt2, 
+pcrplot,
+pcrpred,
+PRESS,
+propagate,
+ratiocalc,
+resplot,
+resVar,
+RMSE,
+Rsq,
+Rsq.ad,
+Rsq.cor,
+RSS,
+sliwin
 )
 
 ## S3 methods
+## S3method(print, pcrfit)
+
 
 
 

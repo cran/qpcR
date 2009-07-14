@@ -27,13 +27,8 @@ Andrej-Nikolai Spiess & Nadine Mueller, Institute for Hormone and Fertlity Resea
 
 \examples{
 data(reps)
-### on single data
-m1 <- pcrfit(reps, 1, 2, l3())
-pcrplot(m1)
-### on replicated data
-repData <- repform(reps[,1:5], c(0,1,1,1,1))
-m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
-pcrplot(m2)
+m1 <- pcrfit(reps, 1, 2, l5)
+pcrplot(m1)    
 }
 
 \keyword{models}

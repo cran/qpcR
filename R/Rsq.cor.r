@@ -1,8 +1,9 @@
-Rsq <- function(object) 
+Rsq.cor <- function(object) 
 {
   rss <- sum(residuals(object)^2)
   Yi <- residuals(object) - fitted(object)
-  tss <- sum((Yi - mean(Yi))^2)
-  1 - (rss/tss) 
+  cor(Yi, fitted(object))^2
 }
+
+
 

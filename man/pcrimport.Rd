@@ -4,12 +4,12 @@
 \title{Simple qPCR data import function (i.e. from text files or clipboard).}
 
 \description{
- Simple wrapper function to easily import qPCR data from the clipboard (default) or tab-delimited text files.
+Simple wrapper function to easily import qPCR data from the clipboard (default) or tab-delimited text files.
 }
 
 \usage{
-  pcrimport(file = "clipboard", sep = "\t", header = TRUE, quote = "", 
-            dec = ".", colClasses = "numeric", ...)
+pcrimport(file = "clipboard", sep = "\t", header = TRUE, quote = "", 
+          dec = ".", colClasses = "numeric", ...)
 }
 
 \arguments{
@@ -27,8 +27,7 @@
 }
 
 \value{
-  A data frame containing a representation of the data in the file. 
-
+A data frame containing a representation of the data in the file.  
 }
 
 \author{
@@ -36,11 +35,11 @@
 }
 
 \examples{
-### paste some Excel data into the clipboard ###
+## paste some Excel data into the clipboard ###
 \dontrun{
 temp <- pcrimport()
 }
-### from a tab-delimited text file ###
+## from a tab-delimited text file ###
 \dontrun{
 temp <- pcrimport("c:\\temp\\foo.txt")
 }

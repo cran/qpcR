@@ -1,41 +1,55 @@
-modlist <- function (x, cols = NULL, fct = l4(), opt = FALSE, norm = FALSE, backsub = NULL, ...)
+modlist <- function(
+x, 
+cyc = 1, 
+fluo = NULL, 
+model = l4, 
+opt = FALSE, 
+norm = FALSE,
+backsub = NULL, 
+opt.method =  rep("Nelder", 5),
+nls.method = "port",
+sig.level = 0.05, 
+crit = "ftest",
+...
+)
 {
-    modList <- NULL
-    counter <- 1
+  modList <- NULL
+  counter <- 1                   
+  
+  if (is.null(fluo)) fluo <- 2:ncol(x)        
     
-    if (is.null(cols)) cols <- 2:ncol(x)        
+  if (!is.null(backsub) && !is.numeric(backsub)) 
+      stop("'backsub' must be either NULL or a numeric sequence!") 
     
-    if (!is.null(backsub) && !is.numeric(backsub)) 
-        stop("'backsub' must be either NULL or a numeric sequence!")
-    
-    if (!is.null(cols) && min(cols) == 1) stop("'cols' must be > 1 because Column 1 must be 'Cycles'!")
-    
-    Cycles <- x[, 1]
-    NAMES <- colnames(x[cols])
-           
-    for (i in cols) {
-        data  <- x[, i]
+  for (i in fluo) {
+    Cycles <- x[, cyc]
+    Fluo  <- x[, i]
                
-        if (norm) data <- data/max(data, na.rm = TRUE)
-        
-        if (!is.null(backsub)) {
-            back <- mean(data[backsub], na.rm = TRUE)
-            data <- data - back
-        }           
-        
-        m <- eval(as.call(list(drmfit, data ~ Cycles, fct = fct)))
-        
-        if (opt) {
-        	  m <- try(mchoice(m, verbose = FALSE, ...), silent = TRUE)
-        }
-        
-        flush.console()
-        cat("Making model for ", NAMES[counter], " (", qpcR:::typeid(m), ")\n", sep= "")
-        modList[[counter]] <- m
-        modList[[counter]]$names <- NAMES[counter]
-        counter <- counter + 1  
+    if (norm) {
+      Fluo <- Fluo - min(Fluo, na.rm = TRUE)
+      Fluo <- Fluo/max(Fluo, na.rm = TRUE)
     }
+        
+    if (!is.null(backsub)) {
+      back <- mean(Fluo[backsub], na.rm = TRUE)
+      Fluo <- Fluo - back
+    }                    
+        
+    DATA <- cbind(Cycles, Fluo)  
+    flush.console()
+    cat("Making model for ", colnames(x[i]), " (", model$name, ")\n", sep= "") 
+                
+    fitObj <- pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, ...)          
+        
+    if (opt) {
+ 	    fitObj <- try(mselect(fitObj, verbose = FALSE, sig.level = sig.level, crit = crit, ...), silent = TRUE)             
+    }                     
+        
+    modList[[counter]] <- fitObj
+    modList[[counter]]$names <- colnames(x[i])   
+    counter <- counter + 1       
+  }
     
-    class(modList) <- "modlist"
-    invisible(modList)
+  class(modList) <- "modlist"
+  invisible(modList)
 }

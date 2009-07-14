@@ -25,15 +25,10 @@ instrument (Roche Diagnostics).
 Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital Hamburg-Eppendorf.
 }
 
-\examples{
-### on single data
+\examples{ 
 data(reps2)
-m1 <- pcrfit(reps2, 1, 2, l3())
-pcrplot(m1)
-### on replicated data
-repData <- repform(reps2[,1:4], c(0,1,1,1))
-m2 <- drmfit(values ~ Cycles, curve = Curve, data = repData, fct = l5())
-pcrplot(m2)
+m1 <- pcrfit(reps2, 1, 2, l3)
+pcrplot(m1)   
 }
 
 \keyword{models}

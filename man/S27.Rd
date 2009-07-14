@@ -26,7 +26,7 @@ Andrej-Nikolai Spiess & Caroline Feig, Department of Andrology, University Hospi
 
 \examples{
 data(S27)
-m1 <- pcrfit(S27, 1, 2, l5())
+m1 <- pcrfit(S27, 1, 2, l5)
 pcrplot(m1)     
 }
 

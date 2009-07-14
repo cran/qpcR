@@ -1,31 +1,34 @@
-PRESS <- function(model)
+PRESS <- function(object)
 {
-      VARS <- all.vars(model$call$formula)
-      CALL <- as.list(model$call)
+  if (!is.null(object$call$data)) DATA <- eval(object$call$data)
+    else DATA <- as.data.frame(sapply(all.vars(object$call$formula), function(a) get(a)))
+  if (!is.na(class(object)[2]) && class(object)[2] == "pcrfit") DATA <- object$DATA
+ 
+  CALL <- as.list(object$call)
+  VARS <- all.vars(object$call$formula)
+  LHS <- VARS[1]
+  RHS <- VARS[-1]
+  matchPRED <- which(!is.na(match(RHS, colnames(DATA))))
+  PREDname <- RHS[matchPRED]
+  PRED.pos <- which(colnames(DATA) == PREDname)
+  RESP.pos <- which(colnames(DATA) == LHS)
+  PRESS.res <- NULL
+ 
+  for (i in 1:nrow(DATA)) {
+    NEWCALL <- CALL
+    NEWCALL$data <- DATA[-i, ]
+    
+    if (!is.na(class(object)[2]) && class(object)[2] == "pcrfit") {
+      NEWMOD <- pcrfit(DATA, PRED.pos, RESP.pos, model = object$MODEL, opt.method = object$opt.method)        
+    } else NEWMOD <- eval(as.call(NEWCALL))
+    
+    NEWPRED <- as.data.frame(DATA[i, PRED.pos])
+    colnames(NEWPRED) <- PREDname
+    y.hat <- as.numeric(predict(NEWMOD, newdata = NEWPRED))
+    PRESS.res[i] <- DATA[i, RESP.pos] - y.hat
+  }
 
-      if (!is.null(as.list(model$call)$data)) {
-            if (!is.data.frame(as.list(model$call)$data)) {
-                  MATCH <- which(as.list(model$call)$data == all.vars(model$call))
-                  DATA <- get(noquote(all.vars(model$call)[MATCH]))
-                  suppressMessages(attach(DATA))
-            } else {
-                  DATA <- as.list(model$call)$data
-                  suppressMessages(attach(DATA))
-            }
-      }
-      
-      DATA <- as.data.frame(sapply(VARS, function(a) get(noquote(a))))
-      PRESS.res <- NULL
-
-      for (i in 1:nrow(DATA)) {
-            NEWCALL <- CALL
-            NEWCALL$data <- DATA[-i, ]
-            NEWMOD <- eval(as.call(NEWCALL))
-            NEWPRED <- as.data.frame(DATA[i, -1])
-            colnames(NEWPRED) <- VARS[-1]
-            y.hat <- predict(NEWMOD, NEWPRED)[1]
-            PRESS.res[i] <- DATA[i, 1] - y.hat
-      }
-      
-      return(list(stat = sum(PRESS.res^2), residuals = PRESS.res))
+  return(list(stat = sum(PRESS.res^2), residuals = PRESS.res))
 }
+  
+  

@@ -4,12 +4,12 @@
 \title{The maxRatio method as in Shain et al}
 
 \description{
-  The maximum ratio (MR) is determined along the interpolated curve of F(x)/F(x-1) and the corresponding
-  cycle number at MR is taken. A measure of qPCR quality (FCN) is then calculated for the curve(s).
+The maximum ratio (MR) is determined along the interpolated curve of F(x)/F(x-1) and the corresponding
+cycle number at MR is taken. A respective cycle number (FCN) is then calculated for MR.
 }
 
 \usage{
-  maxRatio(ml, plot = TRUE, ...)
+maxRatio(ml, plot = TRUE, ...)
 }
 
 \arguments{
@@ -33,16 +33,16 @@ In the original paper the authors smooth the datapoints and then apply a cubic s
 }
 
 \author{
-  Andrej-Nikolai Spiess
+Andrej-Nikolai Spiess
 }
 
 \references{
-  A new method for robust quantitative and qualitative analysis of real-time PCR.\cr
-  Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
+A new method for robust quantitative and qualitative analysis of real-time PCR.\cr
+Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
 }
 
 \examples{
-ml <- modlist(reps, fct = l5()) 
+ml <- modlist(reps, model = l5) 
 maxRatio(ml)
 }
 

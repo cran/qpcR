@@ -1,46 +1,56 @@
 \name{pcrpred}
 \alias{pcrpred}
 
-\title{Value prediction from a fitted sigmoidal model}
+\title{Value prediction from a fitted qPCR model}
 
 \description{
-  After fitting the appropriate sigmoidal model, either the raw fluorescence values can be predicted from the cycle number or \emph{vice versa}. 
+After fitting the appropriate model, either the raw fluorescence values can be predicted from the cycle number or \emph{vice versa}. 
 }
 
 \usage{
-  pcrpred(object, newdata, which = c("y", "x"), ...)
-
+pcrpred(object, newdata, which = c("y", "x"), 
+        interval = c("none", "confidence", "prediction"),
+        level = 0.95) 
 }
 
 \arguments{
-  \item{object}{a 'drc' object.}
-  \item{newdata}{a vector containing the values to estimate from.}
+  \item{object}{an object of class 'pcrfit'.}
+  \item{newdata}{a dataframe containing the values to estimate from, using the same variable naming as in the fitted model.}
   \item{which}{either "y" (default) for prediction of the raw fluorescence or "x" for prediction of the cycle number.}
-  \item{...}{other parameters to be passed to the \code{predict.drc} function.}	
+  \item{interval}{if not \code{"none"}, confidence or prediction intervals are calculated.}      
+  \item{level}{the confidence level.}	
  }
 
 \details{
-Uses the \code{predict.drc} function from the 'drc' library for estimation, if the raw fluorescence values are to be estimated, and
-the inversion function of either the \code{llogistic} or \code{bolztmann} models if the cycle number is to be estimated. 
+y-values (fluorescence) are estimated from \code{object$MODEL$expr}, x-values (cycles) are estimated from \code{object$MODEL$inv}.
+Confidence levels are calculated from the gradient of these and the variance-covariance matrix of \code{object} by \emph{grad(f)} \%*\% \code{vcov(object)} \%*\% \emph{grad(f)}
+ and are based on asymptotic normality (t-distribution).
 }
 
 \value{
- A vector containing the estimated values.  
+A dataframe containing the estimated values and (if chosen) standard error/upper confidence limit/lower confidence limit. 
+The gradient is attached to the dataframe and can be accessed with \code{attr(..., "gradient")}. 
+}
+
+\note{
+The estimation of x (cycles) from fluorescence data if \code{which = "x"} is problematic in the asymptotic regions of the sigmoidal curves
+ (often gives NaN, due to logarithmation of negative values) and works fairly well in the ascending part.
 }
 
 \author{
-  Andrej-Nikolai Spiess and Christian Ritz
+Andrej-Nikolai Spiess
 }
 
-
 \examples{
-m <- pcrfit(reps, 1, 2, l5())
-### which raw fluorescence value at cycle number = 17?
-pcrpred(m, 17)
-### cycle numbers 20:25?
-pcrpred(m, 20:25)
-### which cycle at F = 4
-pcrpred(m, 4, "x")
+m <- pcrfit(reps, 1, 2, l5)
+## which raw fluorescence value at cycle number = 17?
+pcrpred(m, newdata = data.frame(Cycles = 17))
+
+## cycle numbers 20:25, with 95\% confidence?
+pcrpred(m, newdata = data.frame(Cycles = 20:25), interval = "confidence")
+
+## which cycle at Fluo = 4, with 95\% prediction?
+pcrpred(m, newdata = data.frame(Fluo = 4), which = "x", interval = "prediction")
 }
 
 \keyword{models}

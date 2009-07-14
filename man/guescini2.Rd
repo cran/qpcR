@@ -32,20 +32,19 @@ Supplemental data 1 to the paper.
 }
 
 \references{
- A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
- Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
+A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
+Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
 }
 
 \examples{
-\dontrun{
-### effect of decreasing mix
-### on PCR efficiency
+## effect of decreasing mix
+## on PCR efficiency
 data(guescini2)
-ml <- modlist(guescini2, fct = l5())
+ml <- modlist(guescini2, model = l4)
 effs <- sapply(ml, function(x) efficiency(x, plot = FALSE)$eff)
-### mean for the replicates
-tapply(effs, gl(5, 12), function(x) mean(x, na.rm = TRUE)) 
-}
+
+## mean for the replicates
+tapply(effs, gl(5, 12), function(x) mean(x, na.rm = TRUE))
 }
 
 \keyword{models}

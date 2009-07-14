@@ -4,12 +4,12 @@
 \title{Residual variance of a fitted model}
 
 \description{
-  Calculates the residual variance for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
- or any other models where \code{\link{coef}} and \code{\link{residuals}} can be extacted.
+Calculates the residual variance for objects of class \code{nls}, \code{lm}, \code{glm}, \code{drc}
+ or any other models from which \code{\link{coef}} and \code{\link{residuals}} can be extacted.
 }
 
 \usage{
- resVar(object)
+resVar(object)
 }
 
 \arguments{
@@ -21,12 +21,12 @@ The residual variance of the fit.
 }
 
 \author{
-  Andrej-Nikolai Spiess
+Andrej-Nikolai Spiess
 }
 
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5())
+m <- pcrfit(reps, 1, 2, l5)
 resVar(m)
 }
 

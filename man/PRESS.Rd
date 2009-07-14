@@ -9,11 +9,11 @@
 }
 
 \usage{
-PRESS(model)
+PRESS(object)
 }
 
 \arguments{
-\item{model}{a fitted model of the classes as described above.}
+\item{object}{a fitted model.}
 }
 
 \details{
@@ -27,7 +27,7 @@ Small values indicate that the model is not overly sensitive to any single data 
 \value{
 A list with the following components:
 \item{stat}{The PRESS statistic.}
-\item{resid}{a vector containing the PRESS residuals for each \eqn{x_i}.}  
+\item{residuals}{a vector containing the PRESS residuals for each \eqn{x_i}.}  
 }
 
 \author{
@@ -54,18 +54,15 @@ Second Edition (1990), Duxbury Press (PWS-KENT Publishing Company), 299-304.
 
 \examples{
 ## example for PCR analysis
-mod <- pcrfit(reps, 1, 2, l5())
-PRESS(mod)$stat
-## or
-mod <- drmfit(F1.1 ~ Cycles, data = reps, fct = l5())
-PRESS(mod)$stat
+m1 <- pcrfit(reps, 1, 2, l5)
+PRESS(m1)$stat
 
 ## compare PRESS statistic in models
 ## with fewer parameters
-mod2 <- update(mod, fct = l4())
-PRESS(mod2)$stat
-mod3 <- update(mod, fct = l3())
-PRESS(mod3)$stat
+m2 <- pcrfit(reps, 1, 2, l4)
+PRESS(m2)$stat
+m3 <- pcrfit(reps, 1, 2, l3)
+PRESS(m3)$stat
 
 ## example for linear regression
 x <- 1:10
@@ -73,31 +70,13 @@ y <- rnorm(10, x, 0.1)
 mod <- lm(y ~ x)
 PRESS(mod)$stat
 
-## example for NLS fitting
-## starting values need to be attached!
+## example for NLS fitting     
 DNase1 <- subset(DNase, Run == 1)
-inits <- getInitial(density ~ SSlogis(log(conc), Asym, xmid, scal), data = DNase1)
-attach(as.list(inits))
 fm1DNase1 <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), DNase1)
 res <- PRESS(fm1DNase1)
 
 ## PRESS residuals plot
-plot(fitted(fm1DNase1), res$resid)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+barplot(res$residuals)
 }
 
 \keyword{models}

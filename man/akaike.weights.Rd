@@ -19,7 +19,7 @@ akaike.weights(x)
 
 \details{
 Although Akaike's Information Criterion is recognized as a major measure for selecting models, it has one major drawback:
-The AIC values are arbitrary, and despite higher values meaning less goodness-of-fit, this is not very intuitive. For this
+The AIC values lack intuitivity despite higher values meaning less goodness-of-fit. For this
 purpose, Akaike weights come to hand for calculating the weights in a regime of several models. Additional measures can be derived,
 such as delta-AIC's and relative likelihoods that demonstrate the probability of one model being in favor over the other. 
 This is done by using the following formulae:
@@ -57,11 +57,11 @@ Wagenmakers EJ, Farrell Simon. AIC model selection using Akaike weights (2004). 
 }
 
 \examples{
-### apply a list of different sigmoidal models to data
-### and analyze GOF statistics with Akaike weights
-### on 9 different sigmoidal models 
-modList <- list(l5(), l4(), l3(), b5(), b4(), b3(), w4(), w3(), baro5())
-aics <- sapply(modList, function(x) AIC(drmfit(F1.1 ~ Cycles, data = reps, fct = x))) 
+## apply a list of different sigmoidal models to data
+## and analyze GOF statistics with Akaike weights
+## on 6 different sigmoidal models 
+modList <- list(l5, l4, l3, b5, b4, b3)
+aics <- sapply(modList, function(x) AIC(pcrfit(reps, 1, 2, x))) 
 akaike.weights(aics)$weights 
 }
 

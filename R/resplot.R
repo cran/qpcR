@@ -1,4 +1,4 @@
-residplot <- function(object, ...)
+resplot <- function(object, ...)
 {
       if (!is.numeric(object)) resid <- as.numeric(residuals(object)) else resid <- object
       ORD <- order(abs(resid))

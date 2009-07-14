@@ -10,7 +10,7 @@ Calculates the likelihood ratio and p-value from a chi-square distribution for t
 }
 
 \usage{
- LR(objX, objY)
+LR(objX, objY)
 }
 
 \arguments{
@@ -19,9 +19,9 @@ Calculates the likelihood ratio and p-value from a chi-square distribution for t
 }
 
 \details{
- The likelihood ratio statistic is \deqn{LR = \frac{f(X, \hat{\phi}, \hat{\psi})}{f(X, \phi, \hat{\psi_0})}}
- The usual test statistic is \deqn{\Lambda = 2*(l(\hat{\phi}, \hat{\psi}) - l(\phi, \hat{\psi_0}))}
- Following the large sample theory, if \eqn{H_0} is true, then \deqn{\Lambda \sim \chi_p^2}  
+The likelihood ratio statistic is \deqn{LR = \frac{f(X, \hat{\phi}, \hat{\psi})}{f(X, \phi, \hat{\psi_0})}}
+The usual test statistic is \deqn{\Lambda = 2*(l(\hat{\phi}, \hat{\psi}) - l(\phi, \hat{\psi_0}))}
+Following the large sample theory, if \eqn{H_0} is true, then \deqn{\Lambda \sim \chi_p^2}  
 
 }
 
@@ -42,9 +42,9 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-### compare l5 and l4 model
-m1 <- pcrfit(reps, 1, 2, l5())
-m2 <- pcrfit(reps, 1, 2, l4())
+## compare l5 and l4 model
+m1 <- pcrfit(reps, 1, 2, l5)
+m2 <- pcrfit(reps, 1, 2, l4)
 LR(m1, m2)
 }
 
