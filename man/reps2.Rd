@@ -28,7 +28,7 @@ Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital H
 \examples{ 
 data(reps2)
 m1 <- pcrfit(reps2, 1, 2, l3)
-pcrplot(m1)   
+plot(m1) 
 }
 
 \keyword{models}

@@ -39,7 +39,7 @@ Peirson et al., \emph{Nucleic Acids Research}, 2003, \bold{e73}.
 \examples{
 m1 <- pcrfit(reps, 1, 2, l5)
 mp <- midpoint(m1) 
-pcrplot(m1)
+plot(m1)
 abline(h = mp$f.mp, col = 2)
 abline(v = mp$mp, col = 2)  
 }

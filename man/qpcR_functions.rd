@@ -77,10 +77,10 @@ m1 <- pcrfit(reps, 1, 2, b3)
 m2 <- pcrfit(reps, 1, 2, b5)
 m3 <- pcrfit(reps, 1, 2, w4)
 
-## get the second first derivative
+## get the second derivative
 ## curve of m2
 d2 <- b5$d2(m2$DATA[, 1], coef(m2))
-pcrplot(m2)
+plot(m2)
 lines(d2, col = 2)  
 }
 

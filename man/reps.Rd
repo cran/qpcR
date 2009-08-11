@@ -28,7 +28,7 @@ Andrej-Nikolai Spiess & Nadine Mueller, Institute for Hormone and Fertlity Resea
 \examples{
 data(reps)
 m1 <- pcrfit(reps, 1, 2, l5)
-pcrplot(m1)    
+plot(m1)    
 }
 
 \keyword{models}

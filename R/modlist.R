@@ -50,6 +50,6 @@ crit = "ftest",
     counter <- counter + 1       
   }
     
-  class(modList) <- "modlist"
+  class(modList) <- c("modlist", "pcrfit")
   invisible(modList)
 }

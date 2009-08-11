@@ -136,6 +136,7 @@ res2$pval.Perm
 ## toy example is same data as above
 ## but replicated as reference such
 ## that the ratio should be 1.
+\dontrun{
 DAT2 <- pcrbatch(reps, c(2:9, 2:9), l4)
 GROUP2 <- c("gs", "gs", "gs", "gs", 
             "gc", "gc", "gc", "gc",
@@ -147,10 +148,12 @@ res2$conf.Sim
 res2$conf.Perm
 res2$error.Prop/res$eval.Prop
 res2$pval.Perm
+}
 
 ## same as above, but reference data
 ## is mirrored such that the ratio 
 ## is squared.
+\dontrun{
 DAT3 <- pcrbatch(reps, c(2:9, 9:2), l4)
 GROUP3 <- c("gs", "gs", "gs", "gs", 
             "gc", "gc", "gc", "gc",
@@ -162,6 +165,7 @@ res3$conf.Sim
 res3$conf.Perm
 res3$error.Prop/res$eval.Prop
 res3$pval.Perm 
+}
 
 ## compare 'propagate' to REST software
 ## using the data from the REST 2008
@@ -171,6 +175,7 @@ res3$pval.Perm
 ## ties define random reallocation of crossing points
 ## between control and sample.
 ## See help for 'propagate'.
+\dontrun{
 EXPR <- expression((2.01^(cp.gc - cp.gs)/1.97^(cp.rc - cp.rs)))
 cp.rc <- c(26.74, 26.85, 26.83, 26.68, 27.39, 27.03, 26.78, 27.32, NA, NA)
 cp.rs <- c(26.77, 26.47, 27.03, 26.92, 26.97, 26.97, 26.07, 26.3, 26.14, 26.81)
@@ -182,6 +187,7 @@ res$conf.Sim
 res$conf.Perm
 res$eval.Prop
 res$error.Prop
+}
 
 ## Does error propagation in qPCR quantitation make sense?
 ## In ratio calculations based on (E1^cp1)/(E2^cp2),

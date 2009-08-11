@@ -11,8 +11,9 @@ This is the main workhorse function of the qpcR package that fits one of the ava
 }
 
 \usage{
-pcrfit(data, cyc = 1, fluo, model = l4, 
-       opt.method = rep("Nelder", 5), nls.method = "port", ...)
+pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,  
+       opt.method = rep("Nelder", 5), nls.method = "port", 
+       start = NULL, ...)
 }
 
 \arguments{
@@ -20,8 +21,10 @@ pcrfit(data, cyc = 1, fluo, model = l4,
   \item{cyc}{the column number with the cycle data. Defaults to 1.}
   \item{fluo}{the column containing the raw fluorescence data of the run.}
   \item{model}{the model to be used for the analysis, defaults to l4.} 
+  \item{do.optim}{if \code{FALSE}, refinement of starting values by \code{\link{optim}} will be skipped.}
   \item{opt.method}{one of the available methods in \code{\link{optim}} or "GA". See 'Details'.}
   \item{nls.method}{one of the available methods in \code{\link{nls}}. Default is \code{"port"}, which is quite robust.}
+  \item{start}{a vector of starting values that can be supplied externally.}
   \item{...}{other parameters to be passed to \code{optim}, \code{genoud} or \code{nls}.}     
 }
 
@@ -65,6 +68,10 @@ pcrfit(reps, 1, 2, l4)
 ## same with five-parameter model
 ## use "GA" method for optim
 pcrfit(reps, 1, 2, l5, opt.method = "GA")
+
+## skip 'optim' method and supply
+## own starting values
+pcrfit(reps, 1, 2, l4, do.optim = FALSE, start = c(-5, -0.05, 11, 16)) 
 }
 
 \keyword{models}

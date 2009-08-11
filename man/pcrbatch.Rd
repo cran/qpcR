@@ -69,7 +69,9 @@ Larionov et al., \emph{BMC Bioinformatics}, \bold{6}: 62.
 
 \examples{
 ## complete dataset
+\dontrun{
 temp <- pcrbatch(reps)
+}
 
 ## first 4 runs and return parameters of fit
 ## do background subtraction using the first 8 cycles

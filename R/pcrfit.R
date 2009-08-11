@@ -3,18 +3,21 @@ data,
 cyc = 1, 
 fluo, 
 model = l4, 
+do.optim = TRUE,
 opt.method = rep("Nelder", 5), 
 nls.method = "port", 
+start = NULL,
 ...)
-{
+{            
   require(rgenoud, quietly = TRUE)     
-  options(warn = -1)             
+  options(warn = -1)                     
   
   Cycles <- data[, cyc]          
   Fluo <- data[, fluo]        
     
   DATA <- as.data.frame(cbind(Cycles, Fluo))     
-  ssVal <- model$ssFct(Cycles, Fluo)   
+  if (is.null(start)) ssVal <- model$ssFct(Cycles, Fluo)
+   else ssVal <- start      
     
   ssValMat <- NULL
   ssValMat <- rbind(ssValMat, c("start", ssVal))
@@ -26,23 +29,24 @@ nls.method = "port",
   
   FCT2 <- function(x) {
     RES <- Fluo - model$fct(Cycles, x)
-    RES
-  }        
+    RES        
+  }                
   
-  for (i in opt.method) {
-    if (i != "GA") {
-      OPTIM <- try(optim(ssVal, FCT, method = i, hessian = TRUE, control = list(parscale = abs(ssVal), maxit = 50000), ...), silent = TRUE)
-    } else {
-      OPTIM <- try(genoud(fn = FCT, nvars = length(model$parnames), starting.values = ssVal, 
+  if (do.optim) {
+    for (i in opt.method) {
+      if (i != "GA") {
+        OPTIM <- try(optim(ssVal, FCT, method = i, hessian = TRUE, control = list(parscale = abs(ssVal), maxit = 50000), ...), silent = TRUE)
+      } else {
+        OPTIM <- try(genoud(fn = FCT, nvars = length(model$parnames), starting.values = ssVal, 
                       hessian = TRUE, print.level = 0, pop.size = 100, ...), silent = TRUE)         
-    }    
-    if (inherits(OPTIM, "try-error")) stop("Try to use other 'opt.method'")
-    ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
-    ssVal <- OPTIM$par       
+      }    
+      if (inherits(OPTIM, "try-error")) stop("Try to use other 'opt.method'")
+      ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
+      ssVal <- OPTIM$par       
+    }
+    EIGEN <- eigen(OPTIM$hessian)$values  
+    if (any(EIGEN < 0)) print("One of the hessian matrix eigenvalues is negative! Consider a different 'opt.method'...")
   }
-
-  EIGEN <- eigen(OPTIM$hessian)$values  
-  if (any(EIGEN < 0)) print("One of the hessian matrix eigenvalues is negative! Consider a different 'opt.method'...")
   
   names(ssVal) <- model$parnames
 
@@ -62,6 +66,7 @@ nls.method = "port",
   CALL$formula <- as.formula(model$expr)
   CALL$start <- ssVal
   NLS$call <- as.call(CALL)
+  NLS$call2 <- match.call()
   assign("DATA", DATA, envir = globalenv())
 
   class(NLS) <- c("pcrfit", "nls")

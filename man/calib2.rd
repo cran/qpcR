@@ -71,9 +71,11 @@ res <- calib2(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES)
 
 ## using six dilutions with 
 ## four replicates/dilution
+\dontrun{
 CAL2 <- modlist(reps, fluo = 2:25, backsub = 1:8)
 res <- calib2(refcurve = CAL2, predcurve = PRED, thresh = "cpD2", 
-              dil = COPIES, group = gl(6,4))  
+              dil = COPIES, group = gl(6,4)) 
+} 
 }
 
 \keyword{models}

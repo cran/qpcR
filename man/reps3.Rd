@@ -29,7 +29,7 @@ Heike Cappallo-Obermann, Bone Marrow Transplantation Unit, University Hospital H
 ## on single data
 data(reps3)
 m1 <- pcrfit(reps3, 1, 2, l5)
-pcrplot(m1)  
+plot(m1)  
 }
 
 \keyword{models}

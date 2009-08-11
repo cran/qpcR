@@ -32,7 +32,7 @@ Supplemental data 1 to the paper.
 \examples{
 data(rutledge)
 m1 <- pcrfit(rutledge, 1 , 2, l5)
-pcrplot(m1)
+plot(m1)
 }
 
 \keyword{models}

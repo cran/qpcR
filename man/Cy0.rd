@@ -16,8 +16,8 @@ Cy0(object, plot = FALSE, add = FALSE, ...)
 \arguments{
   \item{object}{a fitted object of class 'pcrfit'.}
   \item{plot}{if \code{TRUE}, displays a plot of Cy0.}
-  \item{add}{if \code{TRUE}, a plot is added to any other existing plot, i.e. as from \code{\link{pcrplot}}.}
-  \item{...}{other parameters to be passed to \code{\link{pcrplot}} or \code{\link{points}}.}	
+  \item{add}{if \code{TRUE}, a plot is added to any other existing plot, i.e. as from \code{\link{plot.pcrfit}}.}
+  \item{...}{other parameters to be passed to \code{\link{plot.pcrfit}} or \code{\link{points}}.}	
  }
 
 \details{

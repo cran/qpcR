@@ -46,7 +46,7 @@ Tichopad et al., \emph{Nucleic Acids Research}, 2003, \bold{e122}.\cr
 \examples{
 m <- pcrfit(reps, 1, 2, l5)
 out <- outlier(m) 
-pcrplot(m)
+plot(m)
 abline(v = out$outl, col = 2)
 abline(h = out$f.outl, col = 2)  
 }

@@ -100,8 +100,10 @@ res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter",
               opt.step = c(50, 0)) 
 
 ## iterating the intercept/slope with 20 steps
+\dontrun{
 res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
               opt.step = c(20, 20)) 
+}
 }
 
 \keyword{models}

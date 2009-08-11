@@ -31,9 +31,11 @@ Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
 }
 
 \examples{
+\dontrun{
 data(guescini1)
 ml <- modlist(guescini1, model = l4)
-pcrplot(ml) 
+plot(ml) 
+}
 }
 
 \keyword{models}

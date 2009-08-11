@@ -3,6 +3,8 @@ export(
 
 AICc,
 akaike.weights,
+batchstat, 
+BIC,
 calib,
 calib2,
 curvemean,
@@ -14,21 +16,22 @@ expfit,
 evidence,
 LR,
 maxRatio,
+meanlist,
 midpoint,
 modlist,
 mselect,
 outlier,
 pcrbatch,
+pcrboot,
 pcrfit,
 pcrGOF,
 pcrimport,
 pcropt1,
-pcropt2, 
-pcrplot,
-pcrpred,
+pcrsim,
 PRESS,
 propagate,
 ratiocalc,
+replist,
 resplot,
 resVar,
 RMSE,
@@ -40,7 +43,10 @@ sliwin
 )
 
 ## S3 methods
-## S3method(print, pcrfit)
+S3method(update, pcrfit)
+S3method(predict, pcrfit)
+S3method(plot, pcrfit)
+
 
 
 

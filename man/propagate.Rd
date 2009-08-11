@@ -181,11 +181,14 @@ qqnorm(res$eval.Sim)
 ## Similar to what REST software will do!
 ## Scenario 1: just swapping the 
 ## threshold cycles
+\dontrun{
 res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE, 
                   do.perm = TRUE, ties = c(NA, 1, NA, 1)) 
+
                   
 ## 95\% confidence interval for the ratio
 res$conf.Perm
+}
 
 ## Using covariances in calculation and simulation
 res2 <- propagate(EXPR, DF, type = "raw", 

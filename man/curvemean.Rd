@@ -13,20 +13,19 @@ Starting with a batch of qPCR curves from class \code{modlist}, the function bui
 
 \usage{
 curvemean(ml, mean = c("amean", "gmean", "hmean"), 
-          model = l4, which = 1, plot = TRUE)
+          which = 1, plot = TRUE)
 }
 
 \arguments{
   \item{ml}{a qPCR batch object of class 'modlist'.}
-  \item{mean}{the averaging function, see 'Details'. Default is the arithmetic mean.}
-  \item{model}{the sigmoidal model to be used for the averaged curve.}  
+  \item{mean}{the averaging function, see 'Details'. Default is the arithmetic mean.}     
   \item{which}{the position of the curve in the list which is used for defining the y-values. Defaults to the first curve.}  	
   \item{plot}{should results be plotted?}
 }
 
 \details{
 Starting from the raw fluorescence values of a defined curve in the list, the cycle number of all other curves at this value are
- calculated and averaged. After that, a new sigmoidal model is fit to the obtained data. 
+ calculated and averaged. After that, a new sigmoidal model is fit to the obtained data, using the same sigmoidal model as in \code{ml}.
  Note: often works better (more data points can be averaged) if \code{norm = TRUE} when buidling the model list with \code{\link{modlist}}. 
  Three different averaging functions can be used:
 
@@ -41,7 +40,7 @@ Harmonic mean:
 }
 
 \value{
-A model of class 'pcrfit' from the averaged curve.  
+A model of class 'nls' and 'pcrfit' from the averaged curve.  
 The points from the averaged curve (\code{mean.x}) and the standard deviation (\code{sd.x}) are
  added as items.
 }
