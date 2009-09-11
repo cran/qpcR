@@ -27,7 +27,7 @@ statfun = function(y) mean(y, na.rm = TRUE),
     if (plot) {
       plot(cyc, initMod, type = "n", ylim = c(min(fluoMat, na.rm = TRUE), max(fluoMat, na.rm = TRUE)),
            lwd = 2, col = 1, xlab = "Cycles", ylab = "Fluo", ...)
-      apply(fluoMat, 1, function(x) points(x, cex = 0.5, ...))
+      apply(fluoMat, 1, function(x) points(cyc, x, cex = 0.5, ...))
     }        
     
     if (is.null(fitmodel)) fitmodel <- list(model) else fitmodel <- as.list(fitmodel)       
@@ -52,7 +52,7 @@ statfun = function(y) mean(y, na.rm = TRUE),
         if (j %% 10 == 0) cat(j) else cat(".")
         if (j %% 50 == 0) cat("\n")
         flush.console()            
-        if (plot) lines(cyc, fitted(FIT), col = colvec[k])  
+        if (plot) lines(cyc, fitted(FIT), col = colvec[k], ...)  
         coefMat <- cbind(coefMat, coef(FIT))
         gofMat <- cbind(gofMat, unlist(pcrGOF(FIT)))                     
       }

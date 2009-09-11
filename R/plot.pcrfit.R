@@ -1,6 +1,7 @@
 plot.pcrfit <- function(
 x, 
 fitted = TRUE,
+subset = NULL,
 confband = c("none", "confidence", "prediction"),
 errbar = c("none", "sd", "se", "conf"),
 add = FALSE, 
@@ -11,6 +12,7 @@ level = 0.95,
   object <- x
   confband <- match.arg(confband)
   errbar <- match.arg(errbar)
+  if (!is.null(subset) && length(subset) != 2) stop("'subset' must be a 2-element vector!") 
   
   if (class(object) != "modlist") modList <- list(object) else modList <- object
   if (class(object) == "modlist") {
@@ -26,9 +28,9 @@ level = 0.95,
     if (!is.na(class(object)[2]) && class(object)[2] == "replist") colvec <- gl(attr(object, "nlevels"), 1)
   }      
   
-  statfun <- function(x, errbar, level) {
-    CYC <- x$DATA[, 1]     
-    DATA <- x$DATA[, 2]
+  statfun <- function(object, errbar, level) {
+    CYC <- object$DATA[, 1]     
+    DATA <- object$DATA[, 2]
     fact <- qnorm(1 - ((1 - level)/2))       
     nobs <- round(length(DATA)/length(unique(CYC)))    
     statfun <- switch(errbar, sd = function(x) sd(x, na.rm = TRUE), 
@@ -42,7 +44,8 @@ level = 0.95,
    
     if (i > 1) add <- TRUE
     
-    if (!add) plot(modList[[i]]$DATA, ylim = c(minVal, maxVal), col = colvec[i], ...) else points(modList[[i]]$DATA, col = colvec[i], ...)
+    if (!add) plot(modList[[i]]$DATA, ylim = c(minVal, maxVal), xlim = c(subset[1], subset[2]), col = colvec[i], ...) 
+        else points(modList[[i]]$DATA, col = colvec[i], ...)
     
     if (is.null(modList[[i]]$isReps)) {
       if (fitted) {
@@ -59,7 +62,7 @@ level = 0.95,
   
     if (confband != "none") {
       CYC <- unique(modList[[i]]$DATA[, 1])          
-      CONFINT <- pcrpred(modList[[i]], interval = confband, level = level, ...)[CYC, ]             
+      CONFINT <- predict(modList[[i]], interval = confband, level = level, ...)[CYC, ]             
       lines(CYC, CONFINT$Lower, col = 2, ...)
       lines(CYC, CONFINT$Upper, col = 2, ...)  
     }

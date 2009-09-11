@@ -1,19 +1,21 @@
 \name{PRESS}
 \alias{PRESS}
 
-\title{Allen's PRESS (Prediction Sum-Of-Squares) statistic}
+\title{Allen's PRESS (Prediction Sum-Of-Squares) statistic, aka P-square}
 
 \description{
  Calculates the PRESS statistic, a leave-one-out refitting and prediction method, as described in Allen (1971).
- Works for any regression model with a \code{call} slot and a \code{\link{predict}} function, hence all models of class \code{lm}, \code{glm}, \code{nls} and \code{drc} (and maybe more...). 
+ Works for any regression model with a \code{call} slot, an \code{\link{update}} and a \code{\link{predict}} function, hence all models of class \code{lm}, \code{glm}, \code{nls} and \code{drc} (and maybe more...).
+ The function also returns the PRESS analog to R-square, the P-square. 
 }
 
 \usage{
-PRESS(object)
+PRESS(object, verbose = TRUE)
 }
 
 \arguments{
-\item{object}{a fitted model.}
+  \item{object}{a fitted model.}
+  \item{verbose}{logical. If \code{TRUE}, iterations are displayed on the console.} 
 }
 
 \details{
@@ -22,12 +24,15 @@ The predicted value \eqn{\hat{y}_{i, -i}} is calculated at the excluded point \e
 \deqn{\sum_{i=1}^n (y_i - \hat{y}_{i, -i})^2}
 The PRESS statistic is a surrogate measure of crossvalidation of small sample sizes and a measure for internal validity.
 Small values indicate that the model is not overly sensitive to any single data point.
+The P-square value, the PRESS equivalent to R-square, is given by \deqn{P^2 = \frac{\sum_{i=1}^n \hat{\varepsilon}^2_{-i}}{\sum_{i=1}^n (y_i - \bar{y})^2}}
+ with \eqn{\hat\varepsilon_{-i} = y_i - \hat{y}_{-i}}.
 }
 
 \value{
 A list with the following components:
-\item{stat}{The PRESS statistic.}
-\item{residuals}{a vector containing the PRESS residuals for each \eqn{x_i}.}  
+  \item{stat}{The PRESS statistic.}
+  \item{residuals}{a vector containing the PRESS residuals for each \eqn{x_i}.}  
+  \item{P.square}{the P-square value. See 'Details'.}  
 }
 
 \author{
@@ -55,20 +60,20 @@ Second Edition (1990), Duxbury Press (PWS-KENT Publishing Company), 299-304.
 \examples{
 ## example for PCR analysis
 m1 <- pcrfit(reps, 1, 2, l5)
-PRESS(m1)$stat
+PRESS(m1)
 
 ## compare PRESS statistic in models
 ## with fewer parameters
 m2 <- pcrfit(reps, 1, 2, l4)
-PRESS(m2)$stat
+PRESS(m2)
 m3 <- pcrfit(reps, 1, 2, l3)
-PRESS(m3)$stat
+PRESS(m3)
 
 ## example for linear regression
 x <- 1:10
 y <- rnorm(10, x, 0.1)
 mod <- lm(y ~ x)
-PRESS(mod)$stat
+PRESS(mod)
 
 ## example for NLS fitting     
 DNase1 <- subset(DNase, Run == 1)

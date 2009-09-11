@@ -10,7 +10,7 @@ Very handy if following functions should be applied to different qPCR models, i.
 
 \usage{
 modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE, 
-        backsub = NULL, opt.method =  rep("Nelder", 5), nls.method = "port",
+        backsub = NULL, opt.method =  "LM", nls.method = "port",
         sig.level = 0.05, crit = "ftest", ...)
 }
 

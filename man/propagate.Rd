@@ -14,14 +14,15 @@ For each variable in the dataset, simulated data with \code{nsim} samples is gen
 Each row of the simulated dataset is evaluated and statistics are calculated from the \code{nsim} evaluations.
 
 2) \bold{Permutation approach:}\cr
-The data of the original dataset is shuffled \code{nperm} times (with replacement) according to the ties defined in \code{group}.
+The data of the original dataset is permutated \code{nperm} times by binding observations together according to \code{ties}.
+ The \code{ties} bind observations that can be independent measurements from the same sample. In qPCR terms, this would be a real-time PCR for two different genes on the same sample. If \code{ties} is omitted, the observations are shuffled independently. 
 In detail, two datasets are created for each permutation:
-Dataset1 samples with replacement the data in the columns, such that the data is not shuffled between columns. Dataset2 is obtained by
-  sampling with replacement between the columns as defined in \code{group}. For both datasets, the rows are evaluated and statistics are collected.
-The confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all events mean(Dataset2) smaller/bigger mean(Dataset2) divided by \code{nperm}.
+Dataset1 samples the rows (replicates) of the data according to \code{ties}. Dataset2 is obtained by sampling the columns (samples), also binding columns as in \code{ties}. 
+For both datasets, the permutations are evaluated and statistics are collected.
+The confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all permutations that follow \code{perm.crit}, 
+ whereby \code{init} reflects the permutations of the initial data and \code{perm} the permutations of the randomly reallocated samples.
 Thus, the p-value gives a measure against the null hypothesis that the result in the initial group is just by chance.
-Omitting a grouping definition will result in shuffling the data between all columns (which rarely makes sense). If columns of
- the data are to be fixed in Dataset2, these have to be defined by \code{NA}'s. See 'Details' and 'Examples'.
+See 'Details' and 'Examples'.
  
 3) \bold{Error propagation:}\cr
 For all variables in the original dataset, mean and standard deviation are calculated. Through gaussian error propagation (first-order Taylor expansion),
@@ -30,8 +31,8 @@ For all variables in the original dataset, mean and standard deviation are calcu
 
 \usage{
 propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE, use.cov = FALSE, 
-          nsim = 10000, do.perm = FALSE, perm.crit = "m1 < m2", ties = NULL, 
-          nperm = 2000, alpha = 0.05, plot = TRUE, xlim = NULL, ...)  
+          nsim = 10000, do.perm = FALSE, perm.crit = "perm > init", 
+          ties = NULL, nperm = 2000, alpha = 0.05, plot = TRUE, xlim = NULL, ...)  
 }
 
 \arguments{
@@ -45,8 +46,8 @@ propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE, use.cov = FALSE,
              (n x n, n = number of variables). If \code{FALSE}, the Monte-Carlo simulation and error propagation use only the diagonal (variances).}
   \item{nsim}{the number of simulations to be performed, minimum is 5000.}  
   \item{do.perm}{logical. Should permutation error analysis be applied?}     
-  \item{perm.crit}{a character string defining the differences in means for the permutation p-value. See 'Details'.}
-  \item{ties}{a vector defining the columns in which permutation and data swapping should be applied in order to analyze if differences in groups are only by chance. See 'Details'.}
+  \item{perm.crit}{a character string defining the null hypothesis for the permutation p-value. See 'Details'.}
+  \item{ties}{a vector defining the columns that should be tied together for the permutations. See 'Details'.}
   \item{nperm}{the number of permutations to be performed.}  
   \item{alpha}{the confidence level.}
   \item{plot}{logical. Should histograms with confidence intervals (in blue) be plotted for all analyses?}
@@ -64,41 +65,35 @@ with \eqn{C_Y} = the propagated error, \eqn{F_X} = the p x n matrix with the res
  \eqn{F_X^T} = the n x p transposed matrix of \eqn{F_X}.
 Depending on the input formula, the error propagation may result in an error that is not normally distributed. The Monte Carlo simulation, starting with normal distributions
  of the variables, can clarify this. The plots obtained from this function will also clarify this potential caveat.  
-A high tendency from deviation of normality is encountered in formulae where the error of the denominator is relatively high
+A high tendency from deviation of normality is encountered in formulas where the error of the denominator is relatively high
  or in exponential models where the exponent has a high error. This is one of the problems that is inherent in real-time PCR analysis, as the classical
  ratio calculation with efficiencies (i.e. by the delta-ct method) is usually of the exponential type. 
-The \code{ties} define the swapping order to create the 'NULL' dataset from which permutation p-values are calculated against the initial dataset.
- Same numbers define the columns to swap against, as \code{NA} defined columns are only permutated within and not swapped.
 
-Examples:
-Randomly allocate values between first/third and second/fourth column: c(1, 2, 1, 2)\cr
-Randomly allocate values between first/second column, the values of the remaining columns are not reallocated: c(1, 1, NA, NA).
-
-The criterium for the p-value (\code{perm.crit}) has to be defined by the user.
+The criterium for the permutation p-value (\code{perm.crit}) has to be defined by the user.
 For example, let's say we calculate some value 0.2 which is a ratio between two groups.
-We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. We would thus define \code{perm.crit} as "m1 < m2" meaning that we want to test if the 
- mean of the initial data (m1) is frequently smaller than by the randomly allocated data (m2). 
+We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. 
+We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). 
 }
 
 \value{
   A list with the following components:       
-  \item{mean.Sim}{the mean of all single row-wise evaluations from the Monte Carlo simulated data.}
-  \item{sd.Sim}{the standard deviation of all single row-wise evaluations from the Monte Carlo simulated data.}
-  \item{med.Sim}{the median of all single row-wise evaluations from the Monte Carlo simulated data.}
-  \item{mad.Sim}{the median average deviation of all single row-wise evaluations from the Monte Carlo simulated data.}   
-  \item{data.Sim}{the Monte Carlo simulated data.}
-  \item{eval.Sim}{all single row-wise evaluations from the Monte Carlo simulated data.}
-  \item{conf.Sim}{the confidence values for \code{eval.Sim}.}
-  \item{mean.Perm}{the mean from all row-wise evaluations after dataset resampling (permutation).}
-  \item{sd.Perm}{the standard deviation from all row-wise evaluations after dataset resampling (permutation).}
-  \item{med.Perm}{the median from all row-wise evaluations after dataset resampling (permutation).}
-  \item{mad.Perm}{the median average deviation from all row-wise evaluations after dataset resampling (permutation).}   
-  \item{conf.Perm}{the confidence values obtained for all resamples.}
-  \item{pval.Perm}{the permutation p-value between means of initial group permutations and group swapping permutations.}
+  \item{mean.Sim}{the mean from the Monte Carlo simulated data.}
+  \item{sd.Sim}{the standard deviation from the Monte Carlo simulated data.}
+  \item{med.Sim}{the median of the Monte Carlo simulated data.}
+  \item{mad.Sim}{the median average deviation of the Monte Carlo simulated data.}   
+  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column.}       
+  \item{conf.Sim}{the confidence values for the evaluations from \code{data.Sim}.}
+  \item{mean.Perm}{the mean from all permutations.}
+  \item{sd.Perm}{the standard deviation from all permutations.}
+  \item{med.Perm}{the median from all permutations.}
+  \item{mad.Perm}{the median average deviation from all permutations.} 
+  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}. See 'Examples'.}      
+  \item{conf.Perm}{the confidence interval obtained from all permutations.}
+  \item{pval.Perm}{the permutation p-value AGAINST the hypothesis defined in \code{perm.crit}.}
   \item{eval.Prop}{the result from evaluating the expression with the mean values.}
   \item{error.Prop}{the propagated error.}
-  \item{deriv.Prop}{a list containing the partial derivatives expressions for each variable.}
-  \item{conf.Prop}{the confidence values of the propagated error, assuming normality (be cautious about this point!).}
+  \item{conf.Prop}{the confidence values of the propagated error, assuming normality.}
+  \item{deriv.Prop}{a list containing the partial derivatives expressions for each variable.}   
   \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation.}    
 }
 
@@ -125,7 +120,8 @@ Ripley BD (1987). Stochastic Simulation. Wiley. Page 98.\cr
 
 Testing for normal distribution:\cr
 Thode Jr. HC (2002). Testing for  Normality. Marcel Dekker, New York.\cr
-Royston P (1992). Approximating the Shapiro-Wilk W-test for non-normality. \emph{Statistics and Computing}, \bold{2}, 117-119.\cr
+Royston P (1992). Approximating the Shapiro-Wilk W-test for non-normality.\cr
+\emph{Statistics and Computing}, \bold{2}, 117-119.\cr
 }
 
 \seealso{
@@ -134,7 +130,7 @@ Function \code{\link{ratiocalc}} for error analysis within qPCR ratio calculatio
 
 
 \examples{
-## from summary data just calculate 
+## From summary data just calculate 
 ## Monte-Carlo and propagated error.
 EXPR <- expression(x/y)
 x <- c(5, 0.1)
@@ -142,21 +138,24 @@ y <- c(1, 0.01)
 DF <- cbind(x, y)
 res <- propagate(expr = EXPR, data = DF, type = "stat")
 
-## Do Shapiro-Wilks test on Monte Carlo errors 
+## Do Shapiro-Wilks test on Monte Carlo evaluations 
 ## !maximum 5000 datapoints can be used!
 ## => p.value indicates normality
-shapiro.test(res$eval.Sim[1:5000])
+shapiro.test(res$data.Sim[, 3][1:5000])
 ## How about a graphical analysis:
-qqnorm(res$eval.Sim)
+qqnorm(res$data.Sim[, 3])
 
-## using raw data
+## Using raw data
 ## bring all vectors to same 
-## length with NA's
+## length with NA's.
+## Do permutations (swap x and y values)
 EXPR <- expression(x*y)
 x <- c(2, 2.1, 2.2, 2, 2.3, 2.1)
-y <- c(4, 4, 3.8, 4.1, NA, NA)
+y <- c(4, 4, 3.8, 4.1, 3.1, 3)
 DF <- cbind(x, y)  
-res <- propagate(EXPR, DF, type = "raw")
+res <- propagate(EXPR, DF, type = "raw", do.perm = TRUE)
+## Have a look at permutation result
+res$data.Perm
 
 ## For replicate data, using relative 
 ## quantification ratio from qPCR.
@@ -164,35 +163,39 @@ res <- propagate(EXPR, DF, type = "raw")
 ## Done without using covariance in the 
 ## calculation and simulation.
 ## STRONG deviation from normality!
+## cp's and efficiencies are tied together
+## because they are two observations on the
+## same sample!
 EXPR <- expression((E1^cp1)/(E2^cp2))
 E1 <- c(1.73, 1.75, 1.77)
 cp1 <- c(25.77,26.14,26.33)
 E2 <-  c(1.72,1.68,1.65)
 cp2 <- c(33.84,34.04,33.33)
 DF <- cbind(E1, cp1, E2, cp2)
-res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE)
+res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
+                 do.perm = FALSE)                 
 par(ask = TRUE)
-shapiro.test(res$eval.Sim[1:5000])
-qqnorm(res$eval.Sim)
+shapiro.test(res$data.Sim[, 3][1:5000])
+qqnorm(res$data.Sim[, 3])
 
-## same setup as above but also
+## Same setup as above but also
 ## using a permutation approach
 ## for resampling confidence interval
-## Similar to what REST software will do!
-## Scenario 1: just swapping the 
-## threshold cycles
-\dontrun{
-res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE, 
-                  do.perm = TRUE, ties = c(NA, 1, NA, 1)) 
-
-                  
+## Cp's and efficiencies are tied together
+## because they are two observations on the
+## same sample! 
+## Similar to what REST2008 software does.
+res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
+                 perm.crit = "perm < init", do.perm = TRUE, 
+                 ties = c(1, 1, 2, 2))                   
 ## 95\% confidence interval for the ratio
 res$conf.Perm
-}
+
 
 ## Using covariances in calculation and simulation
-res2 <- propagate(EXPR, DF, type = "raw", 
-                use.cov = TRUE, do.sim = TRUE)
+res2 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
+                 perm.crit = "perm < init", do.perm = TRUE, 
+                 ties = c(1, 2, 1, 2), use.cov = TRUE) 
               
 ## Proof that covariance of Monte-Carlo
 ## simulated dataset is the same as from 
@@ -225,7 +228,7 @@ for (i in seq(0.01, 0.5, by = 0.01)) {
   DF <- cbind(x, y)
   res  <-  propagate(expression(x/y), DF, type = "stat", 
                       do.sim = TRUE, plot = FALSE)
-  hist(res$data.Sim, nclass = 100, main = paste("sd(y):",i))      
+  hist(res$data.Sim[, 3], nclass = 100, main = paste("sd(y):",i))      
 }
 }
 

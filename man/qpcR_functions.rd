@@ -26,10 +26,7 @@ b3
 w4
 w3
 baro5
-expGrowth
-}
-
-\arguments{
+expGrowth 
 }
 
 \details{
@@ -58,18 +55,11 @@ The functions are defined as a list containing the following items:\cr
 \code{$inv.grad}    the inverse functions as an expression for gradient calculation.\cr
 \code{$parnames}    the parameter names.\cr
 \code{$name}        the function name.\cr
-\code{type}         the function type as a character string.\cr  
-}
-
-
-\value{
+\code{$type}        the function type as a character string.\cr  
 }
 
 \author{
 Andrej-Nikolai Spiess
-}
-
-\references{
 }
 
 \examples{

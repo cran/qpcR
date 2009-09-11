@@ -27,6 +27,7 @@ pcrfit,
 pcrGOF,
 pcrimport,
 pcropt1,
+pcropt2,
 pcrsim,
 PRESS,
 propagate,
@@ -40,6 +41,7 @@ Rsq.ad,
 Rsq.cor,
 RSS,
 sliwin
+
 )
 
 ## S3 methods

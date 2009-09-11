@@ -25,12 +25,14 @@ crit,
     
   if (class(x) == "modlist") {
     wdata <- sapply(x, function(x) x$DATA[, 2])
-    namevec <- sapply(x, function(x) x$names)
+    namevec <- sapply(x, function(x) x$names)  
+    models <- lapply(x, function(x) x$MODEL)    
     colnames(wdata) <- namevec
     Cycles <- x[[1]]$DATA[, 1]
   } else {
     wdata <- as.data.frame(x[, cols])
-    namevec <- colnames(x)[cols]     
+    namevec <- colnames(x)[cols] 
+    models <- rep(list(model), ncol(wdata))        
     Cycles <- x[, 1]
   }
            
@@ -61,9 +63,13 @@ crit,
       back <- mean(data[backsub], na.rm = TRUE)
       data <- data - back
     }    
-        
-    mat <- data.frame(cbind(Cycles, data))
-    FIT <- try(pcrfit(mat, 1, 2, model = model, ...), silent = TRUE)
+    
+    l1 <- length(Cycles)
+    l2 <- length(data)
+    maxl <- max(c(l1, l2), na.rm = TRUE) 
+    
+    mat <- data.frame(cbind(Cycles[1:maxl], data[1:maxl]))
+    FIT <- try(pcrfit(mat, 1, 2, model = models[[i]], ...), silent = TRUE)     
     
     if (missing(crit)) CRIT = "ftest" else CRIT <- crit
     if (opt) FIT <- mselect(FIT, verbose = FALSE, crit = CRIT)

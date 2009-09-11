@@ -12,8 +12,9 @@ verbose = TRUE,
   type <- match.arg(type)
   if (class(object) != "pcrfit" && class(object) != "nls") stop("Use only with objects of class 'pcrfit' or 'nls'!")   
     
-  DATA <- eval(object$data, sys.frame(0))     
-  resp <- all.vars(formula(object)[[2]])
+  DATA <- eval(object$data, sys.frame(0))    
+  if (class(object) != "pcrfit") resp <- all.vars(formula(object)[[2]]) else resp <- 2
+  
   fitted1 <- fitted(object)
   resid1 <- residuals(object)   
   modList <- list()

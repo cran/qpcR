@@ -5,9 +5,9 @@
 
 \description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between two samples, 
  using normalization against a reference gene, if supplied. The input can be single qPCR data or (more likely) data containing replicates. 
-Errors and confidence intervals for the obtained ratios can be calculated by Monte-Carlo simulation, a permutation (bootstrap) approach
-  similar to the popular REST software and by (first-order) error propagation. 
-Statistical significance for the ratios is calculated by a permutation approach of reallocated vs. non-reallocated data. See 'Details'. 
+Errors and confidence intervals for the obtained ratios can be calculated by Monte-Carlo simulation, a permutation approach
+ similar to the popular REST software and by (first-order) error propagation. 
+Statistical significance for the ratios is calculated by a permutation approach of randomly reallocated vs. non-reallocated data. See 'Details'. 
 }
 
 \usage{
@@ -15,8 +15,7 @@ ratiocalc(data, group = NULL, which.eff = c("sig", "sli", "exp"),
           type.eff = c("individual", "mean.single", "median.single", 
                        "mean.pair", "median.pair"),
           which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
-          perm = c("cp", "eff", "both", NULL), 
-          pval = c("up", "down"), ...)
+          ...)
 }
 
 \arguments{
@@ -24,9 +23,7 @@ ratiocalc(data, group = NULL, which.eff = c("sig", "sli", "exp"),
   \item{group}{a character vector defining the replicates (if any) as well as target and reference data. See 'Details'}.
   \item{which.eff}{efficiency calculated by which method. Defaults to sigmoidal fit. See output of \code{\link{pcrbatch}}. Alternatively, a fixed numeric value between 1 and 2 that is used for all runs.}
   \item{type.eff}{type of efficiency to be supplied for the error analysis. See 'Details'.}
-  \item{which.cp}{type of crossing point to be used for the analysis. See output of \code{\link{efficiency}}.}
-  \item{perm}{the variables subjected to the permutation approach (reallocation). See 'Details'.}
-  \item{pval}{the direction of gene-regulation to be confirmed by permutation p-value. See 'Details'.}
+  \item{which.cp}{type of crossing point to be used for the analysis. See output of \code{\link{efficiency}}.}   
   \item{...}{other parameters to be passed to \code{\link{propagate}}.}
 }
 
@@ -59,14 +56,13 @@ The qPCR community sometimes uses single efficiencies, or averaged over replicat
 
 The ratios are calculated according to the following formulas:\cr
 Without reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}}
-With reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}\cdot\frac{E.rs^{cp.rs}}{E.rc^{cp.rc}}}
+With reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}\cdot\frac{E.rs^{cp.rs}}{E.rc^{cp.rc}}}  
 
-
-The permutation approach reallocates either crossing points (\code{"cp"}), efficiencies (\code{"E"}) or \code{"both"} between
- target sample and control groups. Ratios are calculated for each reallocation and compared to ratios obtained if samples were permutated but not
-  reallocated. A p-value is calculated from all scenarios in which the reallocation gave a similar/higher ratio than the original data if
- \code{pval} = "up" or similar/lower if \code{pval} = "down". The resulting p-value is thus a measure for the frequency of difference in means of
- the original data and randomly perturbed data.
+The permutation approach permutates crossing point and efficiency replicates within sample and control groups. 
+The sample runs and control runs (and their respective efficiencies) are tied together, which is similar
+ to the popular REST software approach ("pairwise-reallocation test"). Ratios are calculated for each permutation and compared to ratios obtained if samples were
+ randomly reallocated from the sample to the control group. A p-value is calculated from all permutations in which the reallocation gave a higher/lower ratio than the original data.
+The resulting p-value is thus an indication for the significance AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
 
 Confidence values are returned for all three methods (Monte Carlo, permutation, error propagation) as follows:
 
@@ -86,7 +82,7 @@ Andrej-Nikolai Spiess
 }
 
 \note{
-All error types are calculated by \code{\link{propagate}} and often seem quite high. This largely depends on the error of the exponent (i.e. threshold cycles)
+The error calculated from qPCR data by \code{\link{propagate}} often seems quite high. This largely depends on the error of the exponent (i.e. threshold cycles)
  of the exponential function. The error usually decreases when setting \code{use.cov = TRUE} in the \code{...} part of the function. It can be debated anyhow,
  if the variables 'efficiency' and 'threshold cycles' have a covariance structure. As the efficiency is deduced at the second derivative maximum of the sigmoidal
  curve, variance in the second should show an effect on the first, such that the use of a var-covar matrix might be feasible. It is also commonly encountered
@@ -102,14 +98,14 @@ Pfaffl M \emph{et al.} (2002) Relative expression software tool (REST) for group
 
 
 \examples{
-## only target sample and control,
+## Only target sample and control,
 ## no reference, 4 replicates each
 ## individual efficiencies for error
 ## calculation
 DAT <- pcrbatch(reps, 2:9, l4)
 GROUP <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
-res <- ratiocalc(DAT, GROUP, which.eff = "sli", type.eff = "individual",
-          which.cp = "cpD2", perm = "cp", pval = "up")
+res <- ratiocalc(DAT, GROUP, which.eff = "sli", 
+                 type.eff = "individual", which.cp = "cpD2")
 
 ## Typical for using individual efficiencies,
 ## this inflates the error. 95\% confidence intervals 
@@ -118,22 +114,23 @@ res <- ratiocalc(DAT, GROUP, which.eff = "sli", type.eff = "individual",
 res$conf.Sim
 res$conf.Perm
 res$error.Prop/res$eval.Prop
+res$pval.Perm
 
 ## Gets better using averaged efficiencies 
 ## over all replicates
-res2 <- ratiocalc(DAT, GROUP, which.eff = "sli", type.eff = "mean.single",
-          which.cp = "cpD2", perm = "cp", pval = "up")
+res2 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
+                  type.eff = "mean.single", which.cp = "cpD2")
 res2$conf.Sim
 res2$conf.Perm
-res2$error.Prop/res$eval.Prop
+res2$error.Prop/res2$eval.Prop
 
-## p-value indicates significant upregulation
-## in comparison to randomly reallocated 
-## threshold cycles (similar to REST software)
+## p-value indicates significant 
+## upregulation in comparison to randomly reallocated 
+## samples (similar to REST software)
 res2$pval.Perm
 
-## using reference data.
-## toy example is same data as above
+## Using reference data.
+## Toy example is same data as above
 ## but replicated as reference such
 ## that the ratio should be 1.
 \dontrun{
@@ -142,38 +139,48 @@ GROUP2 <- c("gs", "gs", "gs", "gs",
             "gc", "gc", "gc", "gc",
             "rs", "rs", "rs", "rs",
             "rc", "rc", "rc", "rc")
-res2 <- ratiocalc(DAT2, GROUP2, which.eff = "sli", type.eff = "mean.single",
-          which.cp = "cpD2", perm = "cp", pval = "up")
-res2$conf.Sim
-res2$conf.Perm
-res2$error.Prop/res$eval.Prop
-res2$pval.Perm
+res3 <- ratiocalc(DAT2, GROUP2, which.eff = "sli", 
+                  type.eff = "mean.single", which.cp = "cpD2")
+res3$conf.Sim
+res3$conf.Perm
+res3$error.Prop/res3$eval.Prop
+res3$pval.Perm
 }
 
-## same as above, but reference data
+## Same as above, but reference data
 ## is mirrored such that the ratio 
-## is squared.
-\dontrun{
+## is squared.   
 DAT3 <- pcrbatch(reps, c(2:9, 9:2), l4)
 GROUP3 <- c("gs", "gs", "gs", "gs", 
             "gc", "gc", "gc", "gc",
             "rs", "rs", "rs", "rs",
             "rc", "rc", "rc", "rc")
-res3 <- ratiocalc(DAT3, GROUP3, which.eff = "sli", type.eff = "mean.single",
-          which.cp = "cpD2", perm = "cp", pval = "up")
-res3$conf.Sim
-res3$conf.Perm
-res3$error.Prop/res$eval.Prop
-res3$pval.Perm 
-}
+res4 <- ratiocalc(DAT3, GROUP3, which.eff = "sli", 
+                  type.eff = "mean.single", which.cp = "cpD2")
+res4$conf.Sim
+res4$conf.Perm
+res4$error.Prop/res4$eval.Prop
+res4$pval.Perm 
 
-## compare 'propagate' to REST software
+## Example without replicates 
+## => no Monte-Carlo and permutations
+## and no plots.
+DAT <- pcrbatch(reps, 2:5, l4)
+GROUP <- c("gs", "gc", "rs", "rc")
+res5 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
+                  type.eff = "individual", which.cp = "cpD2")
+res5$conf.Sim
+res5$conf.Perm
+res5$error.Prop/res4$eval.Prop
+res5$pval.Perm 
+
+## Compare 'propagate' to REST software
 ## using the data from the REST 2008
 ## manual (http://rest.gene-quantification.info/),
-## have to create dataframe with values as we do
+## Have to create dataframe with values as we do
 ## not use 'pcrbatch', but external cp's & eff's!
-## ties define random reallocation of crossing points
-## between control and sample.
+## Ties define random reallocation of crossing points
+## keeping controls and samples together.
 ## See help for 'propagate'.
 \dontrun{
 EXPR <- expression((2.01^(cp.gc - cp.gs)/1.97^(cp.rc - cp.rs)))
@@ -182,11 +189,13 @@ cp.rs <- c(26.77, 26.47, 27.03, 26.92, 26.97, 26.97, 26.07, 26.3, 26.14, 26.81)
 cp.gc <- c(27.57, 27.61, 27.82, 27.12, 27.76, 27.74, 26.91, 27.49, NA, NA)
 cp.gs <- c(24.54, 24.95, 24.57, 24.63, 24.66, 24.89, 24.71, 24.9, 24.26, 24.44)
 DAT <- cbind(cp.rc, cp.rs, cp.gc, cp.gs)
-res <- propagate(EXPR, DAT, do.sim = TRUE, do.perm = TRUE, ties = c(1, 1, 2, 2))
-res$conf.Sim
-res$conf.Perm
-res$eval.Prop
-res$error.Prop
+res6 <- propagate(EXPR, DAT, do.sim = TRUE, do.perm = TRUE, 
+                  perm.crit = "perm > init", ties = c(1, 2, 1, 2))
+res6$conf.Sim
+res6$conf.Perm
+res6$eval.Prop
+res6$error.Prop
+res6$pval.Perm
 }
 
 ## Does error propagation in qPCR quantitation make sense?

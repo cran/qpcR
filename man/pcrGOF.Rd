@@ -9,11 +9,12 @@ Works for objects of class \code{pcrfit}, \code{drc}, \code{lm}, \code{glm}, \co
 }
 
 \usage{
-pcrGOF(object)
+pcrGOF(object, PRESS = FALSE)
 }
 
 \arguments{
   \item{object}{a fitted object.}
+  \item{PRESS}{logical. If \code{TRUE}, the more calculation intensive P-square is also returned.}
 }
 
 \value{
@@ -25,6 +26,7 @@ A list with the following components:
   \item{BIC}{the Bayesian Information Criteron.}  
   \item{resVar}{the residual variance.}
   \item{RMSE}{the root-mean-squared-error.}
+  \item{P.square}{the PRESS P-square, if \code{PRESS = TRUE}.}
 }
 
 \author{
@@ -34,7 +36,7 @@ Andrej-Nikolai Spiess
 
 \examples{
 m <- pcrfit(reps, 1, 2, l5)
-pcrGOF(m)
+pcrGOF(m, PRESS = TRUE)
 }
 
 \keyword{models}

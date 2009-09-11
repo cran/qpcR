@@ -60,7 +60,7 @@ Andrej-Nikolai Spiess
 \references{
 Bates DM and Watts DG (1988).\cr
 Nonlinear regression analysis and its applications.\cr
-Wiley, Chichester, UK.\cr
+Wiley, Chichester, UK.
 
 Seber GAF and Wild CJ (1989).\cr
 Nonlinear regression.\cr

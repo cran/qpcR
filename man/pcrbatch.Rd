@@ -75,18 +75,18 @@ temp <- pcrbatch(reps)
 
 ## first 4 runs and return parameters of fit
 ## do background subtraction using the first 8 cycles
-temp <- pcrbatch(reps, 2:4, retPar = TRUE, backsub = 1:8)
+res1 <- pcrbatch(reps, 2:4, retPar = TRUE, backsub = 1:8)
 
 ##  first 8 runs, with 4 replicates each, l5 model
-temp <- pcrbatch(reps, 2:9, model = l5, c(1,1,1,1,2,2,2,2))
+res2 <- pcrbatch(reps, 2:9, model = l5, c(1,1,1,1,2,2,2,2))
 
 ## using model selection (likelihood ratio) on the first 4 runs, 
 ## run 1+2 are replicates
-temp <- pcrbatch(reps, 2:5, group = c(1,1,2,3), opt = TRUE, crit = "ratio")
+res3 <- pcrbatch(reps, 2:5, group = c(1,1,2,3), opt = TRUE, crit = "ratio")
 
 ## converting a 'modlist' to 'pcrbatch'
-ml <- modlist(reps, 1, 2:5, l4)
-temp <- pcrbatch(ml)
+ml <- modlist(reps, 1, 2:5, b3)
+res4 <- pcrbatch(ml)      
 }
 
 \keyword{models}

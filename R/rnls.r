@@ -7,11 +7,12 @@ na.action = na.fail,
 psi = psi.huber,
 test.vec = c("resid", "coef", "w"),
 maxit = 20,
-acc = 1e-06,
+acc = 1e-06,   
+trace = FALSE, 
 control = nls.control(),
-trace = FALSE, ...)
+...)
 {
-    mf <- match.call()
+    mf <- match.call()    
     formula <- as.formula(formula)
     if (length(formula) != 3)
         stop("'formula' should be a formula of the type 'y  ~ f(x, alpha)'")
@@ -36,7 +37,7 @@ trace = FALSE, ...)
     irls.delta <- function(old, new) sqrt(sum((old - new)^2,
         na.rm = TRUE)/max(1e-20, sum(old^2, na.rm = TRUE)))
     coef <- start
-    fit <- eval(formula[[3]], c(as.list(data), start))
+    fit <- eval(formula[[3]], c(as.list(data), start))     
     y <- eval(formula[[2]], as.list(data))
     resid <- y - fit
     w <- rep(1, nrow(data))
@@ -81,15 +82,22 @@ trace = FALSE, ...)
         tmp <- weights != 0
         w[tmp] <- w[tmp]/weights[tmp]
     }
-
+    
     out <- list(m = out$m, call = match.call(), formula = oform,
         new.formula = formula, Scale = Scale, w = w,
         status = status, psi = psi, data = dataName, dataClasses = attr(attr(mf,
             "terms"), "dataClasses"))
             
-    out$m$fitted <- function() y - out$m$resid()
+    out$m$fitted <- function() fit
     out$m$lhs <- function() y
     out$call$algorithm <- "port"
+    out$call$control <- control
+    out$call$trace <- FALSE
+    out$call$model <- TRUE
+    out$call$lower <- -Inf
+    out$call$upper <- Inf       
+    out$message <- paste("converged in", iiter, "iterations") 
+    out$control <- control       
             
     class(out) <- "nls"
     return(out)
