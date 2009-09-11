@@ -49,8 +49,8 @@ The different settings for \code{opt} are:
 "slope" iterate along y-axis intercept and slope values.
 
 The paradigm is such that the iterations will start at the second derivative of the first (lowest dilution; highest copy number) curve and
- terminate at the outlier cycle of the last (highest dilution; lowest copy number) curve. Alternatively a defined y-value can be
- defined with \code{term} for the termination threshold. The number of iterations can be defined by \code{opt.step} but the default values
+ terminate at the outlier cycle of the last (highest dilution; lowest copy number) curve. Alternatively a y-value can be
+ given with \code{term} for the termination threshold. The number of iterations can be defined by \code{opt.step} but the default values
  usually give reasonable results. Not to forget, an iterative search only throughout all intercepts can be chosen, as well as a classical
  approach using the second derivative maximum of the first curve or a defined threshold value from the qPCR software, to be defined in 
  \code{thresh}. See 'Examples'.
@@ -104,6 +104,12 @@ res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter",
 res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
               opt.step = c(20, 20)) 
 }
+
+## using replicates for reference curve
+ml <- modlist(reps, model = l4)
+DIL <- rep(10^(6:0),  each = 4) 
+res <- calib(refcurve = ml, dil = DIL)
+
 }
 
 \keyword{models}

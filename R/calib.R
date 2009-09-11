@@ -23,16 +23,22 @@ count = 1)
   opt <- match.arg(opt)
 
   lref <- length(refcurve)
-  lpred <- length(predcurve)        
+  lpred <- length(predcurve)
+  COLref <- rep(rainbow(nlevels(as.factor(dil))), table(as.factor(dil)))
+  COLpred <- rep(rainbow(lpred))        
 
   if (thresh == "cpD2") {
-    cpD2 <- efficiency(refcurve[[1]], plot = FALSE)$cpD2
-    start.y <- as.numeric(pcrpred(refcurve[[1]], newdata = data.frame(Cycles = cpD2)))
-  } else start.y <- thresh   
+    cpDs <- sapply(refcurve, function(x) efficiency(x, plot = FALSE)$cpD2)        
+    cpDsel <- which.min(cpDs)
+    cpD2 <- cpDs[cpDsel]
+    start.y <- as.numeric(predict(refcurve[[cpDsel]], newdata = data.frame(Cycles = cpD2)))
+  } else start.y <- thresh    
 
   if (opt != "none") {
-    end.x <- outlier(refcurve[[lref]])$outl
-    end.y <- outlier(refcurve[[lref]])$f.outl
+    outs <- sapply(refcurve, function(x) outlier(x)$outl)
+    outSel <- which.max(outs)
+    end.x <- outlier(refcurve[[outSel]])$outl
+    end.y <- outlier(refcurve[[outSel]])$f.outl
   } else {
     end.y <- start.y
     opt.step[1] <- 1  
@@ -50,8 +56,10 @@ count = 1)
   } else {
   seqSLOPE <- 0
   }
+  
+  if (!is.null(slope)) seqSLOPE <- slope
 
-  seqALPHA <- atan(abs(seqSLOPE))*180/pi
+  seqALPHA <- atan(abs(seqSLOPE))*180/pi    
       
   lsi <- length(seqINTER)
   lss <- length(seqSLOPE)
@@ -73,13 +81,13 @@ count = 1)
     PARM <- coef(fit)       
     pred.x <- try(uniroot(FCT, interval = c(1, maxX), parm = PARM, m = m, z = z), silent = TRUE)      
     if (inherits(pred.x, "try-error")) return()
-    pred.y <- as.numeric(pcrpred(fit, newdata = data.frame(Cycles = pred.x$root))[1])       
+    pred.y <- as.numeric(predict(fit, newdata = data.frame(Cycles = pred.x$root))[1])       
     return(list(pred.x = pred.x$root, pred.y = pred.y))
   }
       
   LMFCT <- function(dil, ref, pred = NULL, conf) {    
     linModY <- lm(ref ~ dil)
-    conf.Y <- predict(linModY, interval = "confidence", level = conf)[, 2:3]        
+    conf.Y <- predict(linModY, interval = "confidence", level = conf)[, 2:3]         
     eff <- as.numeric(10^(-1/coef(linModY)[2]))
     FOM1 <- AIC(linModY)
     FOM2 <- AICc(linModY)
@@ -120,26 +128,26 @@ count = 1)
       if (plot) {
         MAIN1 <- paste("Intercept:", round(z, 2), "\nAlpha:", round(a, 2))
         MAIN2 <- paste("AIC:", round(LINMOD$FOM1, 2), "\nRsq:", round(LINMOD$FOM3, 5), "\nEff:", round(LINMOD$eff, 2))
-        pcrplot(refcurve, main = NULL, lwd = 1.3, colvec = 1:lref)
+        plot(refcurve, main = NULL, lwd = 1.3, colvec = COLref)
         title(main = MAIN1, cex.main = 0.6)         
         abline(a = z, b = m, col = 1, lwd = 1.3)
-        abline(v = PRED.X, col = 1:lref, lwd = 1.3)
-        points(PRED.X, PRED.Y, col = 1, pch = 16, cex = 0.5)
+        abline(v = PRED.X, col = COLref, lwd = 1.3)
+        points(PRED.X, PRED.Y, col = COLref, pch = 16, cex = 0.5)
             
         if (!is.null(predcurve) && count == 2) {
-          pcrplot(predcurve, add = TRUE, lwd = 2, colvec = 1:lpred)
-          points(PRED.X2, PRED.Y2, col = 1, pch = 15, cex = 0.5)
-          abline(v = PRED.X2, col = 1:lpred, lwd = 2)
+          plot(predcurve, add = TRUE, lwd = 2, colvec = COLpred)
+          points(PRED.X2, PRED.Y2, col = COLpred, pch = 15, cex = 0.5)
+          abline(v = PRED.X2, col = COLpred, lwd = 2)
         }
 
-        plot(dil, PRED.X, col = 1:lref, pch = 16, cex = 1.3, xlab = "log(Dilution or copy number)", ylab = "threshold cycle")
+        plot(dil, PRED.X, col = COLref, pch = 16, cex = 1.3, xlab = "log(Dilution or copy number)", ylab = "threshold cycle")
         title(main = MAIN2, cex.main = 0.6)
         abline(LINMOD$linModY, lwd = 1.3)
         lines(dil, LINMOD$conf.Y[, 1], col = 2)
         lines(dil, LINMOD$conf.Y[, 2], col = 2)                  
                              
         if (!is.null(predcurve) && count == 2) {
-          points(LINMOD$pred.conc, PRED.X2, pch = 15, col = 1:lpred, cex = 1.5)
+          points(LINMOD$pred.conc, PRED.X2, pch = 15, col = COLpred, cex = 1.5)
           if (!all(is.na(LINMOD$pred.conc))) {                                                                                               
             arrows(LINMOD$pred.conf[1, ], PRED.X2, LINMOD$pred.conf[2, ], PRED.X2, code = 3, angle = 90, length = 0.1)                              
           }
@@ -161,18 +169,15 @@ count = 1)
                               predconc = 10^as.numeric(LINMOD$pred.conc),                              
                               predconc.conf = 10^LINMOD$pred.conf,                              
                               eff = LINMOD$eff, 
-                              aic = LINMOD$FOM1, aicc = LINMOD$FOM2, rsq = LINMOD$FOM3, rsq.ad = LINMOD$FOM4))   
+                              aic = LINMOD$FOM1, 
+                              aicc = LINMOD$FOM2, 
+                              rsq = LINMOD$FOM3, 
+                              rsq.ad = LINMOD$FOM4))   
 
-  quan <- quantile(resMat, quan, na.rm = TRUE)    
-  resMat[resMat > quan] <- NA
-  x.NA <- apply(resMat, 1, function(x) all(is.na(x)))
-  y.NA <- apply(resMat, 2, function(x) all(is.na(x)))
-  seqINTER <- seqINTER[!x.NA]
-  seqALPHA <- seqALPHA[!y.NA]
-  resMat <- as.matrix(resMat[!x.NA, !y.NA])    
   BEST <- which(resMat == min(resMat, na.rm = TRUE), arr.ind = TRUE)
-  bestINTER <- seqINTER[BEST[1]]
-  bestSLOPE <- seqSLOPE[BEST[2]]   
+  bestINTER <- seqINTER[BEST[1]]       
+  bestSLOPE <- seqSLOPE[BEST[2]]  
+  
   bestFIT <- calib(refcurve = refcurve, predcurve = predcurve, thresh = bestINTER, dil = dil.old,
                     plot = TRUE, conf = conf, opt = "none", slope = bestSLOPE, count = 2)
       
@@ -181,16 +186,25 @@ count = 1)
   if (opt != "none" && plot.map) {
     par(mfrow = c(1, 1))
     par(ask = TRUE)
+    quan <- quantile(resMat, quan, na.rm = TRUE)    
+    resMat[resMat > quan] <- NA    
+    x.NA <- apply(resMat, 1, function(x) all(is.na(x)))
+    y.NA <- apply(resMat, 2, function(x) all(is.na(x)))
+    seqINTER <- seqINTER[!x.NA]
+    seqALPHA <- seqALPHA[!y.NA]
+    resMat <- as.matrix(resMat[!x.NA, !y.NA]) 
+    BEST2 <- which(resMat == min(resMat, na.rm = TRUE), arr.ind = TRUE)       
     image(x = rev(seqINTER), y = seqALPHA, resMat, col = redblue(256), xlab = "Intercept", ylab = "Alpha", axes = FALSE)
     CEX.X <- 1 - (0.03 * sqrt(length(seqINTER)))
     CEX.Y <- 1 - (0.05 * sqrt(length(seqALPHA)))
     axis(1, at = seqINTER, labels = rev(round(seqINTER, 2)), cex.axis = CEX.X, las = 2)
     axis(2, at = seqALPHA, labels = round(seqALPHA, 2), las = 1, cex.axis = CEX.Y)
     INTspace <- 0.5 * (seqINTER[1] -  seqINTER[2])
-            
+    
     if (length(seqALPHA) > 1) ALPHAspace <- 0.5 * (seqALPHA[2] - seqALPHA[1]) else ALPHAspace <- 1
-    rect(rev(seqINTER)[BEST[1]] - INTspace, seqALPHA[BEST[2]] - ALPHAspace,
-         rev(seqINTER)[BEST[1]] + INTspace, seqALPHA[BEST[2]] + ALPHAspace, lwd = 3)
+    
+    rect(rev(seqINTER)[BEST2[1]] - INTspace, seqALPHA[BEST2[2]] - ALPHAspace,
+         rev(seqINTER)[BEST2[1]] + INTspace, seqALPHA[BEST2[2]] + ALPHAspace, lwd = 3)
 
     for (i in 1:length(seqINTER)) {
       for (j in 1:length(seqALPHA)) {

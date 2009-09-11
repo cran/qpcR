@@ -26,6 +26,7 @@ A list with the following components:
   \item{BIC}{the Bayesian Information Criteron.}  
   \item{resVar}{the residual variance.}
   \item{RMSE}{the root-mean-squared-error.}
+  \item{prob}{the chi-square fit probability.}  
   \item{P.square}{the PRESS P-square, if \code{PRESS = TRUE}.}
 }
 

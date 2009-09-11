@@ -19,6 +19,8 @@ B = 200
   lpred <- length(predcurve)
   lgroup <- length(unique(group))
   dil <- log10(dil)
+  COLref <- rep(rainbow(nlevels(as.factor(dil))), table(as.factor(dil)))
+  COLpred <- rep(rainbow(lpred))   
 
   if(is.null(group))  {
       group <- as.factor(1:lref)
@@ -28,7 +30,6 @@ B = 200
   LMFCT <- function(dil, ref, pred = NULL, conf) {
     linModY <- lm(ref ~ dil)
     conf.Y <- predict(linModY, interval = "confidence", level = conf)
-
     eff <- as.numeric(10^(-1/coef(linModY)[2]))
     FOM1 <- AIC(linModY)
     FOM2 <- AICc(linModY)
@@ -47,11 +48,11 @@ B = 200
    print("Calculating threshold cycles of reference curves...")
    flush.console()
    if (thresh == "cpD2") refCt <- sapply(refcurve, function(x) efficiency(x, plot = FALSE)$cpD2)
-    else refCt <- as.numeric(sapply(refcurve, function(x) pcrpred(x, newdata = data.frame(Fluo = thresh), which = "x")))   
+    else refCt <- as.numeric(sapply(refcurve, function(x) predict(x, newdata = data.frame(Fluo = thresh), which = "x")))   
    print("Calculating threshold cycles of prediction curves...")
    flush.console()
    if (thresh == "cpD2") predCt <- sapply(predcurve, function(x) efficiency(x, plot = FALSE)$cpD2)
-    else predCt <- as.numeric(sapply(predcurve, function(x) pcrpred(x, newdata = data.frame(Fluo = thresh), which = "x")))
+    else predCt <- as.numeric(sapply(predcurve, function(x) predict(x, newdata = data.frame(Fluo = thresh), which = "x")))
 
    iterRef <- split(refCt, group)
 
@@ -69,15 +70,15 @@ B = 200
         par(mar = c(5, 4, 2, 2))
         if (i == 1) {
             par(mfg = c(1, 1))
-            plot(dil, selRef, col = 1:lref, pch = 16, cex = 1.3, xlab = "log(Dilution or copy number)", ylab = "threshold cycle")
+            plot(dil, selRef, col = COLref, pch = 16, cex = 1.3, xlab = "log(Dilution or copy number)", ylab = "threshold cycle")
         } else {
-            points(dil, selRef, col = 1:lref, pch = 16, cex = 1.3)
+            points(dil, selRef, col = COLref, pch = 16, cex = 1.3)
             abline(lmRes$linModY, lwd = 2)
             lines(dil, lmRes$conf.Y[, 2], col = 2, lty = 3)
             lines(dil, lmRes$conf.Y[, 3], col = 2, lty = 3)
          }
          if (!is.null(predcurve)) {
-                  points(lmRes$pred.conc, predCt, pch = 15, col = 1:lpred, cex = 1.5)
+                  points(lmRes$pred.conc, predCt, pch = 15, col = COLpred, cex = 1.5)
                   if (!all(is.na(lmRes$pred.conc))) {
                         arrows(lmRes$pred.conf[1, ], predCt, lmRes$pred.conf[2, ], predCt, code = 3, angle = 90, length = 0.1, col = "blue")
                   }

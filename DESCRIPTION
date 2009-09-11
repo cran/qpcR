@@ -3,7 +3,7 @@ Type: Package
 LazyLoad: yes
 LazyData: yes
 Title: Modelling and analysis of real-time PCR data
-Version: 1.2-2
+Version: 1.2-3
 Date: 2009-09-11
 Author: Andrej-Nikolai Spiess <a.spiess@uke.uni-hamburg.de>, Christian
         Ritz <ritz@kvl.dk>
@@ -13,6 +13,6 @@ Description: Model fitting, optimal model selection and calculation of
         quantitative real-time polymerase chain reaction (qPCR).
 License: GPL (>= 2)
 Depends: R (>= 2.0.0), MASS, rgenoud, gplots, gtools, minpack.lm
-Packaged: 2009-09-21 07:05:06 UTC; aspiess
+Packaged: 2009-11-06 08:14:36 UTC; aspiess
 Repository: CRAN
-Date/Publication: 2009-09-21 07:27:37
+Date/Publication: 2009-11-06 10:18:03

@@ -5,7 +5,7 @@
 
 \description{
  Calculates the Bayesian Information Criterion for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}
- or any other models from which \code{\link{logLik}}, \code{\link{coef}} and \code{\link{residuals}} can be extacted.   
+ or any other models from which \code{\link{logLik}}, \code{\link{coef}} and \code{\link{residuals}} can be extracted.   
 }
 
 \usage{
