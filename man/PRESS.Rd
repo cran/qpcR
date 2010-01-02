@@ -46,7 +46,7 @@ There is also a \code{PRESS} function in library 'MPV' that works solely for \co
 \references{
 The relationship between variable selection and data augmentation and a method for prediction.\cr
 Allen DM.\cr
-Technometrics (1974), \bold{16}:25-127.
+\emph{Technometrics} (1974), \bold{16}:25-127.
 
 The Prediction Sum of Squares as a Criterion for Selecting Predictor Variables.\cr
 Allen DM.\cr

@@ -26,7 +26,7 @@ A plotting function for data of class 'pcrfit' (single curves), 'modlist' (batch
   \item{col}{an optional color vector for the individual curves. Is recycled to the number of runs in \code{x}.} 
   \item{level}{the confidence level used for \code{confband} or \code{errbar}.}
   \item{xlim}{a 2-element vector of the x-value (Cycles) region that should be plotted.}
-  \item{which}{plots \code{all} curves in one 2D or \code{3D} graph or many graphs with \code{single} curves.}
+  \item{which}{plots \code{all} curves in one 2D or \code{3D} graph or many graphs with \code{single} curves.} 
   \item{...}{other parameters to be passed to \code{\link{plot}} or \code{\link{predict}}.}       
 }
 

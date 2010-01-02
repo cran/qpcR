@@ -47,12 +47,17 @@ B = 200
    
    print("Calculating threshold cycles of reference curves...")
    flush.console()
+   
    if (thresh == "cpD2") refCt <- sapply(refcurve, function(x) efficiency(x, plot = FALSE)$cpD2)
     else refCt <- as.numeric(sapply(refcurve, function(x) predict(x, newdata = data.frame(Fluo = thresh), which = "x")))   
+    
    print("Calculating threshold cycles of prediction curves...")
    flush.console()
-   if (thresh == "cpD2") predCt <- sapply(predcurve, function(x) efficiency(x, plot = FALSE)$cpD2)
+   
+   if (!is.null(predcurve)) {
+    if (thresh == "cpD2") predCt <- sapply(predcurve, function(x) efficiency(x, plot = FALSE)$cpD2)
     else predCt <- as.numeric(sapply(predcurve, function(x) predict(x, newdata = data.frame(Fluo = thresh), which = "x")))
+   } else predCt <- NULL
 
    iterRef <- split(refCt, group)
 
@@ -103,10 +108,15 @@ B = 200
    CONF.eff <- CONFINT(summaryList$eff, alpha = alpha)
    CONF.AICc <- CONFINT(summaryList$FOM2, alpha = alpha)
    CONF.Rsq.ad <- CONFINT(summaryList$FOM4, alpha = alpha)
-   if (nrow(summaryList$pred.conc) == 1) summaryList$pred.conc <- t(summaryList$pred.conc)
-   CONF.predconc <- apply(summaryList$pred.conc, 2, function(x) CONFINT(x, alpha = alpha))
    
-   if (!isReps) CONF.predconc <- apply(rbind(lmRes$pred.conf[1, ], lmRes$pred.conf[2, ]) , 2, function(x) CONFINT(x, alpha = alpha))
+   if (!is.null(predcurve)) {
+    if (nrow(summaryList$pred.conc) == 1) summaryList$pred.conc <- t(summaryList$pred.conc)
+    CONF.predconc <- apply(summaryList$pred.conc, 2, function(x) CONFINT(x, alpha = alpha))
+    if (!isReps) CONF.predconc <- apply(rbind(lmRes$pred.conf[1, ], lmRes$pred.conf[2, ]) , 2, function(x) CONFINT(x, alpha = alpha))
+   } else {
+    summaryList$pred.conc <- NULL 
+    CONF.predconc <- NULL
+   } 
       
    if (plot) {
     par(ask = TRUE)
@@ -118,8 +128,10 @@ B = 200
     abline(h = CONF.AICc, col = 2, lwd = 2)
     boxplot(as.numeric(summaryList$FOM4), main = "adjusted R-square", cex = 0.2)
     abline(h = CONF.Rsq.ad, col = 2, lwd = 2)
-    boxplot(summaryList$pred.conc, main = "log(conc) of predicted", cex = 0.2)
-    abline(h = CONF.predconc, col = 2, lwd = 2)
+    if (!is.null(predcurve)) {
+      boxplot(summaryList$pred.conc, main = "log(conc) of predicted", cex = 0.2)
+      abline(h = CONF.predconc, col = 2, lwd = 2)
+    }
   }
   return(list(eff = summaryList$eff, AICc = summaryList$FOM2, Rsq.ad = summaryList$FOM4, predconc = summaryList$pred.conc,
               conf.boot = list(conf.eff = CONF.eff, conf.AICc = CONF.AICc, conf.Rsq.ad = CONF.Rsq.ad, conf.predconc = CONF.predconc)))

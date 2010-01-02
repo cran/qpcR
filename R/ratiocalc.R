@@ -6,8 +6,7 @@ type.eff = c("individual", "mean.single", "median.single",
               "mean.pair", "median.pair"), 
 which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
 ...)
-{
-    require(gtools, quietly = TRUE)
+{      
     if (class(data) != "pcrbatch")
         stop("data is not of class 'pcrbatch'!")
     if (is.null(group))

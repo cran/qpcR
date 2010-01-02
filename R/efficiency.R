@@ -74,17 +74,17 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
     
     ### numeric threshold fluorescence
     if (!is.null(thresh)) {
-        cycF <- as.numeric(round(pcrpred(object, newdata = data.frame(Fluo = thresh), "x"), 2))         
+        cycF <- as.numeric(round(predict(object, newdata = data.frame(Fluo = thresh), "x"), 2))         
         maxEFF <- EFFseq[(cycF + shift - 1) * 100]
         if (shift != 0) shiftCyc <- cycF + shift  
         CYC <- cycF + shift        
     } else cycF <- NA
     
-    if (is.null(thresh)) fluo <- as.numeric(pcrpred(object, newdata = data.frame(Cycles = CYC))) else fluo <- thresh
+    if (is.null(thresh)) fluo <- as.numeric(predict(object, newdata = data.frame(Cycles = CYC))) else fluo <- thresh
 
     ### CQ (comparative quantitation)
     fluoCQ <- 0.2 * fluo
-    cycCQ <- as.numeric(round(pcrpred(object, newdata = data.frame(Fluo = fluoCQ), which = "x"), 2))
+    cycCQ <- as.numeric(round(predict(object, newdata = data.frame(Fluo = fluoCQ), which = "x"), 2))
     if (type == "CQ") {
         maxEFF <- EFFseq[(cycCQ + shift - 1) * 100]
         if (shift != 0) shiftCyc <- cycCQ + shift
@@ -92,7 +92,7 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
         fluo <- fluoCQ
     }
 
-    init1 <- as.numeric(pcrpred(object, newdata = data.frame(Cycles = 0)))     
+    init1 <- as.numeric(predict(object, newdata = data.frame(Cycles = 0)))     
     init2 <- fluo/(maxEFF^CYC)      
         
     if (is.numeric(amount)) 
@@ -101,7 +101,7 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
 
     if (plot) {
         par(mar = c(5, 4, 4, 4))
-        pcrplot(object, lwd = 1.5, main = NA, cex.main = 0.9)
+        plot(object, lwd = 1.5, main = NA, cex.main = 0.9)
         aT <- axTicks(side = 4)
         cF <- max(aT/1)
         axis(side = 4, at = aT, labels = round(aT/cF + 1, 2), 

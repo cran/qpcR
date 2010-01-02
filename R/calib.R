@@ -14,8 +14,6 @@ quan = 0.5,
 slope = NULL, 
 count = 1)
 {
-  require(gplots, quietly = TRUE)
-
   if (class(refcurve) != "modlist") stop("'refcurve' is not a 'modlist'!")
   if (!is.null(predcurve) & class(predcurve) != "modlist") stop("'predcurve' is not a 'modlist'!")
   if (thresh != "cpD2" && !is.numeric(thresh)) stop("'thresh' must be either 'cpD2' or numeric!")
@@ -205,8 +203,9 @@ count = 1)
     seqINTER <- seqINTER[!x.NA]
     seqALPHA <- seqALPHA[!y.NA]
     resMat <- as.matrix(resMat[!x.NA, !y.NA]) 
-    BEST2 <- which(resMat == min(resMat, na.rm = TRUE), arr.ind = TRUE)       
-    image(x = rev(seqINTER), y = seqALPHA, resMat, col = redblue(256), xlab = "Intercept", ylab = "Alpha", axes = FALSE)
+    BEST2 <- which(resMat == min(resMat, na.rm = TRUE), arr.ind = TRUE)   
+    COL <- colorRampPalette(colors = c("red", "white", "blue"))     
+    image(x = rev(seqINTER), y = seqALPHA, resMat, col = COL(256), xlab = "Intercept", ylab = "Alpha", axes = FALSE)
     CEX.X <- 1 - (0.03 * sqrt(length(seqINTER)))
     CEX.Y <- 1 - (0.05 * sqrt(length(seqALPHA)))
     axis(1, at = seqINTER, labels = rev(round(seqINTER, 2)), cex.axis = CEX.X, las = 2)
