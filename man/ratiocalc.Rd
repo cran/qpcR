@@ -61,8 +61,8 @@ With reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}\cdot\frac{E.rs^{cp.r
 The permutation approach permutates crossing point and efficiency replicates within sample and control groups. 
 The sample runs and control runs (and their respective efficiencies) are tied together, which is similar
  to the popular REST software approach ("pairwise-reallocation test"). Ratios are calculated for each permutation and compared to ratios obtained if samples were
- randomly reallocated from the sample to the control group. A p-value is calculated from all permutations in which the reallocation gave a higher/lower ratio than the original data.
-The resulting p-value is thus an indication for the significance AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
+ randomly reallocated from the sample to the control group. Three p-values are calculated from all permutations in which the reallocation gave a higher/equal/lower ratio than the original data.
+The resulting p-values are thus an indication for the significance in any direction AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
 
 Confidence values are returned for all three methods (Monte Carlo, permutation, error propagation) as follows:
 
@@ -101,33 +101,22 @@ Pfaffl M \emph{et al.} (2002) Relative expression software tool (REST) for group
 ## Only target sample and control,
 ## no reference, 4 replicates each
 ## individual efficiencies for error
-## calculation
+## calculation. 
 DAT <- pcrbatch(reps, 2:9, l4)
 GROUP <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
 res <- ratiocalc(DAT, GROUP, which.eff = "sli", 
-                 type.eff = "individual", which.cp = "cpD2")
+                 type.eff = "individual", which.cp = "cpD2")       
+res$summary
 
-## Typical for using individual efficiencies,
-## this inflates the error. 95\% confidence intervals 
-## include 1 (no differential regulation) and errors are
-## also extremely high (over 100\%).
-res$conf.Sim
-res$conf.Perm
-res$error.Prop/res$eval.Prop
-res$pval.Perm
-
-## Gets better using averaged efficiencies 
-## over all replicates
+## Gets even better using averaged efficiencies 
+## over all replicates.
+## p-value indicates significant upregulation in 
+## comparison to randomly reallocated 
+## samples (similar to REST software)
 res2 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
                   type.eff = "mean.single", which.cp = "cpD2")
-res2$conf.Sim
-res2$conf.Perm
-res2$error.Prop/res2$eval.Prop
-
-## p-value indicates significant 
-## upregulation in comparison to randomly reallocated 
-## samples (similar to REST software)
-res2$pval.Perm
+                 
+res2$summary    
 
 ## Using reference data.
 ## Toy example is same data as above
@@ -140,11 +129,8 @@ GROUP2 <- c("gs", "gs", "gs", "gs",
             "rs", "rs", "rs", "rs",
             "rc", "rc", "rc", "rc")
 res3 <- ratiocalc(DAT2, GROUP2, which.eff = "sli", 
-                  type.eff = "mean.single", which.cp = "cpD2")
-res3$conf.Sim
-res3$conf.Perm
-res3$error.Prop/res3$eval.Prop
-res3$pval.Perm
+                  type.eff = "mean.single", which.cp = "cpD2")                  
+res3$summary
 }
 
 ## Same as above, but reference data
@@ -157,22 +143,16 @@ GROUP3 <- c("gs", "gs", "gs", "gs",
             "rc", "rc", "rc", "rc")
 res4 <- ratiocalc(DAT3, GROUP3, which.eff = "sli", 
                   type.eff = "mean.single", which.cp = "cpD2")
-res4$conf.Sim
-res4$conf.Perm
-res4$error.Prop/res4$eval.Prop
-res4$pval.Perm 
+res4$summary
 
 ## Example without replicates 
-## => no Monte-Carlo and permutations
+## => no Monte-Carlo simulations
 ## and no plots.
 DAT <- pcrbatch(reps, 2:5, l4)
 GROUP <- c("gs", "gc", "rs", "rc")
 res5 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
                   type.eff = "individual", which.cp = "cpD2")
-res5$conf.Sim
-res5$conf.Perm
-res5$error.Prop/res4$eval.Prop
-res5$pval.Perm 
+res5$summary
 
 ## Compare 'propagate' to REST software
 ## using the data from the REST 2008
@@ -190,12 +170,9 @@ cp.gc <- c(27.57, 27.61, 27.82, 27.12, 27.76, 27.74, 26.91, 27.49, NA, NA)
 cp.gs <- c(24.54, 24.95, 24.57, 24.63, 24.66, 24.89, 24.71, 24.9, 24.26, 24.44)
 DAT <- cbind(cp.rc, cp.rs, cp.gc, cp.gs)
 res6 <- propagate(EXPR, DAT, do.sim = TRUE, do.perm = TRUE, 
-                  perm.crit = "perm > init", ties = c(1, 2, 1, 2))
-res6$conf.Sim
-res6$conf.Perm
-res6$eval.Prop
-res6$error.Prop
-res6$pval.Perm
+                  perm.crit = "perm > init", ties = c(1, 2, 1, 2),
+                  verbose = TRUE)
+res6$summary
 }
 
 ## Does error propagation in qPCR quantitation make sense?
@@ -212,8 +189,8 @@ for (i in seq(0, 0.1, by = 0.01)) {
       cp2 <- c(18, 18 * i)
       DF <- cbind(E1, cp1, E2, cp2)
       res <- propagate(expression((E1^cp1)/(E2^cp2)), DF, type = "stat", plot = FALSE)
-      x <- c(x, i * 100)
-      y <- c(y, (res$error.Prop/res$eval.Prop) * 100)
+      x <- c(x, i * 100)       
+      y <- c(y, (res$summary[2, 3]/res$summary[1, 3]) * 100)
 }
 plot(x, y, xlim = c(0, 10), lwd = 2, xlab = "c.v. [\%]", ylab = "c.v. (prop) [\%]")
 }

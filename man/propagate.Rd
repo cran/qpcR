@@ -26,14 +26,14 @@ See 'Details' and 'Examples'.
  
 3) \bold{Error propagation:}\cr
 For all variables in the original dataset, mean and standard deviation are calculated. Through gaussian error propagation (first-order Taylor expansion),
- the propagated error is calculated using a matrix approach (See 'Details') by either omitting or including the dataset covariance structure.   
+ the propagated error is calculated using a matrix approach (see 'Details') by either omitting or including the dataset covariance structure.   
 }
 
 \usage{
-propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE, 
+propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE, 
           use.cov = FALSE, nsim = 10000, do.perm = FALSE, 
           perm.crit = "perm > init", ties = NULL, nperm = 2000, 
-          alpha = 0.05, plot = TRUE, xlim = NULL, ...)  
+          alpha = 0.05, plot = TRUE, logx = FALSE, verbose = FALSE, ...)  
 }
 
 \arguments{
@@ -47,12 +47,13 @@ propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE,
              (n x n, n = number of variables). If \code{FALSE}, the Monte-Carlo simulation and error propagation use only the diagonal (variances).}
   \item{nsim}{the number of simulations to be performed, minimum is 5000.}  
   \item{do.perm}{logical. Should permutation error analysis be applied?}     
-  \item{perm.crit}{a character string defining the null hypothesis for the permutation p-value. See 'Details'.}
+  \item{perm.crit}{a character string of one or more criteria defining the null hypothesis for the permutation p-value. See 'Details'.}
   \item{ties}{a vector defining the columns that should be tied together for the permutations. See 'Details'.}
   \item{nperm}{the number of permutations to be performed.}  
   \item{alpha}{the confidence level.}
   \item{plot}{logical. Should histograms with confidence intervals (in blue) be plotted for all analyses?}
-  \item{xlim}{the x-axis limits for tweaking the histograms (in case of severe skewness).}
+  \item{logx}{logical. Should the x-axis of the graphs have logarithmic scale?}
+  \item{verbose}{logical. If \code{TRUE}, a longer output is given including the simulated data, derivatives, covariance matrix etc.}
   \item{...}{other parameters to be supplied to \code{hist}, \code{boxplot} or \code{abline}.}
 }
 
@@ -73,38 +74,25 @@ A high tendency from deviation of normality is encountered in formulas where the
 The criterium for the permutation p-value (\code{perm.crit}) has to be defined by the user.
 For example, let's say we calculate some value 0.2 which is a ratio between two groups.
 We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. 
-We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). 
+We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}).
+One can also supply something like \code{perm.crit = c("perm > init", "perm == init", "perm < init")} to test for all combinations. 
 }
 
 \value{
-  A list with the following components:       
-  \item{mean.Sim}{the mean from the Monte Carlo simulated data.}
-  \item{sd.Sim}{the standard deviation from the Monte Carlo simulated data.}
-  \item{med.Sim}{the median of the Monte Carlo simulated data.}
-  \item{mad.Sim}{the median average deviation of the Monte Carlo simulated data.}   
-  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column.}       
-  \item{conf.Sim}{the confidence values for the evaluations from \code{data.Sim}.}
-  \item{mean.Perm}{the mean from all permutations.}
-  \item{sd.Perm}{the standard deviation from all permutations.}
-  \item{med.Perm}{the median from all permutations.}
-  \item{mad.Perm}{the median average deviation from all permutations.} 
-  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}. See 'Examples'.}      
-  \item{conf.Perm}{the confidence interval obtained from all permutations.}
-  \item{pval.Perm}{the permutation p-value AGAINST the hypothesis defined in \code{perm.crit}.}
-  \item{eval.Prop}{the result from evaluating the expression with the mean values.}
-  \item{error.Prop}{the propagated error.}
-  \item{conf.Prop}{the confidence values of the propagated error, assuming normality.}
-  \item{deriv.Prop}{a list containing the partial derivatives expressions for each variable.}   
-  \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation.}    
+A plot containing the histograms of the Monte-Carlo simulation, the permutation values and histogram of the error propagation. 
+Additionally inserted in the plots are a boxplot, the median values in red and the confidence intervals as blue borders. 
+
+A list with the following components:       
+  \item{summary}{a summary of the collected statistics, given as a dataframe. These are: mean, s.d. median, mad, lower/upper confidence interval and permutation p-value(s).}  
+  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column, if \code{verbose = TRUE}.}       
+  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}, if \code{verbose = TRUE}. See 'Examples'.}      
+  \item{derivs}{a list containing the partial derivatives expressions for each variable, if \code{verbose = TRUE}.}   
+  \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation, if \code{verbose = TRUE}.}    
 }
 
 \author{
 Andrej-Nikolai Spiess
-}
-
-\note{
-A more elaborate description of the different error types can be found under \url{www.dr-spiess.de/qpcR/errors.pdf}.
-}
+}   
 
 \references{
 Error propagation (in general):\cr
@@ -129,7 +117,6 @@ Royston P (1992). Approximating the Shapiro-Wilk W-test for non-normality.\cr
 Function \code{\link{ratiocalc}} for error analysis within qPCR ratio calculation.
 }
 
-
 \examples{
 ## From summary data just calculate 
 ## Monte-Carlo and propagated error.
@@ -137,7 +124,8 @@ EXPR <- expression(x/y)
 x <- c(5, 0.1)
 y <- c(1, 0.01)
 DF <- cbind(x, y)
-res <- propagate(expr = EXPR, data = DF, type = "stat")
+res <- propagate(expr = EXPR, data = DF, type = "stat", 
+                 do.sim = TRUE, verbose = TRUE)
 
 ## Do Shapiro-Wilks test on Monte Carlo evaluations 
 ## !maximum 5000 datapoints can be used!
@@ -150,13 +138,15 @@ qqnorm(res$data.Sim[, 3])
 ## bring all vectors to same 
 ## length with NA's.
 ## Do permutations (swap x and y values)
+## and simulations
 EXPR <- expression(x*y)
 x <- c(2, 2.1, 2.2, 2, 2.3, 2.1)
 y <- c(4, 4, 3.8, 4.1, 3.1, 3)
 DF <- cbind(x, y)  
-res <- propagate(EXPR, DF, type = "raw", do.perm = TRUE)
-## Have a look at permutation result
-res$data.Perm
+res2 <- propagate(EXPR, DF, type = "raw", do.perm = TRUE, 
+                 do.sim = TRUE, verbose = TRUE)
+## Have a look at the results
+res2$summary
 
 ## For replicate data, using relative 
 ## quantification ratio from qPCR.
@@ -167,17 +157,19 @@ res$data.Perm
 ## cp's and efficiencies are tied together
 ## because they are two observations on the
 ## same sample!
+## As we are using an exponential type function,
+## better to logarithmize the x-axis.
 EXPR <- expression((E1^cp1)/(E2^cp2))
 E1 <- c(1.73, 1.75, 1.77)
 cp1 <- c(25.77,26.14,26.33)
 E2 <-  c(1.72,1.68,1.65)
 cp2 <- c(33.84,34.04,33.33)
 DF <- cbind(E1, cp1, E2, cp2)
-res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
-                 do.perm = FALSE)                 
+res3 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
+                 do.perm = FALSE, verbose = TRUE, logx = TRUE)                 
 par(ask = TRUE)
-shapiro.test(res$data.Sim[, 3][1:5000])
-qqnorm(res$data.Sim[, 3])
+shapiro.test(res3$data.Sim[, 5][1:5000])
+qqnorm(res3$data.Sim[, 5])
 
 ## Same setup as above but also
 ## using a permutation approach
@@ -186,23 +178,16 @@ qqnorm(res$data.Sim[, 3])
 ## because they are two observations on the
 ## same sample! 
 ## Similar to what REST2008 software does.
-res <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
+res4 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
                  perm.crit = "perm < init", do.perm = TRUE, 
-                 ties = c(1, 1, 2, 2))                   
-## 95\% confidence interval for the ratio
-res$conf.Perm
-
-
-## Using covariances in calculation and simulation
-res2 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
-                 perm.crit = "perm < init", do.perm = TRUE, 
-                 ties = c(1, 2, 1, 2), use.cov = TRUE) 
+                 ties = c(1, 1, 2, 2), logx = TRUE, verbose = TRUE)
+res4$summary
               
 ## Proof that covariance of Monte-Carlo
 ## simulated dataset is the same as from 
 ## initial data
-res2$covMat
-cov(res2$data.Sim)
+res4$covMat
+cov(res4$data.Sim[, 1:4])
 
 ## Error propagation in a linear model 
 ## using the covariance matrix from summary.lm
@@ -217,7 +202,8 @@ DF <- t(coef(summ)[, 1:2])
 colnames(DF) <- c("b", "m")
 CM <- vcov(mod) ## take var-cov matrix
 colnames(CM) <- c("b", "m")
-propagate(expression(m*7 + b), DF, type = "stat", use.cov = CM)
+res5 <- propagate(expression(m*7 + b), DF, type = "stat", use.cov = CM)
+res5
 
 ## In a x/y regime, when does the propagated error start to
 ## deviate from normality if error of denominator increases?
@@ -228,12 +214,11 @@ for (i in seq(0.01, 0.5, by = 0.01)) {
   y <- c(1, i)
   DF <- cbind(x, y)
   res  <-  propagate(expression(x/y), DF, type = "stat", 
-                      do.sim = TRUE, plot = FALSE)
+                      do.sim = TRUE, plot = FALSE, verbose = TRUE)
   hist(res$data.Sim[, 3], nclass = 100, main = paste("sd(y):",i))      
 }
 }
-
-}
+}   
 
 \keyword{distribution}
 \keyword{htest}

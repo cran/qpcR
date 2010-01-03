@@ -4,7 +4,7 @@ group = NULL,
 which.eff = c("sig", "sli", "exp"),
 type.eff = c("individual", "mean.single", "median.single",
               "mean.pair", "median.pair"), 
-which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
+which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"), 
 ...)
 {      
     if (class(data) != "pcrbatch")
@@ -78,8 +78,9 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
       TIES <- c(1, 2, 1, 2, 1, 2, 1, 2)
     }
         
-    CRIT <- "perm > init"
-    PROP <- propagate(EXPR, allDat, do.perm = TRUE, ties = TIES, perm.crit = CRIT, ...)
+    CRIT <- c("perm > init", "perm == init", "perm < init")             
+    PROP <- propagate(EXPR, allDat, do.sim = TRUE, do.perm = TRUE, ties = TIES, perm.crit = CRIT, 
+                      verbose = TRUE, logx = TRUE, ...)
     PROP <- c(PROP, list(data = allDat))     
     class(PROP) <- "ratiocalc"
     return(PROP)

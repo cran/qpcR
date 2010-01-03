@@ -2,7 +2,7 @@ propagate <- function(
 expr, 
 data, 
 type = c("raw", "stat"),  
-do.sim = TRUE, 
+do.sim = FALSE, 
 use.cov = FALSE, 
 nsim = 10000,
 do.perm = FALSE, 
@@ -10,8 +10,9 @@ perm.crit = "perm > init",
 ties = NULL,
 nperm = 2000,
 alpha = 0.05,
-plot = TRUE, 
-xlim = NULL,      
+plot = TRUE,    
+logx = FALSE,
+verbose = FALSE,      
 ...
 )
 {            
@@ -78,16 +79,16 @@ xlim = NULL,
         checkSIM <- cbind(datSIM, resSIM)
       } else {
         resSIM <- datSIM <- confSIM <- checkSIM <- NA
-      }                   
+      }            
 
-      ### permutation statistics (confidence interval)     
+      ### permutation statistics with ties      
       if (do.perm) {
         if (is.null(ties)) ties <- 1:ncol(data)
-        LEVELS <- unique(ties[!is.na(ties)])             
+        LEVELS <- unique(ties[!is.na(ties)])
         datPERM <- matrix(nrow = nperm, ncol = ncol(data))       
                 
         for (i in 1:nrow(datPERM)) {                 
-          SAMPLE <- sample(1:nrow(data), length(LEVELS), replace = TRUE)           
+          SAMPLE <- sample(1:nrow(data), length(LEVELS), replace = TRUE)  
           for (j in 1:length(LEVELS)) {
             WHICH <- which(ties == LEVELS[j])              
             datPERM[i, WHICH] <- data[SAMPLE[j], WHICH]                       
@@ -112,11 +113,13 @@ xlim = NULL,
         colnames(datPERM2) <- colnames(datPERM)
         evalPERMsamp <- apply(datPERM2, 1, function(x) eval(EXPR, envir = as.list(x)))                             
         init <- evalPERMdata 
-        perm <- evalPERMsamp          
-        LOGIC <- eval(parse(text = perm.crit))                          
-        pvalPERM <- sum(LOGIC == TRUE, na.rm = TRUE)/length(LOGIC[!is.na(LOGIC)])   
-        checkPERM <- cbind(datPERM, evalPERMdata, datPERM2, evalPERMsamp, LOGIC)        
-                                              
+        perm <- evalPERMsamp     
+        LOGIC <- lapply(perm.crit, function(x) eval(parse(text = x)))
+        names(LOGIC) <- perm.crit        
+        pvalPERM <- lapply(LOGIC, function(x) sum(x == TRUE, na.rm = TRUE)/length(x[!is.na(x)]))
+        names(pvalPERM) <- perm.crit            
+        datLOGIC <- as.data.frame(LOGIC)       
+        checkPERM <- cbind(datPERM, evalPERMdata, datPERM2, evalPERMsamp, datLOGIC)                                              
       } else {
         evalPERMdata <- evalPERMsamp <- confPERM <- pvalPERM <- checkPERM <- NA
       }          
@@ -128,64 +131,82 @@ xlim = NULL,
       NDERIVS <- sapply(derivs, eval, envir = as.list(meanvals))      
       propERROR <- as.numeric(NDERIVS %*% SIGMA %*% matrix(NDERIVS))        
       confNORM <- abs(qnorm(alpha/2)) * sqrt(propERROR)       
-      confPROP <- c(propMEAN - confNORM, propMEAN + confNORM)      
+      confPROP <- c(propMEAN - confNORM, propMEAN + confNORM)       
                                        
-      if (plot) {   
+      if (plot) {           
         op <- par(no.readonly = TRUE)
         on.exit(par(op))
         layout(matrix(c(1, 2, 3), 3, 1), heights = c(1, 1, 1))
-        par(mai = c(0.5, 0.5, 0.25, 0.5))         
-                    
+        par(mai = c(0.5, 0.5, 0.25, 0.5))       
+       
+        ### plot simulations
         if (length(resSIM) > 1) {
-          if (missing(xlim)) RANGE <- quantile(resSIM, c(0.01, 0.99), na.rm = TRUE) else RANGE <- xlim
-          HIST <- hist(resSIM, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
-                       main = "Monte-Carlo", xlim = RANGE, ...)
-          aT <- axTicks(1)         
-          rug(resSIM)
-          boxplot(resSIM, horizontal = TRUE, add = TRUE, at = max(HIST$counts)/2, 
-                  boxwex = diff(range(HIST$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", ...)
-          rug(median(resSIM, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)
-          abline(v = confSIM, lwd = 2, col = 4, ...)
+          if (logx) resSIM2 <- suppressWarnings(log(resSIM)) else resSIM2 <- resSIM  
+          if (logx) confSIM2 <- suppressWarnings(log(confSIM)) else confSIM2 <- confSIM          
+          HIST <- hist(resSIM2, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
+                       main = "Monte-Carlo", axes = FALSE, ...)           
+          if (logx) LABELS <- round(exp(HIST$breaks), 2) else LABELS <- round(HIST$breaks, 2)         
+          axis(side = 1, at = HIST$breaks, labels = LABELS)                            
+          rug(resSIM2)
+          boxplot(resSIM2, horizontal = TRUE, add = TRUE, at = max(HIST$counts)/2, 
+                  boxwex = diff(range(HIST$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", outline = FALSE, ...)
+          rug(median(resSIM2, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)
+          abline(v = confSIM2, lwd = 2, col = 4, ...)
+          aT <- HIST$breaks  
         } else aT <- NULL
         
+        ### plot permutations
         if (length(evalPERMdata) > 1) {
-          if (missing(xlim)) RANGE <- quantile(evalPERMdata, c(0.001, 0.999), na.rm = TRUE) else RANGE <- xlim
-          HIST2 <- hist(evalPERMdata, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
-                        main = "Permutation", xlim = if (!is.null(aT)) c(min(aT), max(aT)) else RANGE, ...)
-          rug(evalPERMdata, quiet = TRUE)
-          boxplot(evalPERMdata, horizontal = TRUE, add = TRUE, at = max(HIST2$counts)/2, 
-                  boxwex = diff(range(HIST2$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", ...)
-          rug(median(evalPERMdata, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)         
-          abline(v = confPERM, lwd = 2, col = 4, ...)
+          if (logx) evalPERMdata2 <- suppressWarnings(log(evalPERMdata)) else evalPERMdata2 <- evalPERMdata  
+          if (logx) confPERM2 <- suppressWarnings(log(confPERM)) else confPERM2 <- confPERM           
+          if (is.null(aT)) aT <- pretty(evalPERMdata2)                            
+          HIST2 <- hist(evalPERMdata2, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
+                        main = "Permutation", xlim = if (!is.null(aT)) c(min(aT), max(aT)), axes = FALSE, ...)              
+          if (logx) LABELS <- round(exp(aT), 2) else LABELS <- round(aT, 2)
+          axis(side = 1, at = aT, labels = LABELS)
+          rug(evalPERMdata2, quiet = TRUE)
+          boxplot(evalPERMdata2, horizontal = TRUE, add = TRUE, at = max(HIST2$counts)/2, 
+                  boxwex = diff(range(HIST2$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", outline = FALSE, ...)
+          rug(median(evalPERMdata2, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)          
+          abline(v = confPERM2, lwd = 2, col = 4, ...)
         }
         
+        ### plot error propagation
         DISTR <- rnorm(nsim, propMEAN, sqrt(propERROR))
-        if (is.null(RANGE)) RANGE <- c(min(DISTR, na.rm = TRUE), max(DISTR, na.rm = TRUE))
-        HIST3 <- hist(DISTR, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, main = "Error propagation", 
-                      xlim = if (!is.null(aT)) c(min(aT), max(aT)) else RANGE, ...) 
+        if (logx) DISTR <- suppressWarnings(log(DISTR)) else  DISTR <- DISTR  
+        if (logx) confPROP2 <- suppressWarnings(log(confPROP)) else confPROP2 <- confPROP         
+        if (is.null(aT)) aT <- pretty(DISTR)       
+        HIST3 <- hist(DISTR, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
+                      main = "Error propagation", xlim = if (!is.null(aT)) c(min(aT), max(aT)), axes = FALSE, ...) 
+        if (logx) LABELS <- round(exp(aT), 2) else LABELS <- round(aT, 2)
+        axis(side = 1, at = aT, labels = LABELS)
         rug(DISTR, quiet = TRUE)
         boxplot(DISTR, horizontal = TRUE, add = TRUE, at = max(HIST3$counts)/2, 
-                boxwex = diff(range(HIST3$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", ...)
-        rug(median(DISTR, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)       
-        abline(v = confPROP, lwd = 2, col = 4, ...)
+                boxwex = diff(range(HIST3$counts))/5, axes = FALSE, medcol = 2, boxfill = "gray", outline = FALSE, ...)
+        rug(median(DISTR, na.rm = TRUE), col = 2, lwd = 3, quiet = TRUE)               
+        abline(v = confPROP2, lwd = 2, col = 4, ...)
       }       
       
-      invisible(list(mean.Sim = mean(resSIM, na.rm = TRUE),
-                     sd.Sim = sd(resSIM, na.rm = TRUE), 
-                     med.Sim = median(resSIM, na.rm = TRUE), 
-                     mad.Sim = mad(resSIM, na.rm = TRUE),                       
-                     data.Sim = checkSIM,                                            
-                     conf.Sim = confSIM,                           
-                     mean.Perm = mean(evalPERMdata, na.rm = TRUE),
-                     sd.Perm = sd(evalPERMdata, na.rm = TRUE),
-                     med.Perm = median(evalPERMdata, na.rm = TRUE),
-                     mad.Perm = mad(evalPERMdata, na.rm = TRUE),
-                     data.Perm = checkPERM,
-                     conf.Perm = confPERM,                        
-                     pval.Perm = pvalPERM,
-                     eval.Prop = propMEAN,
-                     error.Prop = sqrt(propERROR),
-                     conf.Prop = confPROP,
-                     deriv.Prop = derivs,                        
-                     covMat = SIGMA))                      
+      outDat <- data.frame(Sim = mean(resSIM, na.rm = TRUE), Perm = mean(evalPERMdata, na.rm = TRUE), Prop = propMEAN)          
+      outDat <- rbind(outDat, c(sd(resSIM, na.rm = TRUE), sd(evalPERMdata, na.rm = TRUE), sqrt(propERROR)))
+      outDat <- rbind(outDat, c(median(resSIM, na.rm = TRUE), median(evalPERMdata, na.rm = TRUE), NA))
+      outDat <- rbind(outDat, c(mad(resSIM, na.rm = TRUE), mad(evalPERMdata, na.rm = TRUE), NA))    
+      outDat <- rbind(outDat, c(confSIM[1], confPERM[1], confPROP[1]))
+      outDat <- rbind(outDat, c(confSIM[2], confPERM[2], confPROP[2]))     
+      row.names(outDat) <- c("Mean", "s.d.", "Median", "MAD", "Conf.lower", "Conf.upper")       
+      
+      if (!all(is.na(pvalPERM))) {
+        pvals <- as.numeric(pvalPERM)       
+        pMat <- matrix(nrow = length(pvals), ncol = ncol(outDat)) 
+        WHICH <- which(names(outDat) == "Perm")
+        pMat[, WHICH] <- pvals       
+        rownames(pMat) <- names(pvalPERM) 
+        colnames(pMat) <- colnames(outDat)       
+        outDat <- rbind(outDat, pMat)
+      }
+      
+      if (verbose) outDat <- list(summary = outDat, data.Sim = checkSIM, data.Perm = checkPERM, derivs = derivs, covMat = SIGMA)
+      else outDat <- list(summary = outDat)
+                   
+      invisible(outDat)                                     
 }
