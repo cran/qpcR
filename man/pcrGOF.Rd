@@ -5,16 +5,17 @@
 
 \description{
 Calculates all implemented measures for the goodness-of-fit and returns them as a list.
-Works for objects of class \code{pcrfit}, \code{drc}, \code{lm}, \code{glm}, \code{nls} and many others...
+Works for objects of class \code{pcrfit}, \code{lm}, \code{glm}, \code{nls}, \code{drc} and many others...
 }
 
 \usage{
-pcrGOF(object, PRESS = FALSE)
+pcrGOF(object, PRESS = FALSE, ...)
 }
 
 \arguments{
-  \item{object}{a fitted object.}
-  \item{PRESS}{logical. If \code{TRUE}, the more calculation intensive P-square is also returned.}
+\item{object}{a fitted object.}
+\item{PRESS}{logical. If \code{TRUE}, the more calculation intensive P-square is also returned.}
+\item{...}{other parameters to be passed to \code{\link{fitchisq}}.}  
 }
 
 \value{
@@ -26,7 +27,7 @@ A list with the following components:
   \item{BIC}{the Bayesian Information Criteron.}  
   \item{resVar}{the residual variance.}
   \item{RMSE}{the root-mean-squared-error.}
-  \item{prob}{the chi-square fit probability.}  
+  \item{chi2.red}{the reduced chi-square, see \code{\link{fitchisq}}.}  
   \item{P.square}{the PRESS P-square, if \code{PRESS = TRUE}.}
 }
 

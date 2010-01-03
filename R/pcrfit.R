@@ -11,7 +11,6 @@ robust = FALSE,
 control = nls.control(),
 ...)
 {            
-  require(rgenoud, quietly = TRUE)
   require(minpack.lm, quietly = TRUE)     
   options(warn = -1)
 
@@ -43,13 +42,9 @@ control = nls.control(),
       if (i == "LM") {
         OPTIM <- nls.lm(ssVal, FCT2, ...)
       }
-      if (i != "GA" && i != "LM") {
+      if (i != "LM") {
         OPTIM <- try(optim(ssVal, FCT, method = i, hessian = TRUE, control = list(parscale = abs(ssVal), maxit = 50000), ...), silent = TRUE)
-      } 
-      if (i == "GA") {
-        OPTIM <- try(genoud(fn = FCT, nvars = length(model$parnames), starting.values = ssVal, 
-                      hessian = TRUE, print.level = 0, pop.size = 100, ...), silent = TRUE)         
-      }                       
+      }                              
       if (inherits(OPTIM, "try-error")) stop("Try to use other 'opt.method'")
       ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
       ssVal <- OPTIM$par       

@@ -54,7 +54,7 @@ statfun = function(y) mean(y, na.rm = TRUE),
         flush.console()            
         if (plot) lines(cyc, fitted(FIT), col = colvec[k], ...)  
         coefMat <- cbind(coefMat, coef(FIT))
-        gofMat <- cbind(gofMat, unlist(pcrGOF(FIT)))                     
+        gofMat <- cbind(gofMat, unlist(pcrGOF(FIT, error = error)))                     
       }
       cat("\n\n")
       coefList[[k]] <- coefMat
@@ -81,7 +81,7 @@ statfun = function(y) mean(y, na.rm = TRUE),
       if (i == 5) SEL <- apply(gofSel, 2, function(x) which.min(x))
       if (i == 6) SEL <- apply(gofSel, 2, function(x) which.min(x))
       if (i == 7) SEL <- apply(gofSel, 2, function(x) which.min(x))
-      if (i == 8) SEL <- apply(gofSel, 2, function(x) which.min(x))       
+      if (i == 8) SEL <- apply(gofSel, 2, function(x) which.min(abs(1 - x)))       
       
       modSel <- sapply(SEL, function(x) fitmodel[[x]]$name) 
       modMat <- rbind(modMat, modSel)     

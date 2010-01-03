@@ -23,7 +23,7 @@ plot = TRUE)
       
   MEAN <- vector(length = nrow(DATA))
   CYCS <- DATA[, 1]
-  EFFS <- sapply(ml, function(x) eff(x)$eff.y[CYCS * 100])    
+  EFFS <- sapply(ml, function(x) eff(x)$eff.y[CYCS * 100])  
     
   for (i in 1:nrow(DATA)) { 
     X <- DATA[i, ]
@@ -33,7 +33,7 @@ plot = TRUE)
                             hmean = hmean(X),
                             cmean1 = cmean(X, 2),
                             cmean2 = cmean(X, E))  
-  }      
+  }  
  
   MEAN[!is.finite(MEAN)] <- NA
   RES <- cbind(MEAN, REF.fluo[COMPL])    

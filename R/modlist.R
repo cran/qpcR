@@ -14,13 +14,17 @@ crit = "ftest",
 )
 {
   modList <- NULL
-  counter <- 1                   
+  counter <- 1   
+  
+  if (class(x)[1] == "pcrfit") {
+    model <- x$MODEL
+    x <- x$DATA            
+  }                         
   
   if (is.null(fluo)) fluo <- 2:ncol(x)        
     
   if (!is.null(backsub) && !is.numeric(backsub)) 
-      stop("'backsub' must be either NULL or a numeric sequence!") 
-    
+      stop("'backsub' must be either NULL or a numeric sequence!")     
 
   for (i in fluo) {
     Cycles <- x[, cyc]
@@ -39,7 +43,7 @@ crit = "ftest",
       Fluo <- Fluo - back
     }                    
         
-    DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)
+    DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)     
     flush.console()
     cat("Making model for ", colnames(x[i]), " (", model$name, ")", sep= "")
                 

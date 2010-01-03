@@ -1,7 +1,7 @@
 PRESS <- function(object, verbose = TRUE)
 {
   if (!is.null(object$call$data)) DATA <- eval(object$call$data)
-    else DATA <- as.data.frame(sapply(all.vars(object$call$formula), function(a) get(a, envir = .GlobalEnv)))
+  else DATA <- as.data.frame(sapply(all.vars(object$call$formula), function(a) get(a, envir = .GlobalEnv)))
  
   VARS <- all.vars(object$call$formula)
   LHS <- VARS[1]

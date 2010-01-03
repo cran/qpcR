@@ -42,7 +42,7 @@ update(m, fluo = 20)
 update(m, data = guescini1) 
 
 ## update 'optim' method
-update(m, opt.method = "GA")   
+update(m, opt.method = "BFGS")   
 }
 
 \keyword{models}

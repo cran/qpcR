@@ -1,39 +1,51 @@
 \name{maxRatio}
 \alias{maxRatio}
 
-\title{The maxRatio method as in Shain et al}
+\title{The maxRatio method as in Shain et al. (2008)}
 
 \description{
-The maximum ratio (MR) is determined along the interpolated curve of F(x)/F(x-1) and the corresponding
-cycle number at MR is taken. A respective cycle number (FCN) is then calculated for MR.
+The maximum ratio (MR) is determined along the cubic spline interpolated curve of F(x)/F(x-1) and the corresponding
+cycle numbers FCN and its adjusted version FCNA are then calculated for MR.
 }
 
 \usage{
-maxRatio(ml, plot = TRUE, ...)
+maxRatio(x, type = c("spline", "sigfit"), baseshift = NULL, 
+         smooth = TRUE, plot = TRUE, ...)
 }
 
 \arguments{
-  \item{ml}{an object of class 'modlist'.}
+  \item{x}{an object of class 'pcrfit' (single run) or 'modlist' (multiple runs).}
+  \item{type}{the parameters are either calculated from the cubic spline interpolation (default) or a sigmoidal fit.}
+  \item{baseshift}{numerical. Shift value in case of \code{type = "spline"}. See 'Details'.}
+  \item{smooth}{logical. If \code{TRUE} and \code{type = "spline"}, invokes a 5-point convolution filter (\code{\link{filter}}). See 'Details'.} 
   \item{plot}{Should diagnostic plots be displayed?}
-  \item{...}{other parameters to be passed to \code{\link{plot}}.}     
+  \item{...}{other parameters to be passed to \code{\link{eff}} or \code{\link{plot}}.}     
 }
 
-\details{
-In the original paper the authors smooth the datapoints and then apply a cubic spline on the ratio curve, 
- in order to attain a resolution of 0.01 cycles. The function here calculates the ratio along a curve
-  of the sigmoidal fit, which results in essentially the same.
+\details{                   
+In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for
+ many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{y_i = y_i + baseshift} (baseline shifting).
+ Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{y_n}{y_{n-1}}-1)}.
+ \emph{FCN} is then calculated as the cycle number at \emph{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2{MR}}.
+ Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated.
+ This must be resolved by tweaking the \code{baseshift} value.  
 }
 
 \value{
  A list with the following components:
+  \item{eff}{the maximum efficiency. Equals to \code{mr} + 1.}
   \item{mr}{the maximum ratio.}
   \item{fcn}{the cycle number at \code{mr}.}
-  \item{fcna}{a corrected \code{fcn}, as described in Shain et al.}
+  \item{fcna}{an adjusted \code{fcn}, as described in Shain et al.}
   \item{names}{the names of the runs as taken from the original dataframe.}  
 }
 
 \author{
 Andrej-Nikolai Spiess
+}
+
+\note{
+This function has been approved by the original author (Eric Shain).
 }
 
 \references{
@@ -42,8 +54,16 @@ Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
 }
 
 \examples{
+## on single curve
+m <- pcrfit(reps, 1, 2, l5)
+maxRatio(m, baseshift = 0.3)     
+
+## on a 'modlist'
+## using 'baseline shifting' and 
+\dontrun{
 ml <- modlist(reps, model = l5) 
-maxRatio(ml)
+maxRatio(ml, baseshift = 0.5)
+}
 }
 
 \keyword{models}

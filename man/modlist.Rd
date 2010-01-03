@@ -15,7 +15,7 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE,
 }
 
 \arguments{
-  \item{x}{a dataframe containing the qPCR data.}
+  \item{x}{a dataframe containing the qPCR data or a single qPCR run of class 'pcrfit'.}
   \item{cyc}{the column containing the cycle data. Defaults to first column.}
   \item{fluo}{the column(s) (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
   \item{model}{the model to be used.} 
@@ -56,6 +56,10 @@ sapply(ml, function(x) efficiency(x, plot = FALSE)$eff)
 ##  and using best model from Akaike weights
 ml <- modlist(reps, 1, 2:4, model = l5, opt = TRUE, norm = TRUE, crit = "weights" )
 sapply(ml, function(x) efficiency(x, plot = FALSE)$cpD2)
+
+## convert a single run to a 'modlist'
+m <- pcrfit(reps, 1, 2, l5)
+ml <- modlist(m)
 }
 
 \keyword{models}

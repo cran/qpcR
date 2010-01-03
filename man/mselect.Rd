@@ -3,7 +3,7 @@
 
 \encoding{latin1}
 
-\title{Selection of the best model by nested F-tests/likelihood ratios/Akaike weights}
+\title{Selection of the best model by nested F-tests/likelihood ratios/Akaike weights/reduced chi-square}
 
 \description{
 Model selection by comparison of different models using\cr
@@ -13,34 +13,35 @@ Model selection by comparison of different models using\cr
   3) bias-corrected Akaike's Information Criterion (AICc),\cr
   4) the estimated residual variance,\cr
   5) the p-value from a nested F-test on the residual variance,\cr
-  6) the p-value from the likelihood ratio (chi-square),\cr
+  6) the p-value from the likelihood ratio,\cr
   7) the Akaike weights based on AIC,\cr
   8) the Akaike weights based on AICc, and\cr
-  9) the chi-square fit probability
+  9) the reduced chi-square, \eqn{\chi_\nu^2}, if replicates exist.
 
 The best model is chosen by 5), 6), 8) or 9) and returned as a new model.
 }
 
 \usage{
 mselect(object, fctList = NULL, sig.level = 0.05, verbose = TRUE, 
-        crit = c("ftest", "ratio", "weights", "fitprob"), do.all = FALSE)
+        crit = c("ftest", "ratio", "weights", "chisq"), do.all = FALSE, ...)
 }
 
 \arguments{
-  \item{object}{an object of class 'pcrfit'.}
-  \item{fctList}{a list of functions to be analyzed, i.e. for a non-nested regime. Should also contain the original model.}
-  \item{sig.level}{the significance level for the nested F-test.}
-  \item{verbose}{logical. If \code{TRUE}, the result matrix is displayed in the console.}
-  \item{crit}{the criterium for model selection. Either 'ftest'/'ratio' for nested models or 'weights'/'fitprob' for nested and non-nested models.}
-  \item{do.all}{if \code{TRUE}, all available sigmoidal models are tested and the best one is selected based on AICc weights.}
+\item{object}{an object of class 'pcrfit' or 'replist'.}
+\item{fctList}{a list of functions to be analyzed, i.e. for a non-nested regime. Should also contain the original model.}
+\item{sig.level}{the significance level for the nested F-test.}
+\item{verbose}{logical. If \code{TRUE}, the result matrix is displayed in the console.}
+\item{crit}{the criterium for model selection. Either 'ftest'/'ratio' for nested models or 'weights'/'fitprob' for nested and non-nested models.}
+\item{do.all}{if \code{TRUE}, all available sigmoidal models are tested and the best one is selected based on AICc weights.}
+\item{...}{other parameters to be passed to \code{\link{fitchisq}}.} 
 }
 
 \details{
 Criteria 5) and 6) cannot be used for comparison unless the models are nested. 
-Criterion 8), Akaike weights, can be used for nested and non-nested regimes, which also accounts for the chi-square fit probability.
+Criterion 8), Akaike weights, can be used for nested and non-nested regimes, which also accounts for the reduced chi-square.
 For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better.
 The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{LR}}), corrected Akaike weights
- (\code{\link{akaike.weights}}) or chi-square fit probability (\code{\link{fitprob}}) and returned as a new model.
+ (\code{\link{akaike.weights}}) or reduced chi-square (\code{\link{fitchisq}}) and returned as a new model.
 When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5; l3/l4/l5.
 If supplying nested models, please do this with ascending number of parameters.  
 }
@@ -55,7 +56,7 @@ Andrej-Nikolai Spiess
 }
 
 \seealso{
-\code{\link{LR}}, \code{\link{akaike.weights}} and \code{\link{fitprob}}.   
+\code{\link{LR}}, \code{\link{akaike.weights}} and \code{\link{fitchisq}}.   
 }  
 
 \examples{
@@ -73,6 +74,12 @@ summary(m2) ## Also converted to l5 model !
 ## try all sigmoidal models
 m3 <- pcrfit(reps, 1, 20, l4)
 mselect(m3, do.all = TRUE) ## baro5 wins by far!
+
+## on replicated data
+## using reduced chi-square
+ml <- modlist(reps, fluo = 2:5)
+rl <- replist(ml, group = c(1, 1, 1, 1))
+mselect(rl, crit = "chisq")
 }
 
 \keyword{models}

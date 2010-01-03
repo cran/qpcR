@@ -3,11 +3,16 @@ object,
 fctList = NULL,
 sig.level = 0.05,
 verbose = TRUE,
-crit = c("ftest", "ratio", "weights", "fitprob"),
-do.all = FALSE
+crit = c("ftest", "ratio", "weights", "chisq"),
+do.all = FALSE, 
+...
 )
 {
   crit <- match.arg(crit)
+  if (any(class(object) == "replist")) object <- object[[1]]
+  else if (any(class(object) == "pcrfit")) object <- object 
+  else stop("'object' must be either of class 'pcrfit' or 'replist'!")
+  
   mtype <- object$MODEL$name
 
   if (is.null(fctList)) {
@@ -34,14 +39,14 @@ do.all = FALSE
 		retMat[i, 4] <- round(resVar(ml[[i]]), 5)   		
     if (i < length(ml)) retMat[i + 1 , 5] <- as.matrix(anova(ml[[i]], ml[[i + 1]]))[2, 6]
     if (i < length(ml)) retMat[i + 1, 6] <- LR(ml[[i]], ml[[i + 1]])$p.value  
-    retMat[i, 7] <- fitprob(ml[[i]])         
+    retMat[i, 7] <- fitchisq(ml[[i]], ...)$chi2.red            
   }           
 	
   aic.w <- round(akaike.weights(retMat[, 2])$weights, 3)
   aicc.w <- round(akaike.weights(retMat[, 3])$weights, 3)       
   retMat <- cbind(retMat, aic.w, aicc.w)      
   	
-  colnames(retMat) <- c("logLik", "AIC", "AICc", "resVar", "ftest", "LR", "fitprob", "AIC.weights", "AICc.weights")
+  colnames(retMat) <- c("logLik", "AIC", "AICc", "resVar", "ftest", "LR", "Chisq", "AIC.weights", "AICc.weights")
   rownames(retMat) <- rn
 	
   if (verbose) print(retMat)
@@ -69,7 +74,7 @@ do.all = FALSE
     optModel <- fctList[[SELECT]]
   }
   
-  if (crit == "fitprob") {
+  if (crit == "chisq") {
     SELECT <- which.min(retMat[, 7])
     optModel <- fctList[[SELECT]]
   }

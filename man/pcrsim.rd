@@ -93,8 +93,9 @@ res$statList
 ## show best model for each simulation
 ## based on different GOF measures
 \dontrun{
-res <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
-              error = 0.2, nsim = 20, fitmodel = list(l4, w3, l5),
+m2 <- pcrfit(reps, 1, 2, l3)
+res <- pcrsim(cyc = 1:30, model = l3, par = coef(m2),
+              error = 0.2, nsim = 200, fitmodel = list(l3, l4, l5),
               select = TRUE)
 res$modelMat
 } 

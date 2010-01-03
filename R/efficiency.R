@@ -1,7 +1,13 @@
-efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift = 0, amount = NULL) 
-{
-
-    if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ"))
+efficiency <- function(
+object, 
+plot = TRUE, 
+type = "cpD2", 
+thresh = NULL, 
+shift = 0, 
+amount = NULL,
+...) 
+{  
+    if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ", "maxRatio"))
     if (is.numeric(type) && (type < min(object$DATA[, 1], na.rm = TRUE) || type > max(object$DATA[, 1], na.rm = TRUE)))
       stop("'type' must be within Cycles range!")
 
@@ -11,10 +17,10 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
     if (!is.null(thresh) && !is.numeric(thresh))
         stop("'thresh' must be numeric!")
     if (is.numeric(thresh) && (thresh < min(object$DATA[, 2], na.rm = TRUE) || thresh > max(object$DATA[, 2], na.rm = TRUE)))
-      stop("'thresh' must be within Fluorescence range!")
+      stop("'thresh' must be within fluorescence range!")
     
     CYCS <- object$DATA[, 1]    
-    EFFobj<- eff(object)
+    EFFobj<- eff(object, ...)
     SEQ <- EFFobj$eff.x      
     D1seq <- object$MODEL$d1(SEQ, coef(object))
     D2seq <- object$MODEL$d2(SEQ, coef(object))   
@@ -23,9 +29,16 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
     maxD1 <- which.max(D1seq) 
     maxD2 <- which.max(D2seq)    
     cycmaxD1 <- SEQ[maxD1]      
-    cycmaxD2 <- SEQ[maxD2]   
+    cycmaxD2 <- SEQ[maxD2]  
     
-    ### cpD2 and CQ
+    if (!is.null(thresh)) type <- "cpD2" 
+    
+    if (type == "maxRatio") {
+      type <- "cpD2"
+      MR <- TRUE
+    } else MR <- FALSE
+    
+    ### cpD2
     if (type == "cpD2" || type == "CQ") {
         maxEFF <- EFFseq[maxD2 + (100 * shift)]
         CYC <- cycmaxD2 + shift 
@@ -78,39 +91,47 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
         maxEFF <- EFFseq[(cycF + shift - 1) * 100]
         if (shift != 0) shiftCyc <- cycF + shift  
         CYC <- cycF + shift        
-    } else cycF <- NA
-    
-    if (is.null(thresh)) fluo <- as.numeric(predict(object, newdata = data.frame(Cycles = CYC))) else fluo <- thresh
+    } else cycF <- NA           
 
-    ### CQ (comparative quantitation)
-    fluoCQ <- 0.2 * fluo
-    cycCQ <- as.numeric(round(predict(object, newdata = data.frame(Fluo = fluoCQ), which = "x"), 2))
+    ### CQ (comparative quantitation)     
     if (type == "CQ") {
+        fluo <- as.numeric(predict(object, newdata = data.frame(Cycles = CYC)))
+        fluoCQ <- 0.2 * fluo
+        cycCQ <- as.numeric(round(predict(object, newdata = data.frame(Fluo = fluoCQ), which = "x"), 2))
         maxEFF <- EFFseq[(cycCQ + shift - 1) * 100]
         if (shift != 0) shiftCyc <- cycCQ + shift
         CYC <- cycCQ + shift
         fluo <- fluoCQ
-    }
+    } else cycCQ <- NA
+    
+    ### maxRatio method as in Shain et al. (2008)
+    if (MR) {
+      EFFobj <- eff(object, type = "spline", ...)
+      SEQ <- EFFobj$eff.x
+      EFFseq <- EFFobj$eff.y
+      maxEFF <- EFFobj$effmax.y
+      cycMR <- EFFobj$effmax.x
+      CYC <- cycMR + shift                         
+    } else cycMR <- NA      
 
+    if (is.null(thresh)) fluo <- as.numeric(predict(object, newdata = data.frame(Cycles = CYC))) else fluo <- thresh
     init1 <- as.numeric(predict(object, newdata = data.frame(Cycles = 0)))     
     init2 <- fluo/(maxEFF^CYC)      
         
-    if (is.numeric(amount)) 
-        CF <- amount/init1
-    else CF <- NA
+    if (is.numeric(amount)) CF <- amount/init1 else CF <- NA
 
     if (plot) {
         par(mar = c(5, 4, 4, 4))
-        plot(object, lwd = 1.5, main = NA, cex.main = 0.9)
+        plot(object, lwd = 1.5, main = NA, cex.main = 0.9, ...)
         aT <- axTicks(side = 4)
         cF <- max(aT/1)
         axis(side = 4, at = aT, labels = round(aT/cF + 1, 2), 
             col = 4, col.axis = 4, las = 1, hadj = 0.3)
         lines(SEQ, (EFFseq * cF) - cF, col = 4, lwd = 1.5)
-        points(CYC, (maxEFF * cF) - cF, col = 4, pch = 16)
-        points(CYC, fluo, col = 1, pch = 16)
-        mtext(side = 4, "Efficiency", line = 2, col = 4)
-        lines(SEQ, D1seq, col = 2, lwd = 1.5)
+        points(CYC, (maxEFF * cF) - cF, col = 4, pch = 16)        
+        points(CYC, fluo, col = 1, pch = 16)         
+        mtext(side = 4, "Efficiency", line = 2, col = 4)         
+        lines(SEQ, D1seq, col = 2, lwd = 1.5)           
         lines(SEQ, D2seq, col = 3, lwd = 1.5)
         abline(h = (maxEFF * cF) - cF, lwd = 1.5, col = 4)
         abline(v = cycmaxD1, lwd = 1.5, col = 2)
@@ -129,6 +150,9 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
 
         if (type == "CQ")
             abline(v = cycCQ, lwd = 1.5, col = "darkviolet")
+            
+        if (MR)  
+            abline(v = cycMR, lwd = 1.5, col = "darkviolet")
                 
         if (is.numeric(type)) 
             abline(v = type, lwd = 1.5, col = 6)
@@ -154,6 +178,9 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
 
         if (type == "CQ")
             mtext(paste("cpCQ:", round(cycCQ, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
+            
+        if (MR)
+            mtext(paste("cpMR:", round(cycMR, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
                    
         if (is.numeric(type)) 
             mtext(paste("ct:", round(type, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)
@@ -174,5 +201,5 @@ efficiency <- function (object, plot = TRUE, type = "cpD2", thresh = NULL, shift
     return(list(eff = maxEFF, resVar = round(resVar(object), 8), AICc = AICc(object), AIC = AIC(object), 
         Rsq = Rsq(object), Rsq.ad = Rsq.ad(object), cpD1 = round(cycmaxD1, 2), cpD2 = round(cycmaxD2, 2), 
         cpE = round(cycmaxEFF, 2), cpR = round(cycEXP, 2), cpT = round(cycF, 2), Cy0 = round(Cy0reg, 2),
-        cpCQ = round(cycCQ, 2), fluo = fluo, init1 = init1, init2 = init2, cf = CF))
+        cpCQ = round(cycCQ, 2), cpMR = round(cycMR, 2), fluo = fluo, init1 = init1, init2 = init2, cf = CF))
 }

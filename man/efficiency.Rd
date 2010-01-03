@@ -6,7 +6,7 @@
 \description{
 This function calculates the PCR efficiency of a model of class 'pcrfit' and several other 
  important values for qPCR quantification like the first and second derivatives and the 
- corresponding maxima thereof (i.e. threshold cycles). These values can be subsequently used for the 
+ corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the 
  calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit.
 Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC),
  the residual variance and the R-square value.   
@@ -14,7 +14,7 @@ Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaik
 
 \usage{
 efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL, 
-           shift = 0, amount = NULL)
+           shift = 0, amount = NULL, ...)
 }
 
 \arguments{
@@ -24,10 +24,11 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
   \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
   \item{shift}{a user defined shift in cycles from the values defined by \code{type}. See 'Examples'.}
   \item{amount}{the template amount or molecule number for quantitative calibration.}
+  \item{...}{additional parameters to be passed to \code{\link{eff}} or \code{\link{plot.pcrfit}}.}
 }
 
 \details{
-The efficiency is always calculated from the efficiency curve (in blue), which is calculated according to \eqn{E = \frac{F(n)}{F(n-1)}} from the 
+The efficiency is always (with the exception of \code{type = "maxRatio"} calculated from the efficiency curve (in blue), which is calculated according to \eqn{E = \frac{F(n)}{F(n-1)}} from the 
 fitted curve, but taken from different points at the curve, as to be defined in \code{type}: 
 
 "cpD2"  taken from the maximum of the second derivative curve,\cr
@@ -44,6 +45,11 @@ The initial fluorescence F(0) for relative or absolute quantification is either 
  E(n) = PCR efficiency at the cycle number defined by \code{type} and Cyc = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F(0)}} is given.
 The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. 
 First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
+
+If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic spline interpolated raw fluorescence values and therefore NOT
+ from the sigmoidal fit. This is a different paradigm and will usually result in fairly the same threshold cycles as with \code{type = "cpD2"},
+ but the efficiencies are generally lower. See documentation to \code{\link{maxRatio}}. This method is usually not applied for calculating
+ efficiencies that are to be used for relative quantification, but one might try...  
 }
 
 \value{
@@ -63,6 +69,7 @@ First and second derivatives are calculated from the fitted function and the max
   \item{cpT}{the PCR cycle corresponding to the fluorescence threshold as defined in \code{thresh}.}
   \item{Cy0}{the PCR threshold cycle 'Cy0' according to Guescini et al. See 'Details'.} 
   \item{cpCQ}{the PCR cycle corresponding to the 20\% fluorescence value at 'cpD2'.}
+  \item{cpMR}{the PCR cycle corresponding to the 'maxRatio', if this was selected.}
   \item{fluo}{the raw fluorescence value at the point defined by \code{type} or \code{thresh}.}
   \item{init1}{the initial template fluorescence from the sigmoidal model, calculated as under 'Details'.}
   \item{init2}{the initial template fluorescence from an exponential model, calculated as under 'Details'.}
