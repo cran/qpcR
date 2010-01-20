@@ -30,9 +30,10 @@ For all variables in the original dataset, mean and standard deviation are calcu
 }
 
 \usage{
-propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE, use.cov = FALSE, 
-          nsim = 10000, do.perm = FALSE, perm.crit = "perm > init", 
-          ties = NULL, nperm = 2000, alpha = 0.05, plot = TRUE, xlim = NULL, ...)  
+propagate(expr, data, type = c("raw", "stat"), do.sim = TRUE, 
+          use.cov = FALSE, nsim = 10000, do.perm = FALSE, 
+          perm.crit = "perm > init", ties = NULL, nperm = 2000, 
+          alpha = 0.05, plot = TRUE, xlim = NULL, ...)  
 }
 
 \arguments{

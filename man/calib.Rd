@@ -18,8 +18,9 @@ An iterative search of the optimal threshold border can be conducted, thereby go
 \usage{
 calib(refcurve, predcurve = NULL, thresh = "cpD2", term = NULL, 
       dil = NULL, plot = TRUE, plot.map = TRUE,
-      conf = 0.95, opt = c("none", "inter", "slope"),
-      opt.step = c(50, 50), quan = 0.5, slope = NULL, count = 1)
+      conf = 0.95, opt = c("none", "inter", "slope"),       
+      opt.step = c(50, 50), stop.crit = c("midpoint", "outlier"), 
+      quan = 0.5, slope = NULL, count = 1)
 }
 
 \arguments{
@@ -33,6 +34,7 @@ calib(refcurve, predcurve = NULL, thresh = "cpD2", term = NULL,
  \item{conf}{the confidence interval. Defaults to 95\%, can be omitted with \code{NULL}.}
  \item{opt}{type of optimization. See 'Details'.}
  \item{opt.step}{a two-element vector. Number of iterations for the intercept as first item, number of slope iterations as second.}
+ \item{stop.crit}{the stopping criterium for the iterations. Default is the 'midpoint' of the highest dilution curve.}
  \item{quan}{the top quantile of iterations to be shown in the heatmap.}
  \item{slope}{a slope to be defined for the threshold line. Mostly used internally by the iteration process.}
  \item{count}{internal counter for recursive purposes. Not to be altered.}  
@@ -108,8 +110,7 @@ res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope",
 ## using replicates for reference curve
 ml <- modlist(reps, model = l4)
 DIL <- rep(10^(6:0),  each = 4) 
-res <- calib(refcurve = ml, dil = DIL)
-
+res <- calib(refcurve = ml, dil = DIL)    
 }
 
 \keyword{models}

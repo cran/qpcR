@@ -33,6 +33,14 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE,
 A list with each item containing the model from each column. A 'names' item containing the column name is attached to each model.
 }
 
+\details{
+In case of unsuccessful model fitting, the run is skipped and the next run is analyzed.
+}
+
+\seealso{
+\code{\link{pcrbatch}} for batch analysis using different methods.
+}
+
 \author{
 Andrej-Nikolai Spiess
 }

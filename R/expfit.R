@@ -28,7 +28,7 @@ plot = TRUE,
       ### midpoint method
       if (method == "midpoint") {
             result <- midpoint(object, noise.cyc = n.ground)
-            MIDPOINT <- round(result$mp)            
+            MIDPOINT <- round(result$cyc.mp)            
             if (fix == "top") CYCS <- (MIDPOINT - nfit + 1):MIDPOINT
             if (fix == "bottom") CYCS <- MIDPOINT:(MIDPOINT + nfit - 1)
             if (fix == "middle") CYCS <- (MIDPOINT - (round(nfit/2 - 1))):(MIDPOINT + (round(nfit/2)))

@@ -14,7 +14,7 @@ This is the main workhorse function of the qpcR package that fits one of the ava
 pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,  
        opt.method = "LM", nls.method = "port", 
        start = NULL, robust = FALSE, control = nls.control(), 
-       weights, ...)
+       ...)
 }
 
 \arguments{
@@ -27,8 +27,7 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
   \item{nls.method}{one of the available methods in \code{\link{nls}}. Default is \code{"port"}, which works quite well.}
   \item{start}{a vector of starting values that can be supplied externally.}
   \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}
-  \item{control}{an optional list of control settings for \code{\link{nls}} or \code{qpcR:::rnls}.}
-  \item{weights}{a vector of weights for nonlinear fitting. Must be same lengths as the data.}
+  \item{control}{an optional list of control settings for \code{\link{nls}} or \code{qpcR:::rnls}.}   
   \item{...}{other parameters to be passed to \code{optim}, \code{genoud} or \code{nls}.}     
 }
 
@@ -96,10 +95,7 @@ pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder"))
 pcrfit(reps, 1, 2, l4, do.optim = FALSE, start = c(-5, -0.05, 11, 16)) 
 
 ## make a robust model
-pcrfit(reps, 1, 2, l4, robust = TRUE) 
-
-## use weights
-pcrfit(reps, 1, 2, l4, weights = 49:1)  
+pcrfit(reps, 1, 2, l4, robust = TRUE)    
 }
 
 \keyword{models}

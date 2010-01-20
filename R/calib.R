@@ -9,6 +9,7 @@ plot.map = TRUE,
 conf = 0.95, 
 opt = c("none", "inter", "slope"),
 opt.step = c(50, 50), 
+stop.crit = c("midpoint", "outlier"), 
 quan = 0.5, 
 slope = NULL, 
 count = 1)
@@ -21,6 +22,7 @@ count = 1)
   if (is.null(dil)) stop("Please define dilutions!")
   if (length(dil) != length(refcurve)) stop("Supply as many dilutions as number of PCRs in 'refcurve'!")
   opt <- match.arg(opt)
+  stop.crit <- match.arg(stop.crit)
 
   lref <- length(refcurve)
   lpred <- length(predcurve)
@@ -35,14 +37,23 @@ count = 1)
   } else start.y <- thresh    
 
   if (opt != "none") {
-    outs <- sapply(refcurve, function(x) outlier(x)$outl)
-    outSel <- which.max(outs)
-    end.x <- outlier(refcurve[[outSel]])$outl
-    end.y <- outlier(refcurve[[outSel]])$f.outl
-  } else {
+    if (stop.crit == "outlier") {
+      outs <- sapply(refcurve, function(x) outlier(x)$outl)
+      outSel <- which.max(outs)
+      end.x <- outlier(refcurve[[outSel]])$outl
+      end.y <- outlier(refcurve[[outSel]])$f.outl
+    } 
+    if (stop.crit == "midpoint") {
+      outs <- sapply(refcurve, function(x) midpoint(x)$cyc.mp)
+      outSel <- which.max(outs)
+      end.x <- midpoint(refcurve[[outSel]])$cyc.mp
+      end.y <- midpoint(refcurve[[outSel]])$f.mp
+    }
+   } else {
     end.y <- start.y
     opt.step[1] <- 1  
-  }       
+   } 
+        
       
   if (is.numeric(term)) end.y <- term
       
@@ -148,7 +159,8 @@ count = 1)
                              
         if (!is.null(predcurve) && count == 2) {
           points(LINMOD$pred.conc, PRED.X2, pch = 15, col = COLpred, cex = 1.5)
-          if (!all(is.na(LINMOD$pred.conc))) {                                                                                               
+          if (is.vector(LINMOD$pred.conf)) LINMOD$pred.conf <- matrix(LINMOD$pred.conf, ncol = 1) 
+          if (!all(is.na(LINMOD$pred.conc))) {                                                                                                              
             arrows(LINMOD$pred.conf[1, ], PRED.X2, LINMOD$pred.conf[2, ], PRED.X2, code = 3, angle = 90, length = 0.1)                              
           }
         }

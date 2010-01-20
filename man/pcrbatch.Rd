@@ -10,7 +10,7 @@ This function batch calculates the results obtained from \code{\link{efficiency}
 The input can also be a list obtained from \code{\link{modlist}}, which simplifies things in many cases.
 The output is a dataframe with the estimated parameters and model description.
 Very easy to use on datasheets containing many qPCR runs, i.e. as can be imported from Excel.  
-The data is automatically copied to the clipboard.
+The result is automatically copied to the clipboard.
 }
 
 \usage{
@@ -39,18 +39,21 @@ pcrbatch(x, cols = NULL, model = l4, group = NULL, type = "cpD2",
 
 \details{
 The qPCR raw data should be arranged with the cycle numbers in the first column with the name "Cycles".
-All subsequent columns must be plain raw data with sensible column descriptions.
-If data of class \code{modlist} is given, all previous data manipulations (i.e. smoothing or background subtraction) are eliminated as the raw data is taken.
-Thus, if \code{opt} was applied with \code{modlist}, this has to be repeated by setting \code{opt = TRUE}.
-If replicates are defined, the output will contain a numbering of groups (i.e. "group1" for the first replicate group).
+All subsequent columns must be plain raw data with sensible column descriptions.  
+If replicates are defined, the output will contain a numbering of groups (i.e. "group_1" for the first replicate group).
 The model selection process is optional, but we advocate using this for obtaining better parameter estimates.
 Normalization has been described to improve certain qPCR analyses, but this has still to be independently evaluated. 
 Background subtraction is done by averaging the \code{backsub} cycles of the run and subtracting this from all data points.
+In case of unsuccessful model fitting, the run is skipped and the next run is analyzed.
 }
 
 \value{
 A dataframe with the results in columns containing the calculated values with descriptions and the method used as the name prefix.
 } 
+
+\seealso{
+The function \code{\link{modlist}} for creating a list of models.
+}
 
 \author{
 Andrej-Nikolai Spiess

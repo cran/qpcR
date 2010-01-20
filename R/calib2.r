@@ -79,6 +79,7 @@ B = 200
          }
          if (!is.null(predcurve)) {
                   points(lmRes$pred.conc, predCt, pch = 15, col = COLpred, cex = 1.5)
+                  if (is.vector(lmRes$pred.conf)) lmRes$pred.conf <- matrix(lmRes$pred.conf, ncol = 1)
                   if (!all(is.na(lmRes$pred.conc))) {
                         arrows(lmRes$pred.conf[1, ], predCt, lmRes$pred.conf[2, ], predCt, code = 3, angle = 90, length = 0.1, col = "blue")
                   }
@@ -102,6 +103,7 @@ B = 200
    CONF.eff <- CONFINT(summaryList$eff, alpha = alpha)
    CONF.AICc <- CONFINT(summaryList$FOM2, alpha = alpha)
    CONF.Rsq.ad <- CONFINT(summaryList$FOM4, alpha = alpha)
+   if (nrow(summaryList$pred.conc) == 1) summaryList$pred.conc <- t(summaryList$pred.conc)
    CONF.predconc <- apply(summaryList$pred.conc, 2, function(x) CONFINT(x, alpha = alpha))
    
    if (!isReps) CONF.predconc <- apply(rbind(lmRes$pred.conf[1, ], lmRes$pred.conf[2, ]) , 2, function(x) CONFINT(x, alpha = alpha))

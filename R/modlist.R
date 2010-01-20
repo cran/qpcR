@@ -21,10 +21,14 @@ crit = "ftest",
   if (!is.null(backsub) && !is.numeric(backsub)) 
       stop("'backsub' must be either NULL or a numeric sequence!") 
     
+
   for (i in fluo) {
     Cycles <- x[, cyc]
     Fluo  <- x[, i]
-               
+    compl <- complete.cases(Fluo)
+    Cycles <- Cycles[compl]
+    Fluo <- Fluo[compl]
+  
     if (norm) {
       Fluo <- Fluo - min(Fluo, na.rm = TRUE)
       Fluo <- Fluo/max(Fluo, na.rm = TRUE)
@@ -35,16 +39,31 @@ crit = "ftest",
       Fluo <- Fluo - back
     }                    
         
-    DATA <- cbind(Cycles, Fluo)  
+    DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)
     flush.console()
-    cat("Making model for ", colnames(x[i]), " (", model$name, ")\n", sep= "") 
+    cat("Making model for ", colnames(x[i]), " (", model$name, ")", sep= "")
                 
-    fitObj <- pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, ...)          
-        
+    fitObj <- try(pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, ...), silent = TRUE)
+    
+    if (inherits(fitObj, "try-error")) {
+      cat(" => ", colnames(x[i]), " gave a fitting error!", sep = "")
+      fitObj$DATA <- DATA
+      class(fitObj) <- "pcrfit"       
+    }
+      
     if (opt) {
- 	    fitObj <- try(mselect(fitObj, verbose = FALSE, sig.level = sig.level, crit = crit, ...), silent = TRUE)             
-    }                     
-        
+ 	    fitObj2 <- try(mselect(fitObj, verbose = FALSE, sig.level = sig.level, crit = crit, ...), silent = TRUE)             
+      if (inherits(fitObj2, "try-error")) {
+        fitObj <- fitObj
+        cat(" => ", colnames(x[i]), " gave a model selection error!", sep = "")
+      } else {
+        fitObj <- fitObj2
+        cat(" => ", fitObj$MODEL$name, sep = "")
+      }
+    }   
+    
+    cat("\n")
+           
     modList[[counter]] <- fitObj
     modList[[counter]]$names <- colnames(x[i])   
     counter <- counter + 1       
@@ -53,3 +72,4 @@ crit = "ftest",
   class(modList) <- c("modlist", "pcrfit")
   invisible(modList)
 }
+

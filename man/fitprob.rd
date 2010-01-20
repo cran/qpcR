@@ -46,7 +46,7 @@ fitprob(m1)
 
 ## 'bad model'
 m2 <- pcrfit(reps, 1, 2, w4)
-fitprob(m1)       
+fitprob(m2)       
 }
 
 \keyword{models}

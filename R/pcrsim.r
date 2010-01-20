@@ -81,6 +81,7 @@ statfun = function(y) mean(y, na.rm = TRUE),
       if (i == 5) SEL <- apply(gofSel, 2, function(x) which.min(x))
       if (i == 6) SEL <- apply(gofSel, 2, function(x) which.min(x))
       if (i == 7) SEL <- apply(gofSel, 2, function(x) which.min(x))
+      if (i == 8) SEL <- apply(gofSel, 2, function(x) which.min(x))       
       
       modSel <- sapply(SEL, function(x) fitmodel[[x]]$name) 
       modMat <- rbind(modMat, modSel)     

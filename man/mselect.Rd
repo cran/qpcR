@@ -14,15 +14,16 @@ Model selection by comparison of different models using\cr
   4) the estimated residual variance,\cr
   5) the p-value from a nested F-test on the residual variance,\cr
   6) the p-value from the likelihood ratio (chi-square),\cr
-  7) the Akaike weights based on AIC and\cr
-  8) the Akaike weights based on AICc.
+  7) the Akaike weights based on AIC,\cr
+  8) the Akaike weights based on AICc, and\cr
+  9) the chi-square fit probability
 
-The best model is chosen by 5), 6), or 8) and returned as a new model.
+The best model is chosen by 5), 6), 8) or 9) and returned as a new model.
 }
 
 \usage{
 mselect(object, fctList = NULL, sig.level = 0.05, verbose = TRUE, 
-        crit = c("ftest", "ratio", "weights"), do.all = FALSE)
+        crit = c("ftest", "ratio", "weights", "fitprob"), do.all = FALSE)
 }
 
 \arguments{
@@ -30,21 +31,22 @@ mselect(object, fctList = NULL, sig.level = 0.05, verbose = TRUE,
   \item{fctList}{a list of functions to be analyzed, i.e. for a non-nested regime. Should also contain the original model.}
   \item{sig.level}{the significance level for the nested F-test.}
   \item{verbose}{logical. If \code{TRUE}, the result matrix is displayed in the console.}
-  \item{crit}{the criterium for model selection. Either 'ftest'/'ratio' for nested models or 'weights' for nested and non-nested models.}
+  \item{crit}{the criterium for model selection. Either 'ftest'/'ratio' for nested models or 'weights'/'fitprob' for nested and non-nested models.}
   \item{do.all}{if \code{TRUE}, all available sigmoidal models are tested and the best one is selected based on AICc weights.}
 }
 
 \details{
 Criteria 5) and 6) cannot be used for comparison unless the models are nested. 
-Criterion 7), Akaike weights, can be used for nested and non-nested regimes.
+Criterion 8), Akaike weights, can be used for nested and non-nested regimes, which also accounts for the chi-square fit probability.
 For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better.
-The best model is chosen either from the nested F-test, likelihood ratio or corrected Akaike weights and returned as a new model.
+The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{LR}}), corrected Akaike weights
+ (\code{\link{akaike.weights}}) or chi-square fit probability (\code{\link{fitprob}}) and returned as a new model.
 When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5; l3/l4/l5.
 If supplying nested models, please do this with ascending number of parameters.  
 }
 
 \value{
-A model of the best fit selected by the nested F-tests, likelihood ratios or Akaike weights.
+A model of the best fit selected by one of the criteria above.
 The new model has an additional list item 'retMat' with a result matrix of the criterion tests.
 }
 
@@ -53,8 +55,8 @@ Andrej-Nikolai Spiess
 }
 
 \seealso{
-\code{\link{LR}}, \code{\link{akaike.weights}}
-}
+\code{\link{LR}}, \code{\link{akaike.weights}} and \code{\link{fitprob}}.   
+}  
 
 \examples{
 ## choose best model based on F-tests 
