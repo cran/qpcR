@@ -1,28 +1,18 @@
 PRESS <- function(object, verbose = TRUE)
 {
-  if (!is.null(object$call$data)) DATA <- eval(object$call$data)
-  else DATA <- as.data.frame(sapply(all.vars(object$call$formula), function(a) get(a, envir = .GlobalEnv)))
- 
-  VARS <- all.vars(object$call$formula)
-  LHS <- VARS[1]
-  RHS <- VARS[-1]   
-  matchPRED <- which(!is.na(match(RHS, colnames(DATA)))) 
-  PREDname <- RHS[matchPRED]
-  PRED.pos <- which(colnames(DATA) == PREDname)
-  RESP.pos <- which(colnames(DATA) == LHS)
+  fetchDATA <- fetchData(object)
+  DATA <- fetchDATA$data
+  PRED.pos <- fetchDATA$pred.pos
+  RESP.pos <- fetchDATA$resp.pos
+  PRED.name <- fetchDATA$pred.name
   PRESS.res <- NULL
  
   for (i in 1:nrow(DATA)) {
-    if (verbose) {
-      if (i %% 10 == 0) cat(i) else cat(".")
-      if (i %% 50 == 0) cat("\n")
-      flush.console()
-    }
-  
+    if (verbose) counter(i)  
     newDATA <- DATA[-i, ]      
-    newMOD <- update(object, data = newDATA)        
+    newMOD <- update(object, data = newDATA)          
     newPRED <- as.data.frame(DATA[i, PRED.pos])
-    colnames(newPRED) <- PREDname
+    colnames(newPRED) <- PRED.name
     y.hat <- as.numeric(predict(newMOD, newdata = newPRED))
     PRESS.res[i] <- DATA[i, RESP.pos] - y.hat
   }

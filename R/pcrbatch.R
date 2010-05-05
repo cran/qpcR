@@ -9,20 +9,44 @@ smooth = c("none", "tukey", "lowess"),
 norm = FALSE, 
 fact = 1, 
 ave = c("mean", "median"), 
-backsub = NULL,   
-retPar = FALSE,
+backsub = NULL,  
 crit, 
+plot = TRUE, 
 ...) 
 {
   smooth <- match.arg(smooth)
   ave <- match.arg(ave)
-  outList <- list()         
+  outList <- list()   
   
   if (class(x) != "modlist" && is.null(cols)) cols <- 2:ncol(x)
   if (class(x) != "modlist" && names(x)[1] != "Cycles") stop("Column 1 should be 'Cycles'!")
   if (!is.null(backsub) && !is.numeric(backsub)) stop("'backsub' must be either NULL or a numeric sequence!")
-  if (!is.null(cols) && min(cols) == 1) stop("'cols' must be > 1 because Column 1 must be 'Cycles'!")
-
+  if (!is.null(cols) && min(cols) == 1) stop("'cols' must be > 1 because Column 1 must be 'Cycles'!")   
+  
+  cat("Creating modlist...\n")
+  if (class(x) != "modlist") modList <- modlist(x, fluo = cols) else modList <- x
+  flush.console()  
+  cat("\nChecking for sigmoidal consistency...\n")
+  flush.console()      
+  effList <- lapply(modList, function(x) try(efficiency(x, plot = FALSE), silent = TRUE))    
+  cpD2 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD2)
+  cpD1 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD1)   
+  RSQ <- sapply(modList, function(x) if(inherits(x, "try-error")) 0 else Rsq.ad(x))  
+  NAMES <- sapply(modList, function(x) x$names)
+  FAIL <- which(cpD2 - cpD1 > 10 | cpD2 < 5 | RSQ < 0.9)
+        
+  if (length(FAIL) > 0) {
+    cat("Found non-sigmoidal structure for", NAMES[FAIL], "\nRemoving them from batch...\n\n") 
+    flush.console() 
+    group <- group[-FAIL]
+    cols <- cols[-FAIL]
+  }
+   
+  for (i in FAIL) modList[[i]]$names <- paste("**", modList[[i]]$names, "**", sep = "")
+             
+  if (plot) plot(modList, which = "single")
+  flush.console()    
+ 
   if (!is.null(group)) {
     if (class(x) == "modlist") stop("This is a 'modlist'. Use 'replist' for averaging...")
     group <- as.factor(group)
@@ -36,8 +60,8 @@ crit,
     DATA2 <- as.data.frame(DATA2)
     namevec <- paste("group_", 1:length(levels(group)), sep = "")
     colnames(DATA2) <- namevec
-    x <- cbind(Cycles, DATA2)
-    cols <- 2:ncol(x)
+    x <- cbind(Cycles, DATA2) 
+    cols <- 2:ncol(x)     
   }
     
   if (class(x) == "modlist") {
@@ -48,7 +72,7 @@ crit,
   else {
       dataList <- list()
       modelList <- list()
-      nameList <- list()
+      nameList <- list()       
       for (i in 1:length(cols)) {
             CC <- complete.cases(x[, cols[i]])
             dataList[[i]] <- cbind(x[CC, 1], x[CC, cols[i]])
@@ -80,6 +104,7 @@ crit,
     cat("   Building sigmoidal model (", modelList[[i]]$name, ")...", sep = "")
     fitObj <- try(pcrfit(DATA, 1, 2, model = modelList[[i]], ...), silent = TRUE)
     if (inherits(fitObj, "try-error")) {
+      nameList[[i]] <- "FAIL"
       cat(" => There was an error in sigmoidal fitting. Skipping...\n") 
       next
     }
@@ -99,43 +124,37 @@ crit,
     cat("\n")
     
     EFF <- try(efficiency(fitObj, plot = FALSE, type = type, ...), silent = TRUE)
-    if (retPar) EFF <- c(EFF, coef(fitObj))
+    if (!inherits(EFF, "try-error")) EFF <- c(EFF, coef(fitObj), model = fitObj$MODEL$name) else EFF <- list(eff = NA)
     names(EFF) <- paste("sig.", names(EFF), sep = "")
-
+    
     cat("   Using window-of-linearity...\n")
     SLI <- try(sliwin(fitObj, plot = FALSE, ...), silent = TRUE)
+    if (inherits(SLI, "try-error")) SLI <- list(eff = NA) 
     names(SLI) <- paste("sli.", names(SLI), sep = "")       
             
     cat("   Fitting exponential model...\n")
     EXP <- try(expfit(fitObj, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
+    if (inherits(EXP, "try-error")) EXP <- list(eff = NA)
     names(EXP) <- paste("exp.", names(EXP), sep = "")
    
-    out.all <- c(EFF, list(sig.model = NA), SLI, EXP)
+    out.all <- c(EFF, SLI, EXP)
     outList[[i]] <- out.all   
-   }
-
-    allNAMES <- c("sig.eff", "sig.resVar", "sig.AICc", "sig.AIC", "sig.Rsq", "sig.Rsq.ad", "sig.cpD1", "sig.cpD2", "sig.cpE",
-                  "sig.cpR", "sig.cpT", "sig.Cy0", "sig.fluo", "sig.init1", "sig.init2", "sig.cf", "sig.model", "sli.eff",
-                  "sli.rmax", "sli.init", "exp.point", "exp.eff", "exp.AIC", "exp.resVar", "exp.RMSE", "exp.init")
-                  
-    resMat <- matrix(nrow = length(allNAMES), ncol = length(outList) + 1)
-    resMat[, 1] <- allNAMES
+  }          
+  
+  allNAMES <- unique(unlist(lapply(outList, function(x) names(x))))     
+  resMat <- data.frame(ROWNAMES = allNAMES)     
     
-    for (i in 1:length(outList)) {
-      outVALS <- as.numeric(outList[[i]])
-      outNAMES <- names(outList[[i]])
-      m <- match(outNAMES, allNAMES)
-      isNA <- which(is.na(m))
-      m[isNA] <- isNA
-      resMat[m, i + 1] <- outVALS
-      resMat[which(resMat[, 1] == "sig.model"), i + 1] <- fitObj$MODEL$name
-    }
+  for (i in 1:length(outList)) {
+    outFrame <- t(as.data.frame(outList[[i]]))       
+    outFrame <- cbind(ROWNAMES = rownames(outFrame), outFrame)      
+    resMat <- merge(resMat, outFrame, by.x = "ROWNAMES", by.y = "ROWNAMES", sort = FALSE, all = TRUE)         
+  }     
 
-    namevec <- unlist(nameList)
-    colnames(resMat) <- c("Vars", namevec)
-    
-    cat("Writing to clipboard...\n\n")
-    write.table(resMat, file = "clipboard-64000", sep = "\t", row.names = FALSE)
-    class(resMat) <- "pcrbatch"
-    return(resMat)
+  nameVec <- unlist(nameList)
+  nameVec <- nameVec[nameVec != "FAIL"]  
+  names(resMat) <- c("Vars", nameVec)       
+  cat("Writing to clipboard...\n\n")
+  write.table(resMat, file = "clipboard-64000", sep = "\t", row.names = FALSE)
+  class(resMat) <- c("data.frame", "pcrbatch")   
+  return(resMat)
 }

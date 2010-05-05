@@ -6,8 +6,8 @@
 \description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between two samples, 
  using normalization against a reference gene, if supplied. The input can be single qPCR data or (more likely) data containing replicates. 
 Errors and confidence intervals for the obtained ratios can be calculated by Monte-Carlo simulation, a permutation approach
- similar to the popular REST software and by (first-order) error propagation. 
-Statistical significance for the ratios is calculated by a permutation approach of randomly reallocated vs. non-reallocated data. See 'Details'. 
+ similar to the popular REST software and by error propagation. 
+Statistical significance for the ratios is calculated by a permutation approach of randomly reallocated vs. non-reallocated data. See 'Details'.
 }
 
 \usage{
@@ -38,6 +38,7 @@ The replicates of the 'pcrbatch' data columns are to be defined as a character v
 There is no distinction between the different runs of the same sample, so that three different runs of a gene of interest in
  a target sample are defined as c("gs", "gs", "gs"). The error analysis calculates statistics from ALL replicates, so that
  a further sub-categorization of runs seems superfluous.
+NOTE: If the setup consists of different sample or gene combinations, use \code{\link{ratiobatch}}!
 
 Examples:\cr
 No replicates: NULL.\cr
@@ -54,9 +55,17 @@ The qPCR community sometimes uses single efficiencies, or averaged over replicat
 "mean.pair":      Efficiencies are averaged from all replicates of target sample and control.\cr
 "median.pair":    Same as above but median instead of mean.\cr
 
+Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}.
+The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio 
+ calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
+  
+\code{type.eff = "mean.single"}     # averaging efficiency across replicates\cr
+\code{which.eff = "sli"}            # taking efficiency from the sliding window method\cr
+\code{which.cp = "sig"}             # using the second derivative maximum of a sigmoidal fit\cr 
+
 The ratios are calculated according to the following formulas:\cr
-Without reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}}
-With reference PCR: \deqn{\frac{E.gc^{cp.gc}}{E.gs^{cp.gs}}\cdot\frac{E.rs^{cp.rs}}{E.rc^{cp.rc}}}  
+Without reference PCR: \deqn{\frac{E(gs)^{cp(gs)}}{E(gc)^{cp(gc)}}}
+With reference PCR: \deqn{\frac{E(gs)^{cp(gs)}}{E(gc)^{cp(gc)}}/\frac{E(rs)^{cp(rs)}}{E(rc)^{cp(rc)}}}  
 
 The permutation approach permutates crossing point and efficiency replicates within sample and control groups. 
 The sample runs and control runs (and their respective efficiencies) are tied together, which is similar
@@ -65,7 +74,6 @@ The sample runs and control runs (and their respective efficiencies) are tied to
 The resulting p-values are thus an indication for the significance in any direction AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
 
 Confidence values are returned for all three methods (Monte Carlo, permutation, error propagation) as follows:
-
 Monte-Carlo:  From the evaluations of the Monte-Carlo simulated data.\cr
 Permutation:  From the evaluations of the within-group permutated data.\cr
 Propagation:  From the propagated error, assuming normality.
@@ -114,8 +122,7 @@ res$summary
 ## comparison to randomly reallocated 
 ## samples (similar to REST software)
 res2 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
-                  type.eff = "mean.single", which.cp = "cpD2")
-                 
+                  type.eff = "mean.single", which.cp = "cpD2")                 
 res2$summary    
 
 ## Using reference data.
@@ -192,7 +199,7 @@ for (i in seq(0, 0.1, by = 0.01)) {
       x <- c(x, i * 100)       
       y <- c(y, (res$summary[2, 3]/res$summary[1, 3]) * 100)
 }
-plot(x, y, xlim = c(0, 10), lwd = 2, xlab = "c.v. [\%]", ylab = "c.v. (prop) [\%]")
+plot(x, y, xlim = c(0, 10), lwd = 2, xlab = "c.v. [%]", ylab = "c.v. (prop) [%]")
 }
 }
 

@@ -26,8 +26,8 @@ A list with the following components:
   \item{AICc}{the bias-corrected Akaike Information Criterion.} 
   \item{BIC}{the Bayesian Information Criteron.}  
   \item{resVar}{the residual variance.}
-  \item{RMSE}{the root-mean-squared-error.}
-  \item{chi2.red}{the reduced chi-square, see \code{\link{fitchisq}}.}  
+  \item{RMSE}{the root-mean-squared-error.}   
+  \item{p.neill}{the p-value from Neill's Lack-of-fit test without replicates. See \code{\link{neill.test}}.}  
   \item{P.square}{the PRESS P-square, if \code{PRESS = TRUE}.}
 }
 
@@ -38,7 +38,7 @@ Andrej-Nikolai Spiess
 
 \examples{
 m <- pcrfit(reps, 1, 2, l5)
-pcrGOF(m, PRESS = TRUE)
+pcrGOF(m, PRESS = TRUE)   
 }
 
 \keyword{models}

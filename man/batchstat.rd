@@ -37,15 +37,15 @@ Andrej-Nikolai Spiess
 \examples{
 ## create 3 'pcrbatch'es
 ## and concatenate
-dat1 <- pcrbatch(reps, 2:5, l4)
-dat2 <- pcrbatch(reps, 6:9, l4)
-dat3 <- pcrbatch(reps, 10:13, l4)
+dat1 <- pcrbatch(reps, 2:5, l4, plot = FALSE)
+dat2 <- pcrbatch(reps, 6:9, l4, plot = FALSE)
+dat3 <- pcrbatch(reps, 10:13, l4, plot = FALSE)
 batchstat(dat1, dat2, dat3)
 
 ## one 'pcrbatch' and doing 
 ## mean on replicates
 ## defined by 'group'
-dat4 <- pcrbatch(reps, 2:9, l4)
+dat4 <- pcrbatch(reps, 2:9, l4, plot = FALSE)
 GROUP <- c(1, 1, 1, 1, 2, 2, 2, 2)
 batchstat(dat4, do = "stat", group = GROUP, statfun = mean)
 

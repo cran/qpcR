@@ -8,7 +8,7 @@
 \description{
 This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}}, and \code{\link{expfit}} on a dataframe containing many qPCR runs.
 The input can also be a list obtained from \code{\link{modlist}}, which simplifies things in many cases.
-The output is a dataframe with the estimated parameters and model description.
+The output is a dataframe with the estimated parameters and model descriptions.
 Very easy to use on datasheets containing many qPCR runs, i.e. as can be imported from Excel.  
 The result is automatically copied to the clipboard.
 }
@@ -16,8 +16,8 @@ The result is automatically copied to the clipboard.
 \usage{
 pcrbatch(x, cols = NULL, model = l4, group = NULL, type = "cpD2",
          opt = FALSE, smooth = c("none", "tukey", "lowess"), norm = FALSE, 
-         fact = 1, ave = c("mean", "median"), backsub = NULL, 
-         retPar = FALSE, crit, ...) 
+         fact = 1, ave = c("mean", "median"), backsub = NULL, crit, 
+         plot = TRUE, ...) 
 }
 
 \arguments{
@@ -31,9 +31,9 @@ pcrbatch(x, cols = NULL, model = l4, group = NULL, type = "cpD2",
   \item{norm}{logical. Normalization of the raw data within [0, 1]. See references.}
   \item{fact}{a constant multiplication factor for the raw qPCR data.}
   \item{ave}{averaging method for replicates. Defaults to "mean", another option is "median".}
-  \item{backsub}{background subtraction. If \code{NULL}, not applied. Otherwise, a numeric sequence such as \code{1:10}. See 'Details'.} 
-  \item{retPar}{logical. Should the parameters from the fit be included in the output?}
+  \item{backsub}{background subtraction. If \code{NULL}, not applied. Otherwise, a numeric sequence such as \code{1:10}. See 'Details'.}   
   \item{crit}{the criterium for model selection. See \code{\link{mselect}}.}
+  \item{plot}{logical. If \code{TRUE}, the single runs are plotted from the internal 'modlist' for diagnostics.}
   \item{...}{other parameters to be passed to downstream methods.}
 }
 
@@ -44,11 +44,13 @@ If replicates are defined, the output will contain a numbering of groups (i.e. "
 The model selection process is optional, but we advocate using this for obtaining better parameter estimates.
 Normalization has been described to improve certain qPCR analyses, but this has still to be independently evaluated. 
 Background subtraction is done by averaging the \code{backsub} cycles of the run and subtracting this from all data points.
-In case of unsuccessful model fitting, the run is skipped and the next run is analyzed.
+In case of unsuccessful model fitting, the run is skipped and the next run is analyzed. Therefore, the resulting dataframe will not
+ contain the failed qPCR runs.
 }
 
 \value{
-A dataframe with the results in columns containing the calculated values with descriptions and the method used as the name prefix.
+A dataframe with the results in columns containing the calculated values, sigmoidal fit parameters and model name together with the different methods used as the name prefix.
+ A plot shows a plot matrix of all amplification curves/sigmoidal fits and failed amplifications marked with asterisks.
 } 
 
 \seealso{
@@ -78,10 +80,10 @@ temp <- pcrbatch(reps)
 
 ## first 4 runs and return parameters of fit
 ## do background subtraction using the first 8 cycles
-res1 <- pcrbatch(reps, 2:4, retPar = TRUE, backsub = 1:8)
+res1 <- pcrbatch(reps, 2:5, backsub = 1:8)
 
 ##  first 8 runs, with 4 replicates each, l5 model
-res2 <- pcrbatch(reps, 2:9, model = l5, c(1,1,1,1,2,2,2,2))
+res2 <- pcrbatch(reps, 2:9, model = l5, group = c(1,1,1,1,2,2,2,2))
 
 ## using model selection (likelihood ratio) on the first 4 runs, 
 ## run 1+2 are replicates

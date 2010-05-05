@@ -1,16 +1,14 @@
 \name{pcrboot}
 \alias{pcrboot}
 
-\title{Bootstrapping and jackknifing qPCR (and other) data}
+\title{Bootstrapping and jackknifing qPCR data}
 
 \description{
 Confidence intervals for the estimated parameters and goodness-of-fit measures are calculated for a nonlinear qPCR data fit by either\cr
 a) boostrapping the residuals of the fit or\cr
 b) jackknifing and refitting the data.
 
-If data of class \code{pcrfit} is supplied, confidence intervals are also calculated for all parameters obtained from the \code{\link{efficiency}} analysis.
-Works for all models with a \code{model$data} item and a \code{\link{fitted}} and \code{\link{residuals}} function.
-See 'Details'. 
+Confidence intervals can also be calculated for all parameters obtained from the \code{\link{efficiency}} analysis.  
 }
 
 \usage{
@@ -19,7 +17,7 @@ pcrboot(object, type = c("boot", "jack"), B = 100, njack = 1,
 }
 
 \arguments{
-  \item{object}{an object of class 'pcrfit' or other.}
+  \item{object}{an object of class 'pcrfit'.}
   \item{type}{either \code{boot}strapping or \code{jack}knifing.} 
   \item{B}{numeric. The number of iterations.} 
   \item{njack}{numeric. In case of \code{type = "jack"}, how many datapoints to exclude. Defaults to leave-one-out.}

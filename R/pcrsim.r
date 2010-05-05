@@ -48,10 +48,8 @@ statfun = function(y) mean(y, na.rm = TRUE),
       cat(fitmodel[[k]]$name, "\n")         
       for (i in 2:ncol(fluoMatT)) {
         FIT <- pcrfit(fluoMatT, 1, i, fitmodel[[k]], ...)          
-        j <- i - 1          
-        if (j %% 10 == 0) cat(j) else cat(".")
-        if (j %% 50 == 0) cat("\n")
-        flush.console()            
+        j <- i - 1 
+        counter(j)        
         if (plot) lines(cyc, fitted(FIT), col = colvec[k], ...)  
         coefMat <- cbind(coefMat, coef(FIT))
         gofMat <- cbind(gofMat, unlist(pcrGOF(FIT, error = error)))                     

@@ -2,17 +2,16 @@ batchstat <- function(..., group = NULL,  do = c("cbind", "stat"), statfun = mea
 {
   do <- match.arg(do)
   DATA <- list(...)
-  lapply(DATA, function(x) if (class(x) != "pcrbatch") stop("All data must be of class 'pcrbatch'!"))
+  lapply(DATA, function(x) if (class(x)[2] != "pcrbatch") stop("All data must be of class 'pcrbatch'!"))
   lapply(DATA, function(x) if (do == "stat" && ncol(x) - 1 != length(group)) stop("'group' length and number of runs must match!"))
-  
-  
+    
   if (do == "cbind") {
     DATAout <- NULL
-    anno <- DATA[[1]][, 1]
+    allNames <- unique(matrix(sapply(DATA, function(x) x[, 1]), ncol = 1))
+    DATAout$Vars <- allNames
     for (i in 1:length(DATA)) {
-     if (i == 1) DATAout <- cbind(DATAout, DATA[[i]])
-      else DATAout <- cbind(DATAout, DATA[[i]][, -1])
-     }
+      DATAout <- merge(DATAout, DATA[[i]], by.x = "Vars", by.y = "Vars")
+    }   
   }
 
   if (do == "stat") {
