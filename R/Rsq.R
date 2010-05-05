@@ -1,8 +1,13 @@
-Rsq <- function(object) 
+Rsq <- function(object)
 {
-  rss <- sum(residuals(object)^2)
+  w <- object$weights
+  r <- residuals(object)
+  f <- fitted(object)
+  if (is.null(w)) w <- rep(1, length(f))
+  rss <- sum(w * residuals(object)^2)
   Yi <- residuals(object) - fitted(object)
-  tss <- sum((Yi - mean(Yi))^2)
-  1 - (rss/tss) 
+  m <- sum(w * Yi)/sum(w)
+  tss <- sum(w * (Yi - m)^2)
+  1 - (rss/tss)
 }
 

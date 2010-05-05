@@ -47,7 +47,6 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
       effNames <- c(effNames, paste("eff.", PATTERN[i], sep = ""))
     }      
 
-    ####
     effDat <- effDat
     cpDat <- cpDat      
         
@@ -89,8 +88,9 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     }
         
     CRIT <- c("perm > init", "perm == init", "perm < init")             
-    PROP <- propagate(EXPR, allDat, do.sim = TRUE, do.perm = TRUE, ties = TIES, perm.crit = CRIT, 
-                      verbose = TRUE, logx = TRUE, ...)
+    PROP <- try(propagate(EXPR, allDat, do.sim = TRUE, do.perm = TRUE, ties = TIES, perm.crit = CRIT, 
+                      verbose = TRUE, logx = TRUE, ...))
+    if (inherits(PROP, "try-error")) stop("'propagate' failed to calculate ratios! Try other 'which.eff', 'type.eff' or 'which.cp'.")
     PROP <- c(PROP, list(data = allDat))     
     class(PROP) <- "ratiocalc"
     return(PROP)

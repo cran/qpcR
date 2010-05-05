@@ -9,6 +9,7 @@ nls.method = "port",
 start = NULL,
 robust = FALSE,
 control = nls.control(),
+weights = NULL,
 ...)
 {            
   require(minpack.lm, quietly = TRUE)     
@@ -27,13 +28,17 @@ control = nls.control(),
   ssValMat <- NULL
   ssValMat <- rbind(ssValMat, c("start", ssVal))
   
+  if (is.null(weights)) weights <- rep(1, length(Fluo)) else weights <- abs(weights)
+  if (length(weights) != length(Fluo)) stop("'weights' and 'fluo' have unequal length!")
+    
   FCT <- function(x) {     
-    SSR <- sum((Fluo - model$fct(Cycles, x))^2)
+    SSR <- sum(sqrt(weights) * (Fluo - model$fct(Cycles, x))^2)
     SSR       
   }    
   
   FCT2 <- function(x) {     
-    RESID <- Fluo - model$fct(Cycles, x)
+    RESID <- Fluo - model$fct(Cycles, x)       
+    RESID <- sqrt(weights) * RESID 
     RESID       
   }                         
   
@@ -58,8 +63,8 @@ control = nls.control(),
   control$warnOnly <-  TRUE
 
   if (!robust) NLS <- try(nls(as.formula(model$expr), data = DATA, start = as.list(ssVal), model = TRUE,
-                          algorithm = nls.method, control = control, ...), silent = TRUE)
-   else NLS <- try(qpcR:::rnls(as.formula(model$expr), data = DATA, start = as.list(ssVal), control = control, ...), silent = TRUE)
+                          algorithm = nls.method, control = control, weights = weights, ...), silent = TRUE)
+   else NLS <- try(qpcR:::rnls(as.formula(model$expr), data = DATA, start = as.list(ssVal), control = control, weights = weights, ...), silent = TRUE)
     
   if (inherits(NLS, "try-error")) stop("There was a problem during 'nls'. Try other method...")                             
     

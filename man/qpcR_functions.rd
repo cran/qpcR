@@ -1,7 +1,9 @@
 \name{qpcR_functions}
+\alias{l6}
 \alias{l5}
 \alias{l4}
 \alias{l3}
+\alias{b6}
 \alias{b5}
 \alias{b4}
 \alias{b3}
@@ -17,9 +19,11 @@ A summary of all available models implemented in this package.
 }
 
 \usage{
+l6
 l5
 l4
 l3
+b6
 b5
 b4
 b3
@@ -31,9 +35,11 @@ expGrowth
 
 \details{
 The following nonlinear models are implemented:\cr\cr
+\bold{l6:} \deqn{f(x) = c + k \cdot log(x) + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
 \bold{l5:} \deqn{f(x) = c + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
 \bold{l4:} \deqn{f(x) = c + \frac{d-c}{1+exp(b(log(x)-log(e)))}}
 \bold{l3:} \deqn{f(x) = \frac{d}{1+exp(b(log(x)-log(e)))}} 
+\bold{b6:} \deqn{f(x) = c + k \cdot x + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
 \bold{b5:} \deqn{f(x) = c + \frac{d-c}{(1+exp(b(x-e)))^f}}
 \bold{b4:} \deqn{f(x) = c + \frac{d-c}{1+exp(b(x-e))}}
 \bold{b3:} \deqn{f(x) = \frac{d}{1+exp(b(x-e))}}

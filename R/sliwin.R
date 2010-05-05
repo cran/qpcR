@@ -4,7 +4,9 @@ sliwin <- function (object, wsize = 5, border = 7, plot = TRUE)
   xmin <- round(cpD2) - border
   xmax <- round(cpD2) + border
   x <- object$DATA[xmin:xmax, 1]
-  y <- log(abs(object$DATA[xmin:xmax, 2]))
+  y <- abs(object$DATA[xmin:xmax, 2])
+  y[y == 0] <- 1E-6
+  y <- log(y)     
   rtable <- vector()
   slopetable <- vector()    
 

@@ -67,12 +67,16 @@ crit = "ftest",
     }   
     
     cat("\n")
+    
+    fitObj$call2$model <- fitObj$MODEL
+    fitObj$call2$opt.method <- opt.method
+    fitObj$call2$nls.method <- nls.method       
            
     modList[[counter]] <- fitObj
     modList[[counter]]$names <- colnames(x[i])   
     counter <- counter + 1       
   }
-    
+  
   class(modList) <- c("modlist", "pcrfit")
   invisible(modList)
 }
