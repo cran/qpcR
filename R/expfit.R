@@ -55,9 +55,9 @@ plot = TRUE,
       POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)  
       
       if (plot) {
-            pcrplot(object, xlab = "Cycles", ylab = "raw fluorescence", ...)
-            points(DATA[, 1], DATA[, 2], col = 2, pch = 16)
-            lines(DATA[, 1], fitted(expMod), col = 2, lwd = 2)
+            pcrplot(object, ...)
+            points(DATA[, 1], DATA[, 2], col = 2, pch = 16, ...)
+            lines(DATA[, 1], fitted(expMod), col = 2, lwd = 2, ...)
       }
 
       return(list(point = POINT, cycles = CYCS, eff = as.numeric(exp(coef(expMod)[2])),

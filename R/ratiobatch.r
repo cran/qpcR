@@ -26,6 +26,7 @@ dataout = "clip",
   GCs <- sort(unique(grep("g\\d*c\\d*", group, perl = TRUE, value = TRUE)))
   RSs <- sort(unique(grep("r\\d*s\\d*", group, perl = TRUE, value = TRUE)))
   GSs <- sort(unique(grep("g\\d*s\\d*", group, perl = TRUE, value = TRUE))) 
+  
   ## detect absence of reference runs
   if (length(RCs) > 0 && length(RSs) > 0) hasRef <- TRUE else hasRef <- FALSE
       

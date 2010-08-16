@@ -37,6 +37,7 @@ PRESS,
 propagate,
 ratiobatch,
 ratiocalc,
+rep2mod,
 replist,
 resplot,
 resVar,
@@ -44,7 +45,8 @@ RMSE,
 Rsq,
 Rsq.ad,
 RSS,
-sliwin
+sliwin,
+SOD
 
 )
 

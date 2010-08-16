@@ -30,16 +30,14 @@ KOD(object, method = c("bar", "pam"),
 When using the KOD method according to Bar et al. (2003), outliers are defined by removing the sample from the replicate group and 
  testing it against the remaining training set by using a normal distribution:
 \deqn{P^* = 2 * \lbrack1 - \Phi(\frac{e_i - \mu_{train}}{\sigma_{train}})\rbrack < 0.05}
-I case of \code{method = "pam"}, outliers are identified by being presented as singletons when setting cluster size \code{k = 2} 
+In case of \code{method = "pam"}, outliers are identified by representing singletons when setting cluster size \code{k = 2} 
  in function \code{\link{pam}}. This is not a statistical approach but one based on the distance to the medoids, in which the outliers 
  exhibit a 'null' distance to the second medoid. Using this method might give completely other outliers as the default.
 }
 
 \value{
-An object of the same class as in \code{object} that is either 'tagged' with outlier information and, if \code{remove = TRUE}, with the 
- outlier qPCR runs removed. In case of a 'modlist', all list items have an additional item \code{$outlier} attached. In case of a 'replist',
- all list items have a new item \code{$outlier} which gives the ID of the outlier run, and all subitems in \code{object[[i]]$modlist[[j]])}
- have the same tag as above.
+An object of the same class as in \code{object} that is 'tagged' in its name (**name**) if it is an outlier and also with an item \code{$outlier} with outlier information (see \code{\link{is.outlier}}). If \code{remove = TRUE}, the 
+ outlier runs are removed (and the fitting updated in case of a 'replist').  
 }
 
 \author{
@@ -47,7 +45,7 @@ Andrej-Nikolai Spiess
 }
 
 \seealso{
-Function \code{\link{is.outlier}} to get an 'outlier summary'.
+Function \code{\link{is.outlier}} to get an outlier summary.
 }
 
 \references{

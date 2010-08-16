@@ -1,11 +1,11 @@
 \name{is.outlier}
 \alias{is.outlier}      
 
-\title{Efficiency outlier summary for objects of class 'modlist' or 'replist'}
+\title{Outlier summary for objects of class 'pcrfit, 'modlist' or 'replist'}
 
 \description{
-After having applied function \code{\link{KOD}} on objects of class 'modlist' or 'replist', \code{is.outlier}
- returns a vector of logicals for each run if they are efficiency outliers or not.  
+After using \code{\link{SOD}} or \code{\link{KOD}} on objects of class 'pcrfit', 'modlist' or 'replist', \code{is.outlier}
+ returns a vector of logicals for each run if they are efficiency (\code{KOD}) or sigmoidal shape (\code{SOD}) outliers or not.  
 }
 
 \usage{
@@ -13,11 +13,11 @@ is.outlier(object)
 }
 
 \arguments{
-  \item{object}{a model of class 'modlist' or 'replist'.}
+  \item{object}{an object of class 'pcrfit', 'modlist' or 'replist' resulting from any of the outlier functions.}
 }
 
 \value{
-A vector of logicals with the run names.
+A vector of logicals with run names.
 }
 
 \author{
@@ -25,7 +25,7 @@ Andrej-Nikolai Spiess
 }
 
 \seealso{
-\code{\link{KOD}}.
+\code{\link{KOD}} and \code{\link{SOD}}.
 }
 
 \examples{
@@ -33,10 +33,20 @@ Andrej-Nikolai Spiess
 ## efficiency outliers
 ml <- modlist(reps)
 res <- KOD(ml)
+
 ## which runs are outliers?
 outl <- is.outlier(res)
 outl
-which(outl)    
+which(outl)
+
+## test for sigmoidal outliers:
+## create a non-amplification curve
+## and throw into 'reps' dataset
+dat <- reps
+dat[, 10] <- rnorm(49, 1, 0.5)
+ml <- modlist(dat)
+res <- SOD(ml)
+is.outlier(res)    
 }
 
 \keyword{models}

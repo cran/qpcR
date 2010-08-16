@@ -1,4 +1,4 @@
-replist <- function(object, group = NULL, opt = FALSE, ...)
+replist <- function(object, group = NULL, opt = FALSE, verbose = TRUE, ...)
 {
   if (class(object) != "modlist") stop("Please supply an object of class 'modlist'!")
   if (is.null(group)) stop("Please define replicate groups!")
@@ -32,7 +32,7 @@ replist <- function(object, group = NULL, opt = FALSE, ...)
   
   for (i in 1:length(meanDATA)) {           
     flush.console()
-    cat("Making model for replicates:", nameVec[[i]]) 
+    if (verbose) cat("Making model for replicates:", nameVec[[i]]) 
     meanMod <- try(pcrfit(meanDATA[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL), silent = TRUE)
     if (inherits(meanMod, "try-error")) stop("There was an error for the starting values!")
     fitObj <- try(pcrfit(repMod[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL, do.optim = FALSE, start = coef(meanMod)), silent = TRUE)
@@ -47,7 +47,7 @@ replist <- function(object, group = NULL, opt = FALSE, ...)
         fitObj <- fitObj2           
       }
     }     
-    cat(" => ", fitObj$MODEL$name, "\n", sep = "")
+    if (verbose) cat(" => ", fitObj$MODEL$name, "\n", sep = "")
     
     finMod[[i]] <- fitObj
     finMod[[i]]$isReps <- TRUE
@@ -57,6 +57,6 @@ replist <- function(object, group = NULL, opt = FALSE, ...)
   }      
   class(finMod) <- c("modlist", "replist", "pcrfit")
   attr(finMod, "nlevels") <- nlevels(group)
-  attr(finMod, "nitems") <- length(group)/nlevels(group)     
+  attr(finMod, "nitems") <- as.numeric(table(group))     
   return(finMod)
 }

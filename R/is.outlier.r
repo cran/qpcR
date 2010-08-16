@@ -1,19 +1,12 @@
 is.outlier <- function(object)
 {
-  if (class(object)[1] != "modlist") stop("Please supply a 'modlist' or 'replist'!")
-  if (class(object)[2] != "replist") {
-    OUTL <- sapply(object, function(x) x$outlier)
-    NAMES <- sapply(object, function(x) x$names)
-    names(OUTL) <- NAMES
-  } else {
-    OUTL <- NULL
-    NAMES <- NULL
-    for (i in 1:length(object)) {
-      tempMod <- object[[i]]$modlist
-      OUTL <- c(OUTL, sapply(tempMod, function(x) x$outlier))
-      NAMES <- c(NAMES, sapply(tempMod, function(x) x$names))
-    }
-    names(OUTL) <- NAMES
-  }
+  if (!(class(object) %in% c("modlist", "replist", "pcrfit"))) stop("object must be of class 'pcrfit', 'modlist' or 'replist'!") 
+  if (class(object)[1] == "pcrfit") object <- list(object) 
+  else if (class(object)[2] == "replist") object <- rep2mod(object)
+  else object <- object
+      
+  OUTL <- sapply(object, function(x) x$outlier)
+  NAMES <- sapply(object, function(x) x$names)
+  names(OUTL) <- NAMES
   return(OUTL)
 }

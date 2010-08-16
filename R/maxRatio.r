@@ -19,7 +19,7 @@ plot = TRUE,
   if (plot) {
     par(mfrow = c(3, 1))     
     par(mar = c(5, 5, 1, 1))       
-    plot(ml, xlab = "Cycles", ylab = "RFU", col = COLS, ...)
+    plot(ml, col = COLS, ...)
     par(mar = c(5, 5, 1, 1))
     xmin <- min(sapply(RES, function(x) min(x$eff.x, na.rm = TRUE)), na.rm = TRUE)
     xmax <- max(sapply(RES, function(x) max(x$eff.x, na.rm = TRUE)), na.rm = TRUE)

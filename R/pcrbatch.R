@@ -26,23 +26,8 @@ plot = TRUE,
   cat("Creating modlist...\n")
   if (class(x) != "modlist") modList <- modlist(x, fluo = cols) else modList <- x
   flush.console()  
-  cat("\nChecking for sigmoidal consistency...\n")
-  flush.console()      
-  effList <- lapply(modList, function(x) try(efficiency(x, plot = FALSE), silent = TRUE))    
-  cpD2 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD2)
-  cpD1 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD1)   
-  RSQ <- sapply(modList, function(x) if(inherits(x, "try-error")) 0 else Rsq.ad(x))  
-  NAMES <- sapply(modList, function(x) x$names)
-  FAIL <- which(cpD2 - cpD1 > 10 | cpD2 < 5 | RSQ < 0.9)
-        
-  if (length(FAIL) > 0) {
-    cat("Found non-sigmoidal structure for", NAMES[FAIL], "\nRemoving them from batch...\n\n") 
-    flush.console() 
-    group <- group[-FAIL]
-    cols <- cols[-FAIL]
-  }
-   
-  for (i in FAIL) modList[[i]]$names <- paste("**", modList[[i]]$names, "**", sep = "")
+    
+  modList <- SOD(modList, ...)
              
   if (plot) plot(modList, which = "single")
   flush.console()    

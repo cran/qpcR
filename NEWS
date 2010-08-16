@@ -1,3 +1,17 @@
+qpcR 1.3 - 0 (16-08-2010) 
+
+    *Added more functionality in respect to 'outlier detection'. Function SOD identifies 'bad' runs (those that failed to really amplify) by inspecting if the amplification curve has any sigmoidal structure. It does so by checking if the first derivative maximum of the curve is within the next 10 cycles of the second derivative maximum. I had a look at several hundered curves and noticed that the FDM is usually never more than 3 cycles away from the SDM if amplification occurs (have a look at the documentation to this function!). It is unpublished, but works well anyhow. rep2mod is a new function to convert an object of class 'replist' back to a 'modlist' preserving the grouping structure as an attribute. This can be useful sometimes...
+    *To handle the new SOD function, modlist, replist, is.outlier and plot.pcrfit have been modified to show information on those runs that were tagged as 'outlier'.
+
+qpcR 1.2 - 9 (26-07-2010) 
+
+    *sliwin failed when some fluorescence values were 0 (because of log(0) = -Inf).  This was fixed.
+    *ratiocalc now delivers an error message if propagate fails.
+    *modlist has been modified so that functions such as PRESS or pcrboot which use an update function work in a batch format with 'lapply'. 
+    *Weighted nonlinear fitting has been added to pcrfit. This is useful as only the baseline region and cycles up to the second derivative cycle number (cpD2) are the really relevant parts of the curve. I am in the process of investigating the benefit of weighting in qPCR analysis...
+    *Rsq now returns R2 for weighted fits (of class 'nls', 'lm', 'glm', 'nlme', 'drc' etc).
+    *Added l6 and b6 as six-parameter log-logistic and logistic models. The additional term k * x is supposed to model the baseline region better. See under ?b6. Again, I'm investigating this... 
+
 qpcR 1.2 - 8 (18-06-2010) 
 
     * BIG update! Added qpcR:::counter and qpcR:::fetchData as convenience functions.  

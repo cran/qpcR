@@ -19,14 +19,11 @@ expcomp <- function(object, ...)
   cols[cols != 1] <- "grey"   
 	cols[cols == 1] <- "red"   
 	lwds <- rep(1, length(RMSEs))
-	lwds[cols != "grey"] <- 3 
-  
-  print(cols)  	
+	lwds[cols != "grey"] <- 3    
 				
 	for (i in 1:length(modList)) {
 		if (i == 1) plot(modList[[i]], col = cols[i], subset = c(min(expReg) - 3, max(expReg) + 3),
-						            lwd = lwds[i], xlab = "Cycles", ylab = "Raw fluorescence", 
-						            main = "Fitting within the exponential region")
+						            lwd = lwds[i], main = "Fitting within the exponential region")
 		else plot(modList[[i]], add = TRUE, col = cols[i], lwd = lwds[i])
 	}
 	return(cbind(model = fnList[order(rk)], RMSE = RMSEs[order(rk)]))
