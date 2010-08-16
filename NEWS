@@ -1,3 +1,9 @@
+qpcR 1.3 - 1 (19-08-2010) 
+
+    *Fast update! Added 'minqa' (minimum quadratic approximation) as a new option for pcrfit. This is essentially a derivative free optimization method that might succeed in fitting curves where other methods fail...
+    *modlist now tags the names of runs in case of failed fitting (*name*) and can also optionally remove them. In addition, SOD also tags the names (**name**) in case that the runs lack sigmoidal curvature. 
+    *plot.pcrfit has been revamped, so that all graphical parameters can be tweaked. It now also displays failed fitting with RED names and outliers as defined by KOD or SOD with BLUE names.
+
 qpcR 1.3 - 0 (16-08-2010) 
 
     *Added more functionality in respect to 'outlier detection'. Function SOD identifies 'bad' runs (those that failed to really amplify) by inspecting if the amplification curve has any sigmoidal structure. It does so by checking if the first derivative maximum of the curve is within the next 10 cycles of the second derivative maximum. I had a look at several hundered curves and noticed that the FDM is usually never more than 3 cycles away from the SDM if amplification occurs (have a look at the documentation to this function!). It is unpublished, but works well anyhow. rep2mod is a new function to convert an object of class 'replist' back to a 'modlist' preserving the grouping structure as an attribute. This can be useful sometimes...

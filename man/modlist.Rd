@@ -9,9 +9,9 @@ Very handy if following functions should be applied to different qPCR models, i.
 }
 
 \usage{
-modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE, 
-        backsub = NULL, opt.method =  "LM", nls.method = "port",
-        sig.level = 0.05, crit = "ftest", ...)
+modlist(x, cyc = 1, fluo = NULL, model = l4, remove = FALSE, opt = FALSE, 
+        norm = FALSE, backsub = NULL, opt.method =  "LM", 
+        nls.method = "port", sig.level = 0.05, crit = "ftest", ...)
 }
 
 \arguments{
@@ -19,6 +19,7 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, opt = FALSE, norm = FALSE,
   \item{cyc}{the column containing the cycle data. Defaults to first column.}
   \item{fluo}{the column(s) (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
   \item{model}{the model to be used.} 
+  \item{remove}{logical. If \code{TRUE}, runs that failed to be fitted are not included in the output. See 'Details'.}
   \item{opt}{logical. Should model selection be applied?} 
   \item{norm}{logical. Should the raw data be normalized within [0; 1] before model fitting?}
   \item{backsub}{background subtraction. If \code{NULL}, not applied. Otherwise, a numeric sequence such as \code{1:10}. See 'Details' in \code{\link{pcrbatch}}.}
@@ -34,7 +35,9 @@ A list with each item containing the model from each column. A 'names' item cont
 }
 
 \details{
-In case of unsuccessful model fitting, the run is skipped and the next run is analyzed.
+In case of unsuccessful model fitting and if \code{remove = FALSE} (default), the original data is included in the output, albeit with no
+ fitting information. This is useful since using \code{plot.pcrfit} on the 'modlist' shows the non-fitted runs. If \code{remove = TRUE},
+  the non-fitted runs are automatically removed and will thus not be displayed. See \code{\link{plot.pcrfit}} for examples.
 }
 
 \seealso{

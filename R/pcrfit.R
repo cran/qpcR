@@ -12,7 +12,8 @@ control = nls.control(),
 weights = NULL,
 ...)
 {            
-  require(minpack.lm, quietly = TRUE)     
+  require(minpack.lm, quietly = TRUE) 
+  require(minqa, quietly = TRUE)        
   options(warn = -1)
 
   Cycles <- data[, cyc]
@@ -43,19 +44,24 @@ weights = NULL,
   }                         
   
   if (do.optim) {
-    for (i in opt.method) {      
+    for (i in opt.method) {
+      if (!(i %in% c("LM", "minqa", "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN"))) 
+        stop("Not an available 'opt.method'! Try one of 'LM', 'minqa', 'Nelder-Mead', 'BFGS', 'CG', 'L-BFGS-B', 'SANN'...")      
       if (i == "LM") {
         OPTIM <- nls.lm(ssVal, FCT2, ...)
       }
-      if (i != "LM") {
+      if (i == "minqa") {
+        OPTIM <- try(newuoa(ssVal, FCT, ...), silent = TRUE)  
+      }
+      if (i %in% c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN")) {
         OPTIM <- try(optim(ssVal, FCT, method = i, hessian = TRUE, control = list(parscale = abs(ssVal), maxit = 50000), ...), silent = TRUE)
-      }                              
+      }                           
       if (inherits(OPTIM, "try-error")) stop("Try to use other 'opt.method'")
       ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
       ssVal <- OPTIM$par       
     }                 
-    EIGEN <- eigen(OPTIM$hessian)$values  
-    if (any(EIGEN < 0)) print("One of the hessian matrix eigenvalues is negative! Consider a different 'opt.method'...")
+    if (!is.null(OPTIM$hessian)) EIGEN <- eigen(OPTIM$hessian)$values else EIGEN <- 0        
+    if (any(EIGEN < 0)) cat(" Negative hessian eigenvalues! Consider a different 'opt.method'...")
   }
   
   names(ssVal) <- model$parnames    

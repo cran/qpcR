@@ -3,6 +3,7 @@ x,
 cyc = 1, 
 fluo = NULL, 
 model = l4, 
+remove = FALSE,
 opt = FALSE, 
 norm = FALSE,
 backsub = NULL, 
@@ -24,14 +25,15 @@ crit = "ftest",
   if (is.null(fluo)) fluo <- 2:ncol(x)        
     
   if (!is.null(backsub) && !is.numeric(backsub)) 
-      stop("'backsub' must be either NULL or a numeric sequence!")     
+      stop("'backsub' must be either NULL or a numeric sequence!")   
 
   for (i in fluo) {
-    Cycles <- x[, cyc]
+    Cycles <- x[, cyc]      
     Fluo  <- x[, i]
     compl <- complete.cases(Fluo)
     Cycles <- Cycles[compl]
     Fluo <- Fluo[compl]
+    NAME <- colnames(x)[i]
   
     if (norm) {
       Fluo <- Fluo - min(Fluo, na.rm = TRUE)
@@ -45,12 +47,17 @@ crit = "ftest",
         
     DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)     
     flush.console()
-    cat("Making model for ", colnames(x[i]), " (", model$name, ")", sep= "")
-                
+    cat("Making model for ", NAME, " (", model$name, ")", sep= "")                
     fitObj <- try(pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, ...), silent = TRUE)
     
-    if (inherits(fitObj, "try-error")) {
-      cat(" => ", colnames(x[i]), " gave a fitting error!", sep = "")
+    if (inherits(fitObj, "try-error")) {      
+      cat(" => gave a fitting error!", sep = "")  
+      if(remove) {
+        cat(" => Removing ", NAME, "...\n", sep = "")
+        next
+      } 
+      cat(" => Tagging name of ", NAME, "...", sep = "")
+      NAME <- paste("*", NAME, "*", sep = "")                
       fitObj$DATA <- DATA
       class(fitObj) <- "pcrfit"       
     }
@@ -73,7 +80,7 @@ crit = "ftest",
     fitObj$call2$nls.method <- nls.method       
            
     modList[[counter]] <- fitObj
-    modList[[counter]]$names <- colnames(x[i])   
+    modList[[counter]]$names <- NAME   
     counter <- counter + 1       
   }
   

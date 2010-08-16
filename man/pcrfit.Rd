@@ -7,7 +7,7 @@
 
 \description{
 This is the main workhorse function of the qpcR package that fits one of the available models to qPCR data using nonlinear least-squares fitting from \code{\link{nls}}, 
- with sensible starting parameters obtained from either \code{nls.lm} (default) or \code{\link{optim}}.
+ with sensible starting parameters obtained from either \code{\link{nls.lm}} (default), \code{\link{newuoa}} or \code{\link{optim}}.
 }
 
 \usage{
@@ -23,7 +23,7 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
   \item{fluo}{the column containing the raw fluorescence data of the run.}
   \item{model}{the model to be used for the analysis. Defaults to l4.} 
   \item{do.optim}{if \code{FALSE}, refinement of starting values by \code{nls.lm} or \code{optim} will be skipped.}
-  \item{opt.method}{one of the available refinement methods. See 'Details'.}
+  \item{opt.method}{one of the available nonlinear minimization methods. See 'Details'.}
   \item{nls.method}{one of the available methods in \code{\link{nls}}. Default is \code{"port"}, which works quite well.}
   \item{start}{a vector of starting values that can be supplied externally.}
   \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}
@@ -36,7 +36,7 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
 The fitting procedure works as follows (hopefully ensuring maximum safeness against convergence errors):
 
 1) Approximate starting values are acquired from \code{model$ssfct}.\cr
-2) Starting values are refined by any of the methods available in \code{optim} or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
+2) Starting values are refined by any of the methods available in \code{optim}, the derivative-free quadratic minimization \code{newuoa} from package 'minqa' or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
  The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to
  each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting 
  values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default.\cr 
@@ -84,7 +84,7 @@ D. Marquardt.\cr
 pcrfit(reps, 1, 2, l4) 
 
 ## using BFGS and Nelder from 'optim'
-pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder"))
+pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder-Mead"))
 
 ## skip 'optim' method and supply
 ## own starting values

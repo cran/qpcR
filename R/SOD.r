@@ -32,15 +32,15 @@ verbose = TRUE,
   for (j in PASS) tempObj[[j]]$outlier <- FALSE  
        
   if (length(FAIL) > 0) {
-    if (verbose) cat(" Found non-sigmoidal structure for", NAMES[FAIL], "\n")  
+    if (verbose) cat(" Found non-sigmoidal structure for ", NAMES[FAIL], "...\n", sep = "")  
     flush.console() 
     if (remove) {
-     if (verbose) cat(" Removing", NAMES[FAIL], "...\n")
+     if (verbose) cat(" Removing ", NAMES[FAIL], "...\n", sep = "")
      flush.console()
      tempObj <- tempObj[-FAIL]
      if (class(object)[2] == "replist") GROUP <- GROUP[-FAIL]
     } else {
-      if (verbose) cat(" Tagging name of", NAMES[FAIL], "...\n")
+      if (verbose) cat(" Tagging name of ", NAMES[FAIL], "...\n", sep = "")
       flush.console()
       for (i in FAIL) tempObj[[i]]$names <- paste("**", tempObj[[i]]$names, "**", sep = "") 
       flush.console()      
