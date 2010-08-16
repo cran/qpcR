@@ -23,7 +23,7 @@ verbose = TRUE,
   if (verbose) cat("Calculating R-square...\n")  
   flush.console()
   RSQ <- sapply(tempObj, function(x) if(inherits(x, "try-error")) 0 else Rsq.ad(x)) 
-  NAMES <- sapply(tempObj, function(x) x$names)   
+  NAMES <- sapply(tempObj, function(x) x$names)  
   if (verbose) cat("Checking for sigmoidal consistency...\n")
   FAIL <- which(cpD2 > cpD1 |  cpD1 - cpD2 > 10 | RSQ < 0.9)
   if (length(FAIL) == 0) PASS <- 1:length(tempObj) else PASS <- (1:length(tempObj))[-FAIL]
@@ -32,15 +32,15 @@ verbose = TRUE,
   for (j in PASS) tempObj[[j]]$outlier <- FALSE  
        
   if (length(FAIL) > 0) {
-    if (verbose) cat(" Found non-sigmoidal structure for ", NAMES[FAIL], "...\n", sep = "")  
+    if (verbose) cat(" Found non-sigmoidal structure for", NAMES[FAIL], "...\n", sep = " ")  
     flush.console() 
     if (remove) {
-     if (verbose) cat(" Removing ", NAMES[FAIL], "...\n", sep = "")
+     if (verbose) cat(" Removing", NAMES[FAIL], "...\n", sep = " ")
      flush.console()
      tempObj <- tempObj[-FAIL]
      if (class(object)[2] == "replist") GROUP <- GROUP[-FAIL]
     } else {
-      if (verbose) cat(" Tagging name of ", NAMES[FAIL], "...\n", sep = "")
+      if (verbose) cat(" Tagging name of", NAMES[FAIL], "...\n", sep = " ")
       flush.console()
       for (i in FAIL) tempObj[[i]]$names <- paste("**", tempObj[[i]]$names, "**", sep = "") 
       flush.console()      

@@ -12,9 +12,9 @@ This is the main workhorse function of the qpcR package that fits one of the ava
 
 \usage{
 pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,  
-       opt.method = "LM", nls.method = "port", 
+       opt.method = "all", nls.method = "all", 
        start = NULL, robust = FALSE, control = nls.control(), 
-       weights = NULL, ...)
+       weights = NULL, verbose = TRUE, ...)
 }
 
 \arguments{
@@ -22,13 +22,14 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
   \item{cyc}{the column containing the cycle data. Defaults to 1.}
   \item{fluo}{the column containing the raw fluorescence data of the run.}
   \item{model}{the model to be used for the analysis. Defaults to l4.} 
-  \item{do.optim}{if \code{FALSE}, refinement of starting values by \code{nls.lm} or \code{optim} will be skipped.}
-  \item{opt.method}{one of the available nonlinear minimization methods. See 'Details'.}
-  \item{nls.method}{one of the available methods in \code{\link{nls}}. Default is \code{"port"}, which works quite well.}
+  \item{do.optim}{if \code{FALSE}, refinement of starting values by any of the optimization methods (see 'Details') will be skipped.}
+  \item{opt.method}{all or one of the available optimization methods. See 'Details'.}
+  \item{nls.method}{all or one of the available methods in \code{\link{nls}}. See 'Details'.}
   \item{start}{a vector of starting values that can be supplied externally.}
   \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}
   \item{control}{an optional list of control settings for \code{\link{nls}} or \code{qpcR:::rnls}.}  
   \item{weights}{a vector with same length as \code{data} containing the weights for the nonlinear fit.} 
+  \item{verbose}{logical. If \code{TRUE}, fitting and convergence results will be displayed in the console.}
   \item{...}{other parameters to be passed to \code{optim}, \code{genoud} or \code{nls}.}     
 }
 
@@ -37,14 +38,17 @@ The fitting procedure works as follows (hopefully ensuring maximum safeness agai
 
 1) Approximate starting values are acquired from \code{model$ssfct}.\cr
 2) Starting values are refined by any of the methods available in \code{optim}, the derivative-free quadratic minimization \code{newuoa} from package 'minqa' or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
+ The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", "minqa" and "SANN".
+ If any of the methods successfully converged, the remaining are skipped and the refined starting values transferred to \code{\link{nls}}.  
  The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to
  each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting 
- values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default.\cr 
-3) One of the possible methods from \code{\link{nls}} is then applied with the starting values obtained from 2).    
+ values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default first method.\cr 
+3) The refined starting values from 2) are fitted with \code{\link{nls}} using the order "port", "default" (Gauss-Newton) and "plinear".
+ Again, if any of the methods converged, the remaining are skipped.    
 
 This function is to be used at the single run level. Otherwise use \code{\link{pcrbatch}} or \code{\link{modlist}}.
 
-The output from the optim methods is checked by ensuring all eigenvalues from the hessian are positive, otherwise a notice will occur.  
+The output from the optim methods is checked by ensuring all eigenvalues from the hessian are positive, otherwise a notice will occur and the next method in queue is used.  
 
 If \code{robust = TRUE}, robust nonlinear fitting will be used. To do this, the internal function \code{qpcR:::rnls} is called
  which is a modification of the \code{nlrob} function of the 'robustbase' package. Modifications were done such that all available generic functions
@@ -76,7 +80,11 @@ K. Levenberg.\cr
 
 An Algorithm for Least-Squares Estimation of Nonlinear Parameters.\cr
 D. Marquardt.\cr
-\emph{SIAM J Appl Math} (19639), \bold{11}: 431-441.
+\emph{SIAM J Appl Math} (1963), \bold{11}: 431-441.\cr
+
+Developments of NEWUOA for minimization without derivatives.\cr
+M. J. D. Powell.\cr
+\emph{IMA Journal of Numerical Analysis} (2008), \bold{28}: 649-664. 
 }
 
 \examples{

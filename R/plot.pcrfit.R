@@ -18,9 +18,12 @@ parSD = list(),
   errbar <- match.arg(errbar)
   which <- match.arg(which)    
   if (class(object) != "modlist") modList <- list(object) else modList <- object      
-  minVal <- min(sapply(modList, function(x) x$DATA[, 2]), na.rm = TRUE)   
-  maxVal <- max(sapply(modList, function(x) x$DATA[, 2]), na.rm = TRUE)
-  CYC <- unique(matrix(sapply(modList, function(x) x$DATA[, 1]), ncol = 1))  
+  cycList <- lapply(modList, function(x) x$DATA[, 1])  
+  fluoList <- lapply(modList, function(x) x$DATA[, 2])
+  minVal <- min(sapply(fluoList, function(x) min(x, na.rm = TRUE)), na.rm = TRUE)   
+  maxVal <- max(sapply(fluoList, function(x) max(x, na.rm = TRUE)), na.rm = TRUE)   
+  CYC <- unique(matrix(do.call(cbind.na, cycList), ncol = 1))
+  CYC <- CYC[!is.na(CYC)]
   LEN <- length(modList)
   NAMES <- sapply(modList, function(x) x$names)     
   
@@ -54,17 +57,16 @@ parSD = list(),
     DATA <- modList[[i]]$DATA
     CC <- complete.cases(DATA[, 2])
     DATA <- DATA[CC, ] 
-    FITTED <- fitted(modList[[i]])[CC]  
-    if (is.null(FITTED)) fitted <- FALSE    
+    FITTED <- fitted(modList[[i]])[CC]     
          
     if (which == "3D") {
       do.call(points3d, modifyList(list(x = DATA[, 1], y = i, z = DATA[, 2], color = colvec[i]), par3D))
-      if (fitted) do.call(lines3d, modifyList(list(x = DATA[CYC, 1], y = i, z = FITTED[CYC], color = colvec[i]), par3D))      
+      if (!is.null(FITTED) && fitted) do.call(lines3d, modifyList(list(x = DATA[CYC, 1], y = i, z = FITTED[CYC], color = colvec[i]), par3D))      
     }
     
     if (which == "all") {
       do.call(points, modifyList(list(DATA[, 1], DATA[, 2], col = colvec[i]), par2D))
-      if (fitted) do.call(lines, modifyList(list(DATA[CYC, 1], FITTED[CYC], col = colvec[i]), par2D)) 
+      if (!is.null(FITTED) && fitted) do.call(lines, modifyList(list(DATA[CYC, 1], FITTED[CYC], col = colvec[i]), par2D)) 
     } 
     
     if (which == "single") {
@@ -74,7 +76,7 @@ parSD = list(),
           else colMain <- "black"
       do.call(plot, modifyList(list(DATA[, 1], DATA[, 2], main = NAME, cex.main = 0.7, col.main = colMain, type = "p", 
                  xlab = FALSE, ylab = FALSE, xaxt = "n", yaxt = "n", col = colvec[i]), par2D))
-      if (fitted) do.call(lines, modifyList(list(DATA[CYC, 1], FITTED[CYC], col = colvec[i]), par2D))      
+      if (!is.null(FITTED) && fitted) do.call(lines, modifyList(list(DATA[CYC, 1], FITTED[CYC], col = colvec[i]), par2D))      
     } 
     
     if (confband != "none") {      

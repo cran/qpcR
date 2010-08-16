@@ -1,3 +1,10 @@
+qpcR 1.3 - 2 (07-09-2010) 
+
+    *Fixed a bug in pcrfit when NA's are present in the fluorescence values. The new version can now handle datasets with unequal number of fluorescence values (i.e. two qPCR runs with 40 and 45 cycles).
+    *In order to handle unequal length data, I have implemented the functions cbind.na, rbind.na and data.frame.na, which can create and bind matrices from unequal length vectors. Instead of the R generic functions cbind, rbind and     data.frame which replicate the vector values to length or give a stop, these three new functions fill to maximum     occuring length with NA's before calling the generics. Actually, I think these are quite useful outside of     qPCR analysis...
+    *Added function baseline which, if a six-parameter model of type l6 or b6 was used, subtracts the shift (parameter c) and baseline slope (parameter k) value from the original data and also optionally refits the baselined data with a new model. This is experimental...
+    *Added function qpcR.news() which displays the latest changes (the same as written here).
+
 qpcR 1.3 - 1 (19-08-2010) 
 
     *Fast update! Added 'minqa' (minimum quadratic approximation) as a new option for pcrfit. This is essentially a derivative free optimization method that might succeed in fitting curves where other methods fail...

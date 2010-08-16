@@ -1,6 +1,6 @@
 PRESS <- function(object, verbose = TRUE)
 {
-  fetchDATA <- fetchData(object)
+  fetchDATA <- qpcR:::fetchData(object)
   DATA <- fetchDATA$data
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
@@ -8,9 +8,10 @@ PRESS <- function(object, verbose = TRUE)
   PRESS.res <- NULL
  
   for (i in 1:nrow(DATA)) {
-    if (verbose) counter(i)  
-    newDATA <- DATA[-i, ]      
-    newMOD <- update(object, data = newDATA)          
+    if (verbose) qpcR:::counter(i)  
+    newDATA <- DATA[-i, ]    
+    if (class(object) == "pcrfit") newMOD <- update(object, data = newDATA, verbose = FALSE) 
+    else newMOD <- update(object, data = newDATA)         
     newPRED <- as.data.frame(DATA[i, PRED.pos])
     colnames(newPRED) <- PRED.name
     y.hat <- as.numeric(predict(newMOD, newdata = newPRED))

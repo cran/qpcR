@@ -4,12 +4,13 @@ cyc = 1,
 fluo, 
 model = l4, 
 do.optim = TRUE,
-opt.method = "LM", 
-nls.method = "port", 
+opt.method = "all", 
+nls.method = "all", 
 start = NULL,
 robust = FALSE,
 control = nls.control(),
 weights = NULL,
+verbose = TRUE,
 ...)
 {            
   require(minpack.lm, quietly = TRUE) 
@@ -18,10 +19,10 @@ weights = NULL,
 
   Cycles <- data[, cyc]
   Fluo <- data[, fluo]
-  DATA <- as.data.frame(cbind(Cycles, Fluo))
-  compl <- complete.cases(Fluo)
-  Cycles <- Cycles[compl]
-  Fluo <- Fluo[compl]
+  DATA <- as.data.frame(cbind(Cycles, Fluo))  
+  DATA <- DATA[complete.cases(DATA), ]
+  Cycles <- DATA[, 1]
+  Fluo <- DATA[, 2] 
 
   if (is.null(start)) ssVal <- model$ssFct(Cycles, Fluo)
    else ssVal <- start
@@ -44,11 +45,12 @@ weights = NULL,
   }                         
   
   if (do.optim) {
+    if (opt.method == "all") opt.method <- c("LM", "BFGS", "Nelder-Mead", "minqa", "SANN") 
     for (i in opt.method) {
       if (!(i %in% c("LM", "minqa", "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN"))) 
         stop("Not an available 'opt.method'! Try one of 'LM', 'minqa', 'Nelder-Mead', 'BFGS', 'CG', 'L-BFGS-B', 'SANN'...")      
       if (i == "LM") {
-        OPTIM <- nls.lm(ssVal, FCT2, ...)
+        OPTIM <- try(nls.lm(ssVal, FCT2, ...), silent = TRUE)
       }
       if (i == "minqa") {
         OPTIM <- try(newuoa(ssVal, FCT, ...), silent = TRUE)  
@@ -56,24 +58,45 @@ weights = NULL,
       if (i %in% c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN")) {
         OPTIM <- try(optim(ssVal, FCT, method = i, hessian = TRUE, control = list(parscale = abs(ssVal), maxit = 50000), ...), silent = TRUE)
       }                           
-      if (inherits(OPTIM, "try-error")) stop("Try to use other 'opt.method'")
+      if (inherits(OPTIM, "try-error")) {
+        if (verbose) cat("Method '", i, "' did not converge. Trying next method...\n", sep = "")
+        if (inherits(OPTIM, "try-error") && i == "SANN") stop("Used all available optimization methods, but none converged...")
+        next
+      }
       ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
-      ssVal <- OPTIM$par       
-    }                 
-    if (!is.null(OPTIM$hessian)) EIGEN <- eigen(OPTIM$hessian)$values else EIGEN <- 0        
-    if (any(EIGEN < 0)) cat(" Negative hessian eigenvalues! Consider a different 'opt.method'...")
-  }
+      ssVal <- OPTIM$par
+      if (!is.null(OPTIM$hessian)) EIGEN <- eigen(OPTIM$hessian)$values else EIGEN <- 0        
+      if (any(EIGEN < 0)) {
+        if (verbose) cat("Negative hessian eigenvalues! Trying next method...\n")
+        next
+      }  
+      if (verbose) cat("Using method '", i, "' converged.\n", sep = "")
+      break      
+    }
+  }              
   
   names(ssVal) <- model$parnames    
-  control$maxiter <-  50000
-  control$warnOnly <-  TRUE
-
-  if (!robust) NLS <- try(nls(as.formula(model$expr), data = DATA, start = as.list(ssVal), model = TRUE,
-                          algorithm = nls.method, control = control, weights = weights, ...), silent = TRUE)
-   else NLS <- try(qpcR:::rnls(as.formula(model$expr), data = DATA, start = as.list(ssVal), control = control, weights = weights, ...), silent = TRUE)
-    
-  if (inherits(NLS, "try-error")) stop("There was a problem during 'nls'. Try other method...")                             
-    
+  CONTROL <- nls.control()
+  CONTROL$maxiter <-  50000
+  CONTROL$warnOnly <-  TRUE
+  CONTROL$tol <- 1e-5
+  
+  if (nls.method == "all") nls.method <- c("port", "default", "plinear") 
+  
+  for (j in nls.method) {
+    if (!robust) NLS <- try(nls(as.formula(model$expr), data = DATA, start = as.list(ssVal), model = TRUE,
+                          algorithm = j, control = CONTROL, weights = weights, ...), silent = TRUE)
+    else NLS <- try(qpcR:::rnls(as.formula(model$expr), data = DATA, start = as.list(ssVal), nls.method = j, 
+                    control = CONTROL, weights = weights, ...), silent = TRUE)
+    if (inherits(NLS, "try-error")) {
+      if (verbose) cat("Method '", j, "' did not converge. Trying next method...\n", sep = "")
+      if (inherits(NLS, "try-error") && j == "plinear") stop("Used all available 'nls' methods, but none converged...")
+      next
+    }
+    if (verbose) cat("Using method '", j, "' converged.\n", sep = "")
+    break
+  }  
+   
   ssValMat <- rbind(ssValMat, c(class(NLS), coef(NLS)))      
                 
   NLS$DATA <- DATA     
@@ -92,8 +115,3 @@ weights = NULL,
   class(NLS) <- c("pcrfit", "nls")
   return(NLS)      
 }
-
-
-
-
-

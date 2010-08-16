@@ -11,7 +11,7 @@ pcropt1 <- function (object, fact = 3, opt = FALSE, plot = TRUE, ...)
   init.sig <- NULL  
   
   START <- try(efficiency(object, plot = FALSE))
-  if (inherits(START, "try-error")) stop("Could not initialize optimization. Try different 'fact'!")
+  if (inherits(START, "try-error")) stop("Could not initialize optimization. Please try different 'fact'!")
   
   cpD1 <- round(START$cpD1)
   cpD2 <- round(START$cpD2)
@@ -24,7 +24,7 @@ pcropt1 <- function (object, fact = 3, opt = FALSE, plot = TRUE, ...)
     for (j in upperseq) {
       newData <- object$DATA[i:j, 1:2]
      
-      newCurve <- try(pcrfit(newData, 1, 2, model = object$MODEL), silent = TRUE)
+      newCurve <- try(pcrfit(newData, 1, 2, model = object$MODEL, verbose = FALSE, ...), silent = TRUE)
       if (inherits(newCurve, "try-error")) break      
       
       if (opt) newCurve <- mselect(newCurve, verbose = FALSE, ...)       

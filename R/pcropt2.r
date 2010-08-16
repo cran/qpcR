@@ -9,7 +9,7 @@ pcropt2 <- function(object, plot = TRUE, which.par = "all", quan = 0.1, delete =
 
   for (i in 1:nrow(DATA)) {
     newDATA <- DATA[-i, ]
-    newMODEL <- update(object, data = newDATA, fluo = 2)
+    newMODEL <- update(object, data = newDATA, fluo = 2, verbose = FALSE)
     modelLIST[[i]] <- newMODEL
     if (plot) plot(newMODEL)
   }

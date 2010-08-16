@@ -10,8 +10,9 @@ Very handy if following functions should be applied to different qPCR models, i.
 
 \usage{
 modlist(x, cyc = 1, fluo = NULL, model = l4, remove = FALSE, opt = FALSE, 
-        norm = FALSE, backsub = NULL, opt.method =  "LM", 
-        nls.method = "port", sig.level = 0.05, crit = "ftest", ...)
+        norm = FALSE, backsub = NULL, opt.method =  "all", 
+        nls.method = "all", sig.level = 0.05, crit = "ftest", 
+        verbose = TRUE, ...)
 }
 
 \arguments{
@@ -27,6 +28,7 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, remove = FALSE, opt = FALSE,
   \item{nls.method}{see \code{\link{pcrfit}}.}
   \item{sig.level}{see \code{\link{mselect}}.}
   \item{crit}{see \code{\link{mselect}}.}
+  \item{verbose}{logical. If \code{TRUE}, fitting and tagging results will be displayed in the console.}
   \item{...}{other parameters to be passed to \code{\link{pcrfit}} or \code{\link{mselect}}.}
  }
 

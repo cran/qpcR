@@ -7,10 +7,11 @@ remove = FALSE,
 opt = FALSE, 
 norm = FALSE,
 backsub = NULL, 
-opt.method =  "LM",
-nls.method = "port",
+opt.method =  "all",
+nls.method = "all",
 sig.level = 0.05, 
 crit = "ftest",
+verbose = TRUE,
 ...
 )
 {
@@ -47,33 +48,34 @@ crit = "ftest",
         
     DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)     
     flush.console()
-    cat("Making model for ", NAME, " (", model$name, ")", sep= "")                
-    fitObj <- try(pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, ...), silent = TRUE)
+    if (verbose) cat("Making model for ", NAME, " (", model$name, ")\n", sep= "")                
+    fitObj <- try(pcrfit(DATA, 1, 2, model, opt.method = opt.method, nls.method = nls.method, verbose = verbose, ...), silent = TRUE)
     
-    if (inherits(fitObj, "try-error")) {      
-      cat(" => gave a fitting error!", sep = "")  
+    if (inherits(fitObj, "try-error")) {  
+      fitObj <- list()     
+      if (verbose) cat(" => gave a fitting error!", sep = "")  
       if(remove) {
-        cat(" => Removing ", NAME, "...\n", sep = "")
+        if (verbose) cat(" => Removing ", NAME, "...\n\n", sep = "")
         next
       } 
-      cat(" => Tagging name of ", NAME, "...", sep = "")
+      if (verbose) cat(" => Tagging name of ", NAME, "...\n", sep = "")
       NAME <- paste("*", NAME, "*", sep = "")                
       fitObj$DATA <- DATA
-      class(fitObj) <- "pcrfit"       
+      class(fitObj) <- "pcrfit"      
     }
       
     if (opt) {
  	    fitObj2 <- try(mselect(fitObj, verbose = FALSE, sig.level = sig.level, crit = crit, ...), silent = TRUE)             
       if (inherits(fitObj2, "try-error")) {
         fitObj <- fitObj
-        cat(" => ", colnames(x[i]), " gave a model selection error!", sep = "")
+        if (verbose) cat(" => ", colnames(x[i]), " gave a model selection error!\n", sep = "")
       } else {
         fitObj <- fitObj2
         cat(" => ", fitObj$MODEL$name, sep = "")
       }
     }   
     
-    cat("\n")
+    if (verbose) cat("\n")
     
     fitObj$call2$model <- fitObj$MODEL
     fitObj$call2$opt.method <- opt.method

@@ -1,7 +1,7 @@
 rnls <- function(
 formula,
 data,
-start,
+start,    
 weights = NULL,
 na.action = na.fail,
 psi = psi.huber,
@@ -10,6 +10,7 @@ maxit = 20,
 acc = 1e-06,   
 trace = FALSE, 
 control = nls.control(),
+nls.method = "port", 
 ...)
 {
     mf <- match.call()    
@@ -64,7 +65,7 @@ control = nls.control(),
             if (!is.null(weights))
                 w <- w * weights
             data$w <- sqrt(w)
-            out <- nls(formula, data = data, start = start, algorithm = "port",
+            out <- nls(formula, data = data, start = start, algorithm = nls.method,
                 trace = trace, na.action = na.action, control = control)
             coef <- coefficients(out)
             start <- coef

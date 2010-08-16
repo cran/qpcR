@@ -47,9 +47,9 @@ statfun = function(y) mean(y, na.rm = TRUE),
     for (k in 1:length(fitmodel)) {
       cat(fitmodel[[k]]$name, "\n")         
       for (i in 2:ncol(fluoMatT)) {
-        FIT <- pcrfit(fluoMatT, 1, i, fitmodel[[k]], ...)          
+        FIT <- pcrfit(fluoMatT, 1, i, fitmodel[[k]], verbose = FALSE, ...)          
         j <- i - 1 
-        counter(j)        
+        qpcR:::counter(j)        
         if (plot) lines(cyc, fitted(FIT), col = colvec[k], ...)  
         coefMat <- cbind(coefMat, coef(FIT))
         gofMat <- cbind(gofMat, unlist(pcrGOF(FIT, error = error)))                     

@@ -12,7 +12,7 @@ verbose = TRUE,
   type <- match.arg(type)
   if (class(object) != "pcrfit") stop("Use only with objects of class 'pcrfit'!")   
     
-  fetchDATA <- fetchData(object)
+  fetchDATA <- qpcR:::fetchData(object)
   DATA <- fetchDATA$data
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
@@ -33,7 +33,7 @@ verbose = TRUE,
       newDATA <- newDATA[-sampleVec, ]      
     }                
   
-    newMODEL <- try(update(object, data = newDATA))      
+    newMODEL <- try(update(object, data = newDATA, verbose = FALSE))      
     
     if (inherits(newMODEL, "try-error")) {
       noconv <- noconv + 1
@@ -48,7 +48,7 @@ verbose = TRUE,
                          gof = pcrGOF(newMODEL)) 
     
     if (do.eff) effList[[i]] <- efficiency(newMODEL, plot = FALSE, ...)[c(1, 7:18)]     
-    if (verbose) counter(i)    
+    if (verbose) qpcR:::counter(i)    
   }
   cat("\n\n")
   if (verbose) cat("fitting converged in ", 100 - (noconv/B), "% of iterations.\n\n", sep = "")      

@@ -4,7 +4,7 @@ expcomp <- function(object, ...)
 	fnList <- lapply(fList, function(x) x$name)
   print("Fitting all sigmoidal models...")
   flush.console()
-	modList <- lapply(fList, function(x) pcrfit(object$DATA, 1, 2, x))   
+	modList <- lapply(fList, function(x) pcrfit(object$DATA, 1, 2, x, verbose = FALSE))   
 	
 	EXP <- expfit(object, plot = FALSE, ...)
 	expMod <- EXP$mod

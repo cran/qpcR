@@ -98,11 +98,13 @@ res <- calib(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES)
 res <- calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
 
 ## iterating the intercept with 50 steps
+par(ask = FALSE)
 res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter", 
               opt.step = c(50, 0)) 
 
 ## iterating the intercept/slope with 20 steps
 \dontrun{
+par(ask = FALSE)
 res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
               opt.step = c(20, 20)) 
 }
