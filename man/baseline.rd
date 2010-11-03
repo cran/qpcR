@@ -1,7 +1,7 @@
 \name{baseline}
 \alias{baseline}
 
-\title{Baselining and refitting qPCR data based on six-parameter sigmoidal models}
+\title{Baselining and refitting six-parameter sigmoidal models}
 
 \description{
 qPCR run(s) that were fit with either the \code{\link{l6}} or \code{\link{b6}} six-parameter models offer the possibility of baselining,

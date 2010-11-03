@@ -1,7 +1,7 @@
 \name{reps}
 \alias{reps}
 
-\title{qPCR dilution experiment with replicates (Roche Lightcycler)}
+\title{qPCR dilution experiments Set \#1 from the package author}
 
 \description{
 A dilution experiment with seven 10-fold dilutions of the cDNA, and four replicates for each dilution.

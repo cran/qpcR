@@ -3,7 +3,7 @@
 
 \encoding{latin1}
 
-\title{Batch calculation of qPCR efficiency and several other important qPCR parameters with different methods}
+\title{Batch calculation of qPCR efficiency and other qPCR parameters}
 
 \description{
 This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}}, and \code{\link{expfit}} on a dataframe containing many qPCR runs.

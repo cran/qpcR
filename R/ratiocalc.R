@@ -20,10 +20,8 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     which.cp <- match.arg(which.cp)
     type.eff <- match.arg(type.eff)   
     DATA <- data[, -1]     
-    cpDat <- ts()
-    effDat <- ts()      
-    cpNames <- NULL
-    effNames <- NULL
+    cpDat <- effDat <- ts()
+    cpNames <- effNames <- NULL
     PATTERN <- unique(group)
     
     if (all(regexpr("rs", group, perl = TRUE) == -1))
@@ -46,10 +44,7 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
       cpNames <- c(cpNames, paste("cp.", PATTERN[i], sep = ""))
       effNames <- c(effNames, paste("eff.", PATTERN[i], sep = ""))
     }      
-
-    effDat <- effDat
-    cpDat <- cpDat      
-        
+    
     cpDat <- cpDat[, -1]
     effDat <- effDat[, -1]                 
 

@@ -1,7 +1,7 @@
 \name{SOD}
 \alias{SOD}
 
-\title{(S)igmoidal (O)utlier (D)etection using first and second derivative maxima}
+\title{(S)igmoidal (O)utlier (D)etection using first/second derivative maxima}
 
 \description{
 Identifies and/or removes qPCR runs that lack sigmoidal structure (that is, failed to amplify).

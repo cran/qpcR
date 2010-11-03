@@ -50,7 +50,7 @@ verbose = TRUE,
       if (!(i %in% c("LM", "minqa", "Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN"))) 
         stop("Not an available 'opt.method'! Try one of 'LM', 'minqa', 'Nelder-Mead', 'BFGS', 'CG', 'L-BFGS-B', 'SANN'...")      
       if (i == "LM") {
-        OPTIM <- try(nls.lm(ssVal, FCT2, ...), silent = TRUE)
+        OPTIM <- try(nls.lm(ssVal, FCT2, control = nls.lm.control(maxiter = 1000), ...), silent = TRUE)
       }
       if (i == "minqa") {
         OPTIM <- try(newuoa(ssVal, FCT, ...), silent = TRUE)  

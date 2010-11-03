@@ -75,7 +75,7 @@ verbose = FALSE,
         colnames(datSIM) <- colnames(DATA)
         resSIM <- apply(datSIM, 1, function(x) eval(EXPR, envir = as.list(x)))
         confSIM <- quantile(resSIM, c(alpha/2, 1 - (alpha/2)), na.rm = TRUE)  
-        if(do.sim && length(unique(resSIM)) == 1) print("Monte Carlo simulation gave unique repetitive error value! Are all derivations constants?")   
+        if(do.sim && length(unique(resSIM)) == 1) print("Monte Carlo simulation gave unique repetitive error value! Are all derivatives constants?")   
         checkSIM <- cbind(datSIM, resSIM)
       } else {
         resSIM <- datSIM <- confSIM <- checkSIM <- NA
@@ -116,7 +116,7 @@ verbose = FALSE,
         perm <- evalPERMsamp     
         LOGIC <- lapply(perm.crit, function(x) eval(parse(text = x)))
         names(LOGIC) <- perm.crit        
-        pvalPERM <- lapply(LOGIC, function(x) sum(x == TRUE, na.rm = TRUE)/length(x[!is.na(x)]))
+        pvalPERM <- lapply(LOGIC, function(x) sum(x == TRUE, na.rm = TRUE)/(length(x[!is.na(x)]) + 1))
         names(pvalPERM) <- perm.crit            
         datLOGIC <- as.data.frame(LOGIC)       
         checkPERM <- cbind(datPERM, evalPERMdata, datPERM2, evalPERMsamp, datLOGIC)                                              

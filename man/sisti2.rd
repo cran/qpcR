@@ -1,7 +1,7 @@
 \name{sisti2}
 \alias{sisti2}
 
-\title{A qPCR dilution experiment with tannic acid as inhibitor (Lightcycler 480) from Sisti et al}
+\title{qPCR dilution experiments Set \#2 from Sisti et al. (2010)}
 
 \description{
 A high quality 2-fold inhibitor dilution experiment with 9 dilution steps of tannic acid and 6 replicates each.

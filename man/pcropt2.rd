@@ -1,7 +1,7 @@
 \name{pcropt2}
 \alias{pcropt2}
 
-\title{Elimination of qPCR cycles with low (high) impact on fitted parameters}
+\title{Elimination of qPCR cycles with low/high impact on fitted parameters}
 
 \description{
 The qPCR curve containing \emph{n} cycles is refitted \emph{n-1} times, each time leaving out one cycle.

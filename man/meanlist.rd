@@ -3,7 +3,7 @@
 
 \encoding{latin1}
 
-\title{Amalgamation of single data models to a model containing the averaged model}
+\title{Amalgamation of single data models into an averaged model}
 
 \description{
 Starting from a 'modlist' containing qPCR models from single data, \code{meanlist} amalgamates

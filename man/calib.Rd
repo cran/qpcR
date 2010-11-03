@@ -1,7 +1,7 @@
 \name{calib}
 \alias{calib}
 
-\title{Calculation of qPCR efficiency by dilution curve analysis with an optional iterative search of the optimal threshold border}
+\title{Calculation of qPCR efficiency by dilution curve analysis}
 
 \description{
 This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the 

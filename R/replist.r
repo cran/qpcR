@@ -32,7 +32,7 @@ replist <- function(object, group = NULL, opt = FALSE, verbose = TRUE, ...)
   
   for (i in 1:length(meanDATA)) {           
     flush.console()
-    if (verbose) cat("Making model for replicates:", nameVec[[i]]) 
+    if (verbose) cat("Making model for replicates:", nameVec[[i]], "\n") 
     meanMod <- try(pcrfit(meanDATA[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL), silent = TRUE)
     if (inherits(meanMod, "try-error")) stop("There was an error for the starting values!")
     fitObj <- try(pcrfit(repMod[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL, do.optim = FALSE, start = coef(meanMod)), silent = TRUE)

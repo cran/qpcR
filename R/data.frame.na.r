@@ -1,5 +1,5 @@
 data.frame.na <- function (..., row.names = NULL, check.rows = FALSE, check.names = TRUE,
-    stringsAsFactors = default.stringsAsFactors())
+    stringsAsFactors = FALSE)
 {
     data.row.names <- if (check.rows && is.null(row.names))
         function(current, new, i) {

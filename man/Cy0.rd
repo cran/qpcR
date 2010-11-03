@@ -1,7 +1,7 @@
 \name{Cy0}
 \alias{Cy0}
 
-\title{Cy0 alternative to crossing points/threshold cycles as in Guescini et al}
+\title{Cy0 alternative to threshold cycles as in Guescini et al. (2008)}
 
 \description{
 An alternative to the classical crossing point/threshold cycle estimation as described in Guescini et al.

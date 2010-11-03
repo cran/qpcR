@@ -3,7 +3,7 @@
 
 \encoding{latin1}
 
-\title{Amalgamation of single data models to a model containing replicates}
+\title{Amalgamation of single data models into a model containing replicates}
 
 \description{
 Starting from a 'modlist' containing qPCR models from single data, \code{replist} amalgamates

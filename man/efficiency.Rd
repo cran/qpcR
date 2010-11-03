@@ -1,7 +1,7 @@
 \name{efficiency}
 \alias{efficiency}
 
-\title{Calculation of qPCR efficiency and several other important qPCR parameters}
+\title{Calculation of qPCR efficiency and other important qPCR parameters}
 
 \description{
 This function calculates the PCR efficiency of a model of class 'pcrfit' and several other 
@@ -128,7 +128,11 @@ efficiency(m2, thresh = 1)
 ## using the first 30 cycles and a template amount
 ## (optical calibration)
 m3 <-  pcrfit(reps[1:30, ], 1, 2, l5)
-efficiency(m3, amount = 1E3)    
+efficiency(m3, amount = 1E3)   
+
+## using 'maxRatio' method from Shain et al. (2008)
+## baseshifting essential!
+efficiency(m2, type = "maxRatio", baseshift = 0.2)   
 }
 
 \keyword{models}

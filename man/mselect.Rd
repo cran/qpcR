@@ -3,7 +3,7 @@
 
 \encoding{latin1}
 
-\title{Selection of the best model by nested F-tests/likelihood ratios/Akaike weights/reduced chi-square}
+\title{Sigmoidal model selection by different criteria}
 
 \description{
 Model selection by comparison of different models using\cr

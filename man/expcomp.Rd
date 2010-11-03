@@ -1,7 +1,7 @@
 \name{expcomp}
 \alias{expcomp}
 
-\title{Comparison of all available sigmodal models by RMSE within the exponential region}
+\title{Comparison of all sigmodal models within the exponential region}
 
 \description{
 The exponential region of the qPCR data is identified by the studentized outlier method, as in \link{expfit}.

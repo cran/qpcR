@@ -1,7 +1,7 @@
 \name{midpoint}
 \alias{midpoint}
 
-\title{Calculation of the exponential region midpoint according to Peirson et al}
+\title{Calculation of the 'midpoint' region according to Peirson et al. (2003)}
 
 \description{
 Calculates the exponential region midpoint using the algorithm described under 'References'.

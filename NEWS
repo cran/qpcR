@@ -1,3 +1,15 @@
+qpcR 1.3 - 3 (03-11-2010) 
+
+    *Added dataset 'boggy' from Boggy et al. (2010). 
+    *Implemented a function for the import of data obtained from ABI instruments (qpcR:::ABImport()). This is still experimental, hence no documentation.
+    *nls.lm has now increase default iterations (1000). This might solve some convergence problems.
+    *mselect has been changed to include the l6 and b6 six-parameter models.
+    *data.frame.na has now default 'stringsAsFactors = FALSE' to not automatically convert character vectors to factors.
+    *ratiocalc has been altered to a less verbose output.
+    *efficiency has been simplified in its code.
+    *Added a function for melting curve analysis (meltcurve). It can automatically analyze melting fluorescence data from a dataframe containing temperature and corresponding fluorescence values. The melting curves are smoothed, first derivatives are calculated and peaks automatically detected. A graphical output is given as a plot matrix of the single runs and the Tm values of the products are returned as a list.
+
+
 qpcR 1.3 - 2 (07-09-2010) 
 
     *Fixed a bug in pcrfit when NA's are present in the fluorescence values. The new version can now handle datasets with unequal number of fluorescence values (i.e. two qPCR runs with 40 and 45 cycles).

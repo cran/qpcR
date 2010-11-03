@@ -1,7 +1,7 @@
 \name{AICc}
 \alias{AICc}
 
-\title{Akaike's second-order corrected Information Criterion for small sample sizes}
+\title{Akaike's second-order corrected Information Criterion}
 
 \description{
  Calculates the second-order corrected Akaike Information Criterion for objects of class \code{drc}, \code{lm}, \code{glm}, \code{nls}

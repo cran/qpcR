@@ -1,7 +1,7 @@
 \name{pcrimport}
 \alias{pcrimport}
 
-\title{Simple qPCR data import function (i.e. from text files or clipboard).}
+\title{Simple qPCR data import function (i.e. from text files or clipboard)}
 
 \description{
 Simple wrapper function to easily import qPCR data from the clipboard (default) or tab-delimited text files.

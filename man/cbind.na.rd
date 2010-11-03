@@ -3,7 +3,7 @@
 \alias{rbind.na}
 \alias{data.frame.na}  
 
-\title{Create data frames from objects of unequal size or combine R objects of unequal size by Rows or Columns}  
+\title{Create or combine data of unequal size by Rows or Columns}  
 
 \description{
 For \code{data.frame.na}, a data frame can be created from objects of unequal length (thereby filling to maximum occuring length with \code{NA}'s).
@@ -15,7 +15,7 @@ For \code{cbind} and \code{rbind}, take a sequence of vector, matrix or data fra
 cbind.na(..., deparse.level = 1)
 rbind.na(..., deparse.level = 1)
 data.frame.na(..., row.names = NULL, check.rows = FALSE, check.names = TRUE,
-              stringsAsFactors = default.stringsAsFactors())
+              stringsAsFactors = FALSE)
 }
 
 \arguments{

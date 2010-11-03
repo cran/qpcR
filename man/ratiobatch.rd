@@ -1,7 +1,7 @@
 \name{ratiobatch}
 \alias{ratiobatch}
 
-\title{Calculation of ratios/propagated errors/confidence intervals/permutation p-values from qPCR runs with/without reference data in a batch format for multiple genes/samples}
+\title{Calculation of ratios in a batch format for multiple genes/samples}
 
 \description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between samples, 
  using normalization against one or more reference gene(s), if supplied. The input can be single qPCR data or (more likely) data containing replicates. 

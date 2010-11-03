@@ -31,12 +31,7 @@ amount = NULL,
     cycmaxD1 <- SEQ[maxD1]      
     cycmaxD2 <- SEQ[maxD2]  
     
-    if (!is.null(thresh)) type <- "cpD2" 
-    
-    if (type == "maxRatio") {
-      type <- "cpD2"
-      MR <- TRUE
-    } else MR <- FALSE
+    if (!is.null(thresh)) type <- "cpD2"        
     
     ### cpD2
     if (type == "cpD2" || type == "CQ") {
@@ -105,7 +100,7 @@ amount = NULL,
     } else cycCQ <- NA
     
     ### maxRatio method as in Shain et al. (2008)
-    if (MR) {
+    if (type == "maxRatio") {
       EFFobj <- eff(object, type = "spline", ...)
       SEQ <- EFFobj$eff.x
       EFFseq <- EFFobj$eff.y
@@ -123,37 +118,27 @@ amount = NULL,
     if (plot) {
         par(mar = c(5, 4, 4, 4))
         plot(object, lwd = 1.5, main = NA, cex.main = 0.9, ...)
-        aT <- axTicks(side = 4)
-        cF <- max(aT/1)
-        axis(side = 4, at = aT, labels = round(aT/cF + 1, 2), 
-            col = 4, col.axis = 4, las = 1, hadj = 0.3)
-        lines(SEQ, (EFFseq * cF) - cF, col = 4, lwd = 1.5)
-        points(CYC, (maxEFF * cF) - cF, col = 4, pch = 16)        
-        points(CYC, fluo, col = 1, pch = 16)         
-        mtext(side = 4, "Efficiency", line = 2, col = 4)         
-        lines(SEQ, D1seq, col = 2, lwd = 1.5)           
-        lines(SEQ, D2seq, col = 3, lwd = 1.5)
-        abline(h = (maxEFF * cF) - cF, lwd = 1.5, col = 4)
-        abline(v = cycmaxD1, lwd = 1.5, col = 2)
-        abline(h = fluo, col = 1)
+        points(CYC, fluo, col = 1, pch = 16)    
+        lines(SEQ, D1seq, col = 2, lwd = 1.5) 
+        lines(SEQ, D2seq, col = 3, lwd = 1.5)  
+        abline(h = fluo, col = 1) 
         axis(side = 2, at = fluo, labels = round(fluo, 3), col = 1, 
-            col.axis = 1, cex.axis = 0.7, las = 1)
-            
-        if (type == "maxE") 
-            abline(v = cycmaxEFF, lwd = 1.5, col = 4)
-            
-        if (type == "expR") 
-            abline(v = cycEXP, lwd = 1.5, col = 6)
-            
-        if (type == "Cy0") 
-            abline(v = Cy0reg, lwd = 1.5, col = "darkviolet") 
-
-        if (type == "CQ")
-            abline(v = cycCQ, lwd = 1.5, col = "darkviolet")
-            
-        if (MR)  
-            abline(v = cycMR, lwd = 1.5, col = "darkviolet")
-                
+             col.axis = 1, cex.axis = 0.7, las = 1)      
+        par(new = TRUE)
+        plot(SEQ, EFFseq, axes = FALSE, xlab = "", ylab = "", type = "l", col = 4, lwd = 1.5)
+        axis(side = 4, col = 4, col.axis = 4, col.ticks = 4)            
+        points(CYC, maxEFF, col = 4, pch = 16)      
+        mtext(side = 4, "Efficiency", line = 2.5, col = 4)         
+        abline(h = maxEFF, lwd = 1.5, col = 4)
+        abline(v = cycmaxD1, lwd = 1.5, col = 2)
+                    
+        switch(type, maxE = abline(v = cycmaxEFF, lwd = 1.5, col = 4),
+                     expR = abline(v = cycEXP, lwd = 1.5, col = 6),           
+                     Cy0 = abline(v = Cy0reg, lwd = 1.5, col = "darkviolet"),
+                     CQ = abline(v = cycCQ, lwd = 1.5, col = "darkviolet"),
+                     maxRatio = abline(v = cycMR, lwd = 1.5, col = "darkviolet")
+        )
+                        
         if (is.numeric(type)) 
             abline(v = type, lwd = 1.5, col = 6)
             
@@ -167,20 +152,12 @@ amount = NULL,
         mtext(paste("cpD2:", round(cycmaxD2, 2)), line = 0, col = 3, adj = 0.65, cex = 0.9)
         mtext(paste("cpD1:", round(cycmaxD1, 2)), line = 0, col = 2, adj = 0.35, cex = 0.9)
         
-        if (type == "maxE") 
-            mtext(paste("cpE:", round(cycmaxEFF, 2)), line = 1, col = 4, adj = 0.65, cex = 0.9)
-            
-        if (type == "expR") 
-            mtext(paste("cpR:", round(cycEXP, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)
-            
-        if (type == "Cy0") 
-            mtext(paste("Cy0:", round(Cy0reg, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9) 
-
-        if (type == "CQ")
-            mtext(paste("cpCQ:", round(cycCQ, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
-            
-        if (MR)
-            mtext(paste("cpMR:", round(cycMR, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
+        switch(type, maxE = mtext(paste("cpE:", round(cycmaxEFF, 2)), line = 1, col = 4, adj = 0.65, cex = 0.9),            
+                     expR = mtext(paste("cpR:", round(cycEXP, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9),
+                     Cy0 = mtext(paste("Cy0:", round(Cy0reg, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9),
+                     CQ = mtext(paste("cpCQ:", round(cycCQ, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9),
+                     maxRatio = mtext(paste("cpMR:", round(cycMR, 2)), line = 1, col = "darkviolet", adj = 0.65, cex = 0.9)
+        )
                    
         if (is.numeric(type)) 
             mtext(paste("ct:", round(type, 2)), line = 1, col = 6, adj = 0.65, cex = 0.9)
@@ -196,6 +173,9 @@ amount = NULL,
             col = 1, adj = 0.65, cex = 0.9)
         mtext(paste("Model:", object$MODEL$name), line = 3, col = 1, adj = 0.5, 
             cex = 0.9)
+        
+        par(new = TRUE)
+        plot(object, type = "n", axes = FALSE, main = "", xlab = "", ylab = "")
     }
     
     return(list(eff = maxEFF, resVar = round(resVar(object), 8), AICc = AICc(object), AIC = AIC(object), 

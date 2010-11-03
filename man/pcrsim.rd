@@ -1,7 +1,7 @@
 \name{pcrsim}
 \alias{pcrsim}
 
-\title{Simulation of sigmoidal qPCR data with goodness-of-fit analysis for different models}
+\title{Simulation of sigmoidal qPCR data with goodness-of-fit analysis}
 
 \description{Simulated sigmoidal qPCR curves are generated from an initial model to which some
  user-defined noise is added. One or more models can then be fit to this random data and goodness-of-fit (GOF)

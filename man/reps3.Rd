@@ -1,7 +1,7 @@
 \name{reps3}
 \alias{reps3}
 
-\title{A qPCR dilution experiment with replicates (Stratagene MXPro3000P)}
+\title{qPCR dilution experiments Set \#3 from the package author}
 
 \description{
 A high quality dilution experiment with six 4-fold dilutions of the cDNA, and three replicates for each dilution.

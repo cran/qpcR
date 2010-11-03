@@ -1,7 +1,7 @@
 \name{guescini1}
 \alias{guescini1}
 
-\title{A qPCR dilution experiment with replicates (Lightcycler 480) from Guescini et al}
+\title{qPCR dilution experiments Set \#1 from Guescini et al. (2008)}
 
 \description{
 A high quality 10-fold dilution experiment with 7 dilution steps and 12 replicates each.

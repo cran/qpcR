@@ -5,7 +5,7 @@
 \alias{batsch4}
 \alias{batsch5}
 
-\title{qPCR dilution experiments with replicates (Lightcycler 1.0) from Batsch et al}
+\title{qPCR dilution experiments from Batsch et al. (2008)}
 
 \description{
 High quality 4-fold dilution experiments with 5 dilution steps and 3 replicates each.

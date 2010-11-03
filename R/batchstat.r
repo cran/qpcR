@@ -7,8 +7,8 @@ batchstat <- function(..., group = NULL,  do = c("cbind", "stat"), statfun = mea
     
   if (do == "cbind") {
     DATAout <- NULL
-    allNames <- unique(matrix(sapply(DATA, function(x) x[, 1]), ncol = 1))
-    DATAout$Vars <- allNames
+    aN <- unique(matrix(sapply(DATA, function(x) x[, 1]), ncol = 1))
+    DATAout$Vars <- aN
     for (i in 1:length(DATA)) {
       DATAout <- merge(DATAout, DATA[[i]], by.x = "Vars", by.y = "Vars")
     }   
@@ -20,10 +20,10 @@ batchstat <- function(..., group = NULL,  do = c("cbind", "stat"), statfun = mea
     DATAout <- list()
 
     for (i in 1:length(DATA)) {
-      anno <- DATA[[i]][ ,1]
-      DATAtemp <- DATA[[i]][, -1]
+      anno <- DATA[[i]][ ,1, drop = FALSE]
+      DATAtemp <- DATA[[i]][, -1, drop = FALSE]
       STAT <- apply(DATAtemp, 1, function(x) tapply(as.numeric(x), group, function(y) statfun(y, na.rm = TRUE)))
-      if (nlevels(group) == 1) STAT <- t(t(STAT)) else STAT <- t(STAT)
+      STAT <- t(STAT)
       STAT <- cbind(anno, STAT)
       colnames(STAT) <- c("Vars", paste("group", 1:nlevels(group), sep = ""))
       DATAout[[i]] <- STAT

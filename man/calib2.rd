@@ -1,7 +1,7 @@
 \name{calib2}
 \alias{calib2}
 
-\title{Calculation of qPCR efficiency by dilution curve analysis and bootstrapping of dilution curve replicates}
+\title{Calculation of qPCR efficiency by dilution curve bootstrapping}
 
 \description{
 This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the 

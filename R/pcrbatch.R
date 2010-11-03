@@ -39,9 +39,9 @@ plot = TRUE,
     if (ave == "mean") centre <- function(x) mean(x, na.rm = TRUE)
     if (ave == "median") centre <- function(x) median(x, na.rm = TRUE)
     Cycles <- x[, 1]
-    DATA <- x[, cols]     
-    DATA2 <- apply(DATA, 1, function(x) tapply(x, group, function(x) centre(x)))
-    if (nlevels(group) > 1) DATA2 <- t(DATA2)
+    DATA <- x[, cols, drop = FALSE]     
+    DATA2 <- apply(DATA, 1, function(x) tapply(x, group, function(x) centre(x)))     
+    DATA2 <- t(DATA2)
     DATA2 <- as.data.frame(DATA2)
     namevec <- paste("group_", 1:length(levels(group)), sep = "")
     colnames(DATA2) <- namevec

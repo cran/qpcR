@@ -1,7 +1,7 @@
 \name{S27}
 \alias{S27}
 
-\title{PCR data from 15 different testicular biopsies (Roche Lightcycler)}
+\title{qPCR data of the S27a transcript in 15 testicular biopsies}
 
 \description{
 The data was obtained from cDNA reverse transcribed from the isolated RNA of 15 different testicular biopsies.

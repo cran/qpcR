@@ -1,7 +1,7 @@
 \name{KOD}
 \alias{KOD}
 
-\title{(K)inetic (O)utlier (D)etection according to Bar et al. (2003) or using Partitioning Around Medoids}
+\title{(K)inetic (O)utlier (D)etection according to Bar et al. (2003)}
 
 \description{
 Identifies and/or removes qPCR runs whose efficiency differs significantly from all other runs of the same group.

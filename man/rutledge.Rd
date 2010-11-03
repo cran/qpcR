@@ -1,7 +1,7 @@
 \name{rutledge}
 \alias{rutledge}
 
-\title{qPCR dilution experiment with replicates and different runs from Rutledge et al (Biorad Opticon)}
+\title{qPCR dilution experiments from Rutledge et al. (2004)}
 
 \description{
 A dilution experiment of a 102 bp amplicon with six 10-fold dilutions, with four replicates each in five independent runs.

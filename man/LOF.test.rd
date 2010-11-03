@@ -1,7 +1,7 @@
 \name{LOF.test}
 \alias{LOF.test}
 
-\title{A formal Lack-Of-Fit test of a nonlinear model against a one-way ANOVA model}
+\title{Formal Lack-Of-Fit test of a nonlinear model against a one-way ANOVA model}
 
 \description{
 Tests the nonlinear model against a more general one-way ANOVA model and from a likelihood ratio test.

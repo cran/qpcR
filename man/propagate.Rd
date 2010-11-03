@@ -2,7 +2,7 @@
 \alias{propagate}
 \encoding{latin1}
 
-\title{General error analysis function using Monte-Carlo simulation/permutation/(first-order) error propagation}
+\title{General error analysis function using different methods}
 
 \description{
 A general function for the calculation of errors. Can be used for qPCR data, but any data that should be subjected to error analysis will do.

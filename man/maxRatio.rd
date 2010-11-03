@@ -50,7 +50,8 @@ This function has been approved by the original author (Eric Shain).
 
 \references{
 A new method for robust quantitative and qualitative analysis of real-time PCR.\cr
-Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
+Shain EB & Clemens JM.\cr
+\emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
 }
 
 \examples{

@@ -1,7 +1,7 @@
 \name{ratiocalc}
 \alias{ratiocalc}
 
-\title{Calculation of ratios/propagated errors/confidence intervals/permutation p-values from qPCR runs with/without reference data}
+\title{Calculation of ratios from qPCR runs with/without reference data}
 
 \description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between two samples, 
  using normalization against a reference gene, if supplied. The input can be single qPCR data or (more likely) data containing replicates. 
@@ -81,8 +81,9 @@ Propagation:  From the propagated error, assuming normality.
 
 \value{
 A list with the following components:\cr
-The complete output from \code{\link{propagate}}, attached with the data that was transferred to \code{\link{propagate}} for
- the error analysis as item \code{data}. 
+\code{data}: the data that was transferred to \code{\link{propagate}} for  the error analysis.\cr
+\code{data.Sim, data.Perm, derivs, covMat}: The complete output from \code{\link{propagate}}.\cr
+\code{summary}: a summary of the results obtained from the Monte Carlo simulation, permutation and error propagation. 
 }
 
 \author{
