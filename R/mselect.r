@@ -13,74 +13,84 @@ do.all = FALSE,
   else if (any(class(object) == "pcrfit")) object <- object 
   else stop("'object' must be either of class 'pcrfit' or 'replist'!")
   
-  mtype <- object$MODEL$name
+  mtype <- object$MODEL$name     
 
   if (is.null(fctList)) {
-    if (mtype %in% c("b3", "b4", "b5", "b6")) fctList <- list(b3, b4, b5, b6)
-    if (mtype %in% c("l3", "l4", "l5", "l6")) fctList <- list(l3, l4, l5, l6)
-    if (mtype == "w4" || mtype == "w3") fctList <- list(w4, w3)
-  }
+    if (mtype %in% c("b3", "b4", "b5", "b6", "b7")) fctLIST <- list(b3, b4, b5, b6, b7)
+    if (mtype %in% c("l3", "l4", "l5", "l6", "l6")) fctLIST <- list(l3, l4, l5, l6, l7)
+    if (mtype == "mak2" || mtype == "mak3") fctLIST <- list(mak2, mak3)
+  } else fctLIST <- fctList
   
   if (do.all) {
-      fctList <- list(l6, l5, l4, l3, b6, b5, b4, b3, w4, w3, baro5)
+      fctLIST <- list(l3, l4, l5, l6, l7, b3, b4, b5, b6, b7)
       crit <- "weights"
   }
   
-  retMat <- matrix(nrow = length(fctList), ncol = 7)
+  retMAT <- matrix(nrow = length(fctLIST), ncol = 7)
   rn <- NULL	
+   
+  modLIST <- list()
+  
+  for (i in 1:length(fctLIST)) {
+    tempMOD <- try(pcrfit(object$DATA, 1, 2, fctLIST[[i]], opt.method = object$opt.method), silent = TRUE)
+    if (inherits(tempMOD, "try-error")) next     
+    modLIST[[i]] <- tempMOD
+  } 
 
-  ml <- lapply(fctList, function(x) pcrfit(object$DATA, 1, 2, x, opt.method = object$opt.method))
-
-  for (i in 1:length(ml)) {
-    rn[i] <- ml[[i]]$MODEL$name
-    retMat[i, 1] <- round(logLik(ml[[i]]), 2)
-		retMat[i, 2] <- round(AIC(ml[[i]]), 2)
-		retMat[i, 3] <- round(AICc(ml[[i]]), 2)
-		retMat[i, 4] <- round(resVar(ml[[i]]), 5)   		
-    if (i < length(ml)) retMat[i + 1 , 5] <- as.matrix(anova(ml[[i]], ml[[i + 1]]))[2, 6]
-    if (i < length(ml)) retMat[i + 1, 6] <- LR(ml[[i]], ml[[i + 1]])$p.value  
-    retMat[i, 7] <- fitchisq(ml[[i]], ...)$chi2.red            
+  for (i in 1:length(modLIST)) {
+    rn[i] <- modLIST[[i]]$MODEL$name
+    retMAT[i, 1] <- round(logLik(modLIST[[i]]), 2)
+		retMAT[i, 2] <- round(AIC(modLIST[[i]]), 2)
+		retMAT[i, 3] <- round(AICc(modLIST[[i]]), 2)
+		retMAT[i, 4] <- round(resVar(modLIST[[i]]), 5)   		
+    if (i < length(modLIST)) retMAT[i + 1 , 5] <- as.matrix(anova(modLIST[[i]], modLIST[[i + 1]]))[2, 6]
+    if (i < length(modLIST)) retMAT[i + 1, 6] <- LR(modLIST[[i]], modLIST[[i + 1]])$p.value  
+    retMAT[i, 7] <- fitchisq(modLIST[[i]], ...)$chi2.red            
   }           
 	
-  aic.w <- round(akaike.weights(retMat[, 2])$weights, 3)
-  aicc.w <- round(akaike.weights(retMat[, 3])$weights, 3)       
-  retMat <- cbind(retMat, aic.w, aicc.w)      
+  aic.w <- round(akaike.weights(retMAT[, 2])$weights, 3)
+  aicc.w <- round(akaike.weights(retMAT[, 3])$weights, 3)       
+  retMAT <- cbind(retMAT, aic.w, aicc.w)      
   	
-  colnames(retMat) <- c("logLik", "AIC", "AICc", "resVar", "ftest", "LR", "Chisq", "AIC.weights", "AICc.weights")
-  rownames(retMat) <- rn
+  colnames(retMAT) <- c("logLik", "AIC", "AICc", "resVar", "ftest", "LR", "Chisq", "AIC.weights", "AICc.weights")
+  rownames(retMAT) <- rn
 	
-  if (verbose) print(retMat)
-	
+  if (verbose) {
+    cat("\n")
+    print(retMAT)
+  }     
+  	
   if (crit == "ftest") {
-    modTRUE <- retMat[, 5] < sig.level     
+    modTRUE <- retMAT[, 5] < sig.level    
     if(all(is.na(modTRUE))) stop("nested f-test was unsuccessful! Probably not nested (df = 0)?")   
-    modTRUE[is.na(modTRUE)] <- FALSE     
+    modTRUE[is.na(modTRUE)] <- FALSE   
     WHICH <- which(modTRUE)                
     SELECT <- max(WHICH)
-    if (any(modTRUE == TRUE)) optModel <- fctList[[SELECT]] else optModel <- object$MODEL      
+    if (any(modTRUE == TRUE)) optMODEL <- fctLIST[[SELECT]] else optMODEL <- object$MODEL      
   }
       
   if (crit == "ratio") {     
-    if (any(retMat[, 6] == 0, na.rm = TRUE)) stop("likelihood ratio p-value is 0! Probably not nested (df = 0)?")     
-    modTRUE <- retMat[, 6] < sig.level   
+    if (any(retMAT[, 6] == 0, na.rm = TRUE)) stop("likelihood ratio p-value is 0! Probably not nested (df = 0)?")     
+    modTRUE <- retMAT[, 6] < sig.level   
     modTRUE[is.na(modTRUE)] <- FALSE      
     WHICH <- which(modTRUE)     
-    SELECT <- max(WHICH) 
-    optModel <- fctList[[SELECT]]   
+    SELECT <- max(WHICH)   
+    if (any(modTRUE == TRUE)) optMODEL <- fctLIST[[SELECT]] else optMODEL <- object$MODEL    
   }
 
   if (crit == "weights") {
-    SELECT <- which.max(retMat[, 9])
-    optModel <- fctList[[SELECT]]
+    SELECT <- which.max(retMAT[, 9])
+    optMODEL <- fctLIST[[SELECT]]
   }
   
   if (crit == "chisq") {
-    SELECT <- which.min(retMat[, 7])
-    optModel <- fctList[[SELECT]]
+    SELECT <- which.min(abs(1 - retMAT[, 7]))
+    optMODEL <- fctLIST[[SELECT]]
   }
       
-  optMod <- pcrfit(object$DATA, 1, 2, optModel, opt.method = object$opt.method)    
+  cat("\n")
+  optMODEL <- pcrfit(object$DATA, 1, 2, optMODEL, opt.method = object$opt.method)    
 
-  optMod$retMat <- retMat
-  return(optMod)
+  optMODEL$retMat <- retMAT
+  return(optMODEL)
 }

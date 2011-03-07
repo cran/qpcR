@@ -1,7 +1,7 @@
 \name{sisti1}
 \alias{sisti1}
 
-\title{qPCR dilution experiments Set \#1 from Sisti et al. (2010)}
+\title{qPCR dilution experiments Set #1 from Sisti et al. (2010)}
 
 \description{
 A high quality 10-fold dilution experiment with 6 dilution steps and 12 replicates each.

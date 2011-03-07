@@ -1,10 +1,11 @@
 \name{efficiency}
-\alias{efficiency}
+\alias{efficiency} 
+\alias{efficiency.modlist} 
 
 \title{Calculation of qPCR efficiency and other important qPCR parameters}
 
 \description{
-This function calculates the PCR efficiency of a model of class 'pcrfit' and several other 
+This function calculates the PCR efficiency of a model of class 'pcrfit' or on a 'modlist', including several other 
  important values for qPCR quantification like the first and second derivatives and the 
  corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the 
  calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit.
@@ -18,7 +19,7 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
 }
 
 \arguments{
-  \item{object}{an object of class 'pcrfit'.}
+  \item{object}{an object of class 'pcrfit' or 'modlist'.}
   \item{plot}{logical. If TRUE, a graph is displayed. If FALSE, values are printed out.}
   \item{type}{the method of efficiency estimation. See 'Details'.}
   \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
@@ -74,6 +75,8 @@ If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic
   \item{init1}{the initial template fluorescence from the sigmoidal model, calculated as under 'Details'.}
   \item{init2}{the initial template fluorescence from an exponential model, calculated as under 'Details'.}
   \item{cf}{the conversion factor between raw fluorescence and template amount, if the latter is defined.}
+
+If \code{object} was of type 'modlist', the results are given as a matrix, with samples in columns.
 }
 
 \author{
@@ -98,41 +101,47 @@ It is advisable not to take too many cycles of the plateau phase prior to fittin
 m1 <-  pcrfit(reps, 1, 2, l4)
 efficiency(m1)
  
-## selection of best model
-## using one cycle 'downstream'
+## Using one cycle 'downstream'
 ## of second derivative max
-m2 <- mselect(m1)
-efficiency(m2, type = "cpD2", shift = -1)    
+efficiency(m1, type = "cpD2", shift = -1)
 
 ## using "maxE" method, with calculation of PCR efficiency
 ## 2 cycles 'upstream' from the cycle of max efficiency
-efficiency(m2, type = "maxE", shift = 2)
+efficiency(m1, type = "maxE", shift = 2)
 
 ## using the exponential region
-efficiency(m2, type = "expR")
+efficiency(m1, type = "expR")
 
 ## using threshold cycle (i.e. 15.32) 
 ## from PCR software
-efficiency(m2, type = 15.32)
+efficiency(m1, type = 15.32)
 
 ## using Cy0 method from
 ## Guescini et al. (2008),
 ## add Cy0 tangent
-efficiency(m2, type = "Cy0")
-Cy0(m2, add = TRUE)
+efficiency(m1, type = "Cy0")
+Cy0(m1, add = TRUE)
 
 ## using a defined fluorescence
 ## threshold value from PCR software
-efficiency(m2, thresh = 1)
+efficiency(m1, thresh = 1)
  
 ## using the first 30 cycles and a template amount
 ## (optical calibration)
-m3 <-  pcrfit(reps[1:30, ], 1, 2, l5)
-efficiency(m3, amount = 1E3)   
+m2 <-  pcrfit(reps[1:30, ], 1, 2, l5)
+efficiency(m2, amount = 1E3)
 
 ## using 'maxRatio' method from Shain et al. (2008)
 ## baseshifting essential!
-efficiency(m2, type = "maxRatio", baseshift = 0.2)   
+efficiency(m1, type = "maxRatio", baseshift = 0.2)
+
+\dontrun{
+## on a modlist with plotting
+## of the efficiencies
+ml <- modlist(reps, model = l5)
+res <- sapply(ml, function(x) efficiency(x)$eff)
+barplot(as.numeric(res))
+}
 }
 
 \keyword{models}

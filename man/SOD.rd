@@ -48,9 +48,16 @@ plot(res, which = "single")
 
 ## remove outlier run
 res <- SOD(ml, remove = TRUE)
-plot(res)
+plot(res, which = "single")
 
 \dontrun{
+## removing and updating in case
+## of supplying a 'replist'
+rl <- replist(ml, gl(7, 4)) 
+plot(rl) # F3.1 affects the fit!
+rl2 <- SOD(rl, remove = TRUE)
+plot(rl2)
+
 ## to get an impression on FDM and SDM criteria,
 ## concatenate many different datasets and then
 ## calculate FDM - SDM of all runs and plot

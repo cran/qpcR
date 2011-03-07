@@ -33,7 +33,7 @@ The function \code{\link{pcrfit}} in this package.
 m <- pcrfit(reps, 1, 2, l4)
 
 ## update model
-update(m, model = baro5)
+update(m, model = l5)
 
 ## update qPCR run
 update(m, fluo = 20)

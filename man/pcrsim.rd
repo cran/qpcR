@@ -68,24 +68,24 @@ Andrej-Nikolai Spiess
 m <- pcrfit(reps, 1, 2, l4)
 
 ## simulate homoscedastic error
-## and test initial model, w3 and l5 
-## model on data
+## and test models l4, l5 and l6 
+## on data
 res <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
-              error = 0.2, nsim = 20, fitmodel = list(l4, w3, l5))
+              error = 0.2, nsim = 20, fitmodel = list(l4, l5, l6))
 
 ## use heteroscedastic noise typical for 
 ## qPCR: more noise at lower fluorescence
 \dontrun{
 res2 <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
               error = 0.01, errfun = function(y) 1/y,
-              nsim = 20, fitmodel = list(l4, w3, l5))
+              nsim = 20, fitmodel = list(l4, l5, l6))
 }
 
 ## get 95\% confidence interval for 
-## the models GOF in question (l4, w3, l5) 
+## the models GOF in question (l4, l5, l6) 
 \dontrun{
 res <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
-              error = 0.2, nsim = 20, fitmodel = list(l4, w3, l5),
+              error = 0.2, nsim = 20, fitmodel = list(l4, l5, l6),
               statfun = function(y) quantile(y, c(0.025, 0.975)))
 res$statList  
 }  

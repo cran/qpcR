@@ -32,7 +32,7 @@ For all variables in the original dataset, mean and standard deviation are calcu
 \usage{
 propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE, 
           use.cov = FALSE, nsim = 10000, do.perm = FALSE, 
-          perm.crit = "perm > init", ties = NULL, nperm = 2000, 
+          perm.crit = NULL, ties = NULL, nperm = 2000, 
           alpha = 0.05, plot = TRUE, logx = FALSE, verbose = FALSE, ...)  
 }
 
@@ -75,19 +75,20 @@ The criterium for the permutation p-value (\code{perm.crit}) has to be defined b
 For example, let's say we calculate some value 0.2 which is a ratio between two groups.
 We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. 
 We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}).
-One can also supply something like \code{perm.crit = c("perm > init", "perm == init", "perm < init")} to test for all combinations. 
+The default (\code{NULL}) is to test all three variants \code{perm.crit = c("perm > init", "perm == init", "perm < init")}. 
 }
 
 \value{
 A plot containing the histograms of the Monte-Carlo simulation, the permutation values and histogram of the error propagation. 
 Additionally inserted in the plots are a boxplot, the median values in red and the confidence intervals as blue borders. 
 
-A list with the following components:       
-  \item{summary}{a summary of the collected statistics, given as a dataframe. These are: mean, s.d. median, mad, lower/upper confidence interval and permutation p-value(s).}  
-  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column, if \code{verbose = TRUE}.}       
-  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}, if \code{verbose = TRUE}. See 'Examples'.}      
-  \item{derivs}{a list containing the partial derivatives expressions for each variable, if \code{verbose = TRUE}.}   
-  \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation, if \code{verbose = TRUE}.}    
+A list with the following components (if \code{verbose = TRUE}):   
+  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column.}       
+  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}.}      
+  \item{data.Prop}{\code{nsim} values taken from a normal distribution with mean and s.d. calculated from the propagated error.}   
+  \item{derivs}{a list containing the partial derivatives expressions for each variable.}   
+  \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation.}    
+  \item{summary}{a summary of the collected statistics, given as a dataframe. These are: mean, s.d. median, mad, lower/upper confidence interval and permutation p-value(s).} 
 }
 
 \author{
@@ -99,6 +100,10 @@ Error propagation (in general):\cr
 Taylor JR (1996). An Introduction to error analysis. University Science Books, New York.\cr
  
 A very good technical paper describing error propagation by matrix calculation can be found under \url{www.nada.kth.se/~kai-a/papers/arrasTR-9801-R3.pdf}.\cr
+
+Evaluation of measurement data - Guide to the expression of uncertainty in measurement.\cr
+JCGM 100:2008 (GUM 1995 with minor corrections).\cr
+\url{http://www.ifcc.org/pdf/GUM_JCGM_100_2008_E.pdf}.\cr
 
 Error propagation (in qPCR):\cr
 Nordgard O \emph{et al.} (2006). Error propagation in relative real-time reverse transcription polymerase chain reaction quantification models: The balance between accuracy and precision. \emph{Analytical Biochemistry}, \bold{356}, 182-193.\cr
@@ -121,7 +126,7 @@ Function \code{\link{ratiocalc}} for error analysis within qPCR ratio calculatio
 ## From summary data just calculate 
 ## Monte-Carlo and propagated error.
 EXPR <- expression(x/y)
-x <- c(5, 0.1)
+x <- c(5, 0.01)
 y <- c(1, 0.01)
 DF <- cbind(x, y)
 res <- propagate(expr = EXPR, data = DF, type = "stat", 
@@ -129,31 +134,45 @@ res <- propagate(expr = EXPR, data = DF, type = "stat",
 
 ## Do Shapiro-Wilks test on Monte Carlo evaluations 
 ## !maximum 5000 datapoints can be used!
-## => p.value indicates normality
-shapiro.test(res$data.Sim[, 3][1:5000])
+## => p.value on border to non-normality
+shapiro.test(res$data.Sim[1:5000, 3])
 ## How about a graphical analysis:
 qqnorm(res$data.Sim[, 3])
 
 ## Using raw data
-## bring all vectors to same 
-## length with NA's.
+## If data is of unequal length,
+## use cbind.na to avoid replication!
 ## Do permutations (swap x and y values)
-## and simulations
+## and simulations.
 EXPR <- expression(x*y)
 x <- c(2, 2.1, 2.2, 2, 2.3, 2.1)
-y <- c(4, 4, 3.8, 4.1, 3.1, 3)
-DF <- cbind(x, y)  
+y <- c(4, 4, 3.8, 4.1, 3.1)
+DF <- cbind.na(x, y)  
 res2 <- propagate(EXPR, DF, type = "raw", do.perm = TRUE, 
                  do.sim = TRUE, verbose = TRUE)
 ## Have a look at the results
 res2$summary
+
+## Example in Annex H.1 from the GUM manual
+## (see 'References'), an end gauge calibration
+## study
+EXPR <- expression(ls + d - ls * (da * the + as * dt))
+ls <- c(50000623, 25)
+d <- c(215, 9.7)
+da <- c(0, 0.58E-6)
+the <- c(-0.1, 0.41)
+as <- c(11.5E-6, 1.2E-6)
+dt <- c(0, 0.029)
+DF <- cbind(ls, d, da, the, as, dt)
+GUM.1 <- propagate(expr = EXPR, data = DF, type = "stat", 
+                    do.sim = TRUE, verbose = TRUE)
+## => u = 31.71 (GUM says 32).  
 
 ## For replicate data, using relative 
 ## quantification ratio from qPCR.
 ## How good is the estimation of the propagated error?
 ## Done without using covariance in the 
 ## calculation and simulation.
-## STRONG deviation from normality!
 ## cp's and efficiencies are tied together
 ## because they are two observations on the
 ## same sample!
@@ -167,27 +186,30 @@ cp2 <- c(33.84,34.04,33.33)
 DF <- cbind(E1, cp1, E2, cp2)
 res3 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
                  do.perm = FALSE, verbose = TRUE, logx = TRUE)                 
-par(ask = TRUE)
-shapiro.test(res3$data.Sim[, 5][1:5000])
+## STRONG deviation from normality!
+shapiro.test(res3$data.Sim[1:5000, 5])
 qqnorm(res3$data.Sim[, 5])
 
 ## Same setup as above but also
 ## using a permutation approach
-## for resampling confidence interval
+## for resampling the confidence interval.
 ## Cp's and efficiencies are tied together
 ## because they are two observations on the
 ## same sample! 
 ## Similar to what REST2008 software does.
 res4 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
-                 perm.crit = "perm < init", do.perm = TRUE, 
+                 perm.crit = NULL, do.perm = TRUE, 
                  ties = c(1, 1, 2, 2), logx = TRUE, verbose = TRUE)
 res4$summary
+## p-value of 0 in perm < init indicates that not a single 
+## exchange of group memberships resulted in a smaller ratio!
               
 ## Proof that covariance of Monte-Carlo
 ## simulated dataset is the same as from 
 ## initial data
 res4$covMat
 cov(res4$data.Sim[, 1:4])
+all.equal(res4$covMat, cov(res4$data.Sim[, 1:4]))
 
 ## Error propagation in a linear model 
 ## using the covariance matrix from summary.lm
@@ -207,15 +229,16 @@ res5
 
 ## In a x/y regime, when does the propagated error start to
 ## deviate from normality if error of denominator increases?
-## Watch increasing skewness of histogram!
+## Watch increasing deviation in qqnorm-plot!
 \dontrun{
 x <- c(5, 1)
-for (i in seq(0.01, 0.5, by = 0.01)) {
+for (i in seq(0, 0.2, by = 0.01)) {
   y <- c(1, i)
   DF <- cbind(x, y)
-  res  <-  propagate(expression(x/y), DF, type = "stat", 
-                      do.sim = TRUE, plot = FALSE, verbose = TRUE)
-  hist(res$data.Sim[, 3], nclass = 100, main = paste("sd(y):",i))      
+  res6  <-  propagate(expression(x/y), DF, type = "stat", 
+                      do.sim = TRUE, plot = FALSE, verbose = TRUE,
+                      logx = TRUE)
+  qqnorm(res6$data.Sim[, 3])        
 }
 }
 }   

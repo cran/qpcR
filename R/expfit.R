@@ -50,18 +50,19 @@ plot = TRUE,
       DATA <- cbind(object$DATA[, 1], object$DATA[, 2])
       DATA <- DATA[CYCS, ]
       expMod <- pcrfit(DATA, 1, 2, expGrowth)         
-      EFF <- exp(as.numeric(coef(expMod)[2]))     
+      EFF <- exp(as.numeric(coef(expMod)[2])) 
+      EFF.cycles <- object$DATA[CYCS, 2]/object$DATA[CYCS - 1, 2]  
+      INIT <- as.numeric(coef(expMod)[1]) * as.numeric(exp(coef(expMod)[2]))  
       
       POINT <- switch(method, outlier = OUTLIER, midpoint = MIDPOINT, ERBCP = EXPREG)  
       
       if (plot) {
-            pcrplot(object, ...)
+            plot(object, ...)
             points(DATA[, 1], DATA[, 2], col = 2, pch = 16, ...)
             lines(DATA[, 1], fitted(expMod), col = 2, lwd = 2, ...)
       }
 
-      return(list(point = POINT, cycles = CYCS, eff = as.numeric(exp(coef(expMod)[2])),
-            eff.cycles = object$DATA[CYCS, 2]/object$DATA[CYCS - 1, 2],
+      return(list(point = POINT, cycles = CYCS, eff = EFF, eff.cycles = EFF.cycles,
             AIC = AIC(expMod), resVar = resVar(expMod), RMSE = RMSE(expMod),
-            init = as.numeric(coef(expMod)[1]), mod = expMod))
+            init = INIT, mod = expMod))
 }

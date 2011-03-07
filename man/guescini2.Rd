@@ -1,7 +1,7 @@
 \name{guescini2}
 \alias{guescini2}
 
-\title{qPCR dilution experiments Set \#2 from Guescini et al. (2008)}
+\title{qPCR dilution experiments Set #2 from Guescini et al. (2008)}
 
 \description{
 A high quality experiment in which a decreasing amount of PCR mix mimics PCR inhibition.

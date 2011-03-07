@@ -96,6 +96,7 @@ data.frame.na <- function (..., row.names = NULL, check.rows = FALSE, check.name
             xi <- unclass(xi)
             fixed <- TRUE
             for (j in seq_along(xi)) {
+                ### added NA fill to max length/nrow
                 xi1 <- xi[[j]]
                 if (is.vector(xi1) || is.factor(xi1))
                   xi[[j]] <- c(xi1, rep(NA, nr - nrows[i]))

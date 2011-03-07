@@ -34,7 +34,7 @@ Calls \code{\link{outlier}} for the calculation of the studentized residuals and
  for calculation of the exponential phase 'midpoint'. For method 'ERBCP' (Exponential Region By Crossing Points), the exponential region
  is calculated by \eqn{expR = cpD2 - \code{corfact} * (cpD1-cpD2)}. The efficiency is calculated a) from the exponential fit with \eqn{Eff = exp(k)} and b) for each 
  cycle within the exponential region from the raw fluorescence values by \eqn{Eff = \frac{F(n)}{F(n-1)}}. 
- The inital template fluorescence (F0) is derived from parameter b.
+ The inital template fluorescence (F0) is derived from \eqn{b * exp(k)}.
 }
 
 \value{

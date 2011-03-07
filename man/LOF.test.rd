@@ -55,8 +55,8 @@ ml <- modlist(reps, fluo = 2:5, model = l5)
 rl <- replist(ml, group = c(1, 1, 1, 1))
 LOF.test(rl)
 
-## Example with a 'nls' fi
-## there is a lack-of-fit
+## Example with a 'nls' fit
+## => there is a lack-of-fit
 DNase1 <- subset(DNase, Run == 1)
 fm1DNase1 <- nls(density ~ SSlogis(log(conc), Asym, xmid, scal), DNase1) 
 LOF.test(fm1DNase1)

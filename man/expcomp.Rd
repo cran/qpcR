@@ -20,8 +20,9 @@ expcomp(object, ...)
 
 \details{
 The following sigmoidal models are fitted:
-b3, b4, b5, l3, l4, l5, w3, w4, baro5
+b3, b4, b5, b6, l3, l4, l5, l6
 }
+
 
 \value{
 A dataframe with names of the models, in ascending order of RMSE.

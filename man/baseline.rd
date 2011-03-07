@@ -20,7 +20,7 @@ baseline(object, refit = TRUE, refit.model = NULL, verbose = TRUE, ...)
   \item{refit}{logical. If \code{TRUE}, the baselined data is used for refitting the model.}
   \item{refit.model}{an optional new model used for refitting. If \code{NULL}, the original model, i.e. \code{l6} or \code{b6} from the object is used.}
   \item{verbose}{logical. If \code{TRUE}, the analysis steps are displayed in the console window.} 
-  \item{...}{other parameters to be passed to \code{\link{pcrfit}}, i.e. \code{weights}.} 
+  \item{...}{other parameters to be passed to \code{\link{pcrfit}}.} 
 }
 
 \details{
@@ -29,7 +29,7 @@ This function is experimental and ongoing work will show if it is feasible.
 
 \value{
 Either a (refitted) model or a 'modlist' containing the (refitted) models.
-The returned object has a new attribute \code{attr(object, "baselined")} containing the baselined data. See 'Examples'.
+The returned object or 'modlist' items have a new \code{$DATA.base} object containing the baselined data. See 'Examples'.
 }
 
 \author{
@@ -40,13 +40,12 @@ Andrej-Nikolai Spiess, based on an idea from Eric Shain.
 ## baselining a single model
 m <- pcrfit(reps, 1, 2, l6)
 res <- baseline(m)
-attr(res, "baselined")
+res$DATA.base
 
 ## baselining a 'modlist'
 ml <- modlist(reps, fluo = 2:5, model = l6)
 res <- baseline(ml)
-plot(res)
-attr(res, "baselined") 
+plot(res) 
 }
 
 \keyword{models}

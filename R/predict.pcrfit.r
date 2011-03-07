@@ -13,30 +13,31 @@ level = 0.95,
   if (missing(newdata)) newdata <- object$DATA
   else {
     if (which == "x") newdata <- cbind(rep(1, nrow(newdata)), newdata)
-  }     
+  }      
   
   ### get predicted values
   if (which == "y") PRED <- object$MODEL$fct(newdata[, 1], coef(object))
   else PRED <- object$MODEL$inv(newdata[, 2], coef(object))
-           
+             
   ### make list with gradients     
   if (which == "y") DERIVS <- lapply(object$MODEL$parnames, function(x) D(object$MODEL$expr.grad, x))
        else DERIVS <- lapply(object$MODEL$parnames, function(x) D(object$MODEL$inv.grad, x))
    
-  ### create dataframe for gradient calculation
-  DATA <- cbind(newdata, t(coef(object)))   
-    
   GRAD <- NULL
   retMat <- NULL
   
   ### create t-statistic for confidence/prediction
   if (!identical(interval, "none")) {
     tquan <- qt(1 - (1 - level)/2, df.residual(object))     
-  }              
-    
-  for (i in 1:nrow(DATA)) {        
-    ### calculate gradients     
-    dfEval <- as.numeric(lapply(DERIVS, function(x) eval(x, envir = DATA[i, ])))      
+  }       
+      
+  for (i in 1:nrow(newdata)) {     
+    ### create dataframe for gradient calculation
+    tempDATA <- data.frame(newdata[i, , drop = FALSE], t(coef(object))) 
+           
+    ### calculate gradients  
+    dfEval <- as.numeric(lapply(DERIVS, function(x) eval(x, envir = tempDATA)))
+        
     GRAD <- rbind(GRAD, as.numeric(dfEval))    
     ### calculate variance
     VAR <- dfEval %*% vcov(object) %*% dfEval           

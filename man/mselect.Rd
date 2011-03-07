@@ -42,7 +42,7 @@ Criterion 8), Akaike weights, can be used for nested and non-nested regimes, whi
 For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better.
 The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{LR}}), corrected Akaike weights
  (\code{\link{akaike.weights}}) or reduced chi-square (\code{\link{fitchisq}}) and returned as a new model.
-When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5; l3/l4/l5.
+When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5/b6; l3/l4/l5/l6.
 If supplying nested models, please do this with ascending number of parameters.  
 }
 
@@ -64,22 +64,22 @@ Andrej-Nikolai Spiess
 ## on the corresponding nested models
 m1 <- pcrfit(reps, 1, 2, l3)
 m2 <- mselect(m1)
-summary(m2)  ## Converted to l5 model !
+summary(m2)  ## Converted to l7 model!
 
 ## use Akaike weights on non-nested models
 ## compare to original model
 m2 <- mselect(m1, fctList = list(l3, l5, b3), crit = "weights")
-summary(m2) ## Also converted to l5 model !
+summary(m2) ## Converted to l5 model!
 
 ## try all sigmoidal models
 m3 <- pcrfit(reps, 1, 20, l4)
-mselect(m3, do.all = TRUE) ## baro5 wins by far!
+mselect(m3, do.all = TRUE) ## l7 wins by far!
 
 ## on replicated data
 ## using reduced chi-square
-ml <- modlist(reps, fluo = 2:5)
+ml <- modlist(reps, fluo = 2:5, model = l4)
 rl <- replist(ml, group = c(1, 1, 1, 1))
-mselect(rl, crit = "chisq")
+mselect(rl, crit = "chisq")  ## converted to l6!
 }
 
 \keyword{models}

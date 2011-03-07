@@ -5,57 +5,66 @@ verbose = TRUE,
 ...
 )
 {
-  CLASS <- class(object)
-  if (!(class(object)[1] %in% c("pcrfit", "modlist", "replist"))) stop("object must be of class 'pcrfit', 'modlist' or 'replist'!")
-  if (class(object)[1] == "pcrfit") tempObj <- list(object) else tempObj <- object
-  if (class(object)[2] == "replist") {
-    tempObj <- rep2mod(object)
-    GROUP <- attr(tempObj, "group")      
-  }      
-         
-  effList <- lapply(tempObj, function(x) try(efficiency(x, plot = FALSE, ...), silent = TRUE)) 
-  if (verbose) cat("\nCalculating second derivative maximum...\n")
-  flush.console()
-  cpD2 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD2)  
-  if (verbose) cat("Calculating first derivative maximum...\n")   
-  flush.console()
-  cpD1 <- sapply(effList, function(x) if(inherits(x, "try-error")) 0 else x$cpD1) 
-  if (verbose) cat("Calculating R-square...\n")  
-  flush.console()
-  RSQ <- sapply(tempObj, function(x) if(inherits(x, "try-error")) 0 else Rsq.ad(x)) 
-  NAMES <- sapply(tempObj, function(x) x$names)  
-  if (verbose) cat("Checking for sigmoidal consistency...\n")
-  FAIL <- which(cpD2 > cpD1 |  cpD1 - cpD2 > 10 | RSQ < 0.9)
-  if (length(FAIL) == 0) PASS <- 1:length(tempObj) else PASS <- (1:length(tempObj))[-FAIL]
-    
-  for (i in FAIL) tempObj[[i]]$outlier <- TRUE
-  for (j in PASS) tempObj[[j]]$outlier <- FALSE  
-       
-  if (length(FAIL) > 0) {
-    if (verbose) cat(" Found non-sigmoidal structure for", NAMES[FAIL], "...\n", sep = " ")  
-    flush.console() 
-    if (remove) {
-     if (verbose) cat(" Removing", NAMES[FAIL], "...\n", sep = " ")
+ CLASS <- class(object)
+
+ if (!(CLASS[1] %in% c("pcrfit", "modlist", "replist"))) stop("object must be of class 'pcrfit', 'modlist' or 'replist'!")
+ if (CLASS[1] == "pcrfit") OBJ <- list(object) else OBJ <- object
+ if (CLASS[2] == "replist") {
+    OBJ <- rep2mod(object)
+    GROUP <- attr(OBJ, "group")
+ }
+ 
+ outOBJ <- vector("list", length = length(OBJ))
+
+ for (i in 1:length(OBJ)) {
+     tempOBJ <- OBJ[[i]]
+     NAMES <- tempOBJ$names
+     if (verbose) cat(NAMES, "\nCalculating first and second derivative maximum...\n")
      flush.console()
-     tempObj <- tempObj[-FAIL]
-     if (class(object)[2] == "replist") GROUP <- GROUP[-FAIL]
-    } else {
-      if (verbose) cat(" Tagging name of", NAMES[FAIL], "...\n", sep = " ")
-      flush.console()
-      for (i in FAIL) tempObj[[i]]$names <- paste("**", tempObj[[i]]$names, "**", sep = "") 
-      flush.console()      
-    }      
-  } 
-  
-  cat("\n")
-    
-  if (class(object)[1] == "pcrfit") tempObj <- tempObj[[1]]
-  if (class(object)[2] == "replist") {
-    class(tempObj) <- c("modlist", "pcrfit")  
-    cat("Updating 'replist':\n")    
-    tempObj <- replist(tempObj, GROUP, verbose = verbose, ...)
+     EFF <- try(efficiency(tempOBJ, plot = FALSE, ...), silent = TRUE)
+     cpD2 <- if (inherits(EFF, "try-error")) 0 else EFF$cpD2
+     cpD1 <- if (inherits(EFF, "try-error")) 0 else EFF$cpD1
+     if (verbose) cat("Calculating R-square...\n")
+     flush.console()
+     RSQ <- if(inherits(EFF, "try-error")) 0 else Rsq(tempOBJ)
+     if (verbose) cat("Checking for sigmoidal consistency...\n")
+
+     if (cpD2 > cpD1 |  cpD1 - cpD2 > 10 | RSQ < 0.9) {
+        tempOBJ$outlier <- TRUE
+        if (verbose) cat(" Found non-sigmoidal structure for", NAMES, "...\n", sep = " ")
+        flush.console()
+
+        if (remove) {
+           if (verbose) cat(" Removing", NAMES, "...\n\n", sep = " ")
+           flush.console()
+           next
+        }
+        
+        if (verbose) cat(" Tagging name of", NAMES, "...\n", sep = " ")
+        flush.console()
+        tempOBJ$names <- paste("**", tempOBJ$names, "**", sep = "")
+     } else tempOBJ$outlier <- FALSE
+     
+     cat("\n")
+     outOBJ[[i]] <- tempOBJ
+ }
+ 
+ if (remove) {
+  WHICH <- which(outOBJ == "NULL")
+  if (length(WHICH) > 0) {
+    outOBJ <- outOBJ[-WHICH]
+    if (CLASS[2] == "replist") GROUP <- GROUP[-WHICH]
   }
-  
-  class(tempObj) <- CLASS      
-  return(tempObj)
+ }      
+
+ if (CLASS[1] == "pcrfit") outOBJ <- outOBJ[[1]]  
+ 
+ class(outOBJ) <- CLASS 
+ 
+ if (CLASS[2] == "replist") {    
+    cat("Updating 'replist':\n")     
+    outOBJ <- replist(outOBJ, GROUP, verbose = verbose, ...)
+ }    
+
+ return(outOBJ)
 } 

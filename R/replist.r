@@ -1,41 +1,47 @@
-replist <- function(object, group = NULL, opt = FALSE, verbose = TRUE, ...)
+replist <- function(
+object, 
+group = NULL, 
+remove = TRUE,
+opt = FALSE, 
+verbose = TRUE, 
+...)
 {
   if (class(object) != "modlist") stop("Please supply an object of class 'modlist'!")
   if (is.null(group)) stop("Please define replicate groups!")
-  if (length(group) != length(object)) stop("length of 'group' and 'object' must match!")   
-  group <- as.factor(group)
+  if (length(group) != length(object)) stop("length of 'group' and 'object' must match!")    
   
-  splitVec <- split(1:length(object), group)      
-  nameVec <- sapply(object, function(x) x$names)
-  nameVec <- split(nameVec, group)  
+  if (remove) {
+    CLASS <- sapply(object, function(x) class(x)[2]) 
+    NAMES <- sapply(object, function(x) x$names)  
+    FAILS <- which(is.na(CLASS))     
+    if (length(FAILS) > 0) {
+      cat("Removing tagged runs and updating 'group':", NAMES[FAILS], "\n\n")
+      object <- object[-FAILS]
+      group <- group[-FAILS]
+    }                     
+  } 
+    
+  group <- as.factor(group)  
   
-  repMod <- list()
-  meanDATA <- list()
-  tempModList <- list()
-  tempDATA <- NULL
+  splitVEC <- split(1:length(object), group)      
+  nameVEC <- sapply(object, function(x) x$names)
+  nameVEC <- split(nameVEC, group)  
   
-  for (i in 1:length(splitVec)) {   
-   for (j in splitVec[[i]]) {      
-    tempDATA <- rbind(tempDATA, object[[j]]$DATA)      
-   }  
-   tempModList[[i]] <- object[splitVec[[i]]]               
-   repMod[[i]] <- tempDATA 
-   meanFLUO <- tapply(tempDATA[, 2], as.factor(tempDATA[, 1]), function(x) mean(x, na.rm = TRUE))    
-   uniqueCYC <- unique(tempDATA[, 1])
-   tempDATA <- cbind(uniqueCYC, meanFLUO)
-   colnames(tempDATA) <- c("Cycles", "Fluo")
-   meanDATA[[i]] <- tempDATA  
-   tempDATA <- NULL            
-  }    
+  repMOD <- list()
   
-  finMod <- list()
-  
-  for (i in 1:length(meanDATA)) {           
+  for (i in 1:length(splitVEC)) {
+    CYCS <- NULL
+    FLUO <- NULL  
+     
+    for (j in splitVEC[[i]]) {
+      CYCS <- c(CYCS, object[[j]]$DATA[, 1])     
+      FLUO <- c(FLUO, object[[j]]$DATA[, 2])     
+      DATA <- cbind(Cycles = CYCS, Fluo = FLUO)    
+    }  
+    
+    if (verbose) cat("Making model for replicates:", nameVEC[[i]], "\n") 
     flush.console()
-    if (verbose) cat("Making model for replicates:", nameVec[[i]], "\n") 
-    meanMod <- try(pcrfit(meanDATA[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL), silent = TRUE)
-    if (inherits(meanMod, "try-error")) stop("There was an error for the starting values!")
-    fitObj <- try(pcrfit(repMod[[i]], 1, 2, model = object[[splitVec[[i]][1]]]$MODEL, do.optim = FALSE, start = coef(meanMod)), silent = TRUE)
+    fitObj <- try(pcrfit(DATA, 1, 2, model = object[[splitVEC[[i]][1]]]$MODEL), silent = TRUE)
     if (inherits(fitObj, "try-error")) cat(" => gave a fitting error!\n", sep = "")
     
     if (opt) {
@@ -47,16 +53,20 @@ replist <- function(object, group = NULL, opt = FALSE, verbose = TRUE, ...)
         fitObj <- fitObj2           
       }
     }     
-    if (verbose) cat(" => ", fitObj$MODEL$name, "\n", sep = "")
     
-    finMod[[i]] <- fitObj
-    finMod[[i]]$isReps <- TRUE
-    finMod[[i]]$names <- paste("group_", i, sep = "") 
-    finMod[[i]]$DATA <- repMod[[i]]
-    finMod[[i]]$modlist <- tempModList[[i]]     
+    if (verbose) cat(" => ", fitObj$MODEL$name, "\n\n", sep = "")
+    flush.console()
+    
+    repMOD[[i]] <- fitObj
+    repMOD[[i]]$isReps <- TRUE
+    repMOD[[i]]$names <- paste("group_", i, sep = "") 
+    repMOD[[i]]$DATA <- DATA     
+    repMOD[[i]]$modlist <- object[unlist(splitVEC[i])]     
   }      
-  class(finMod) <- c("modlist", "replist", "pcrfit")
-  attr(finMod, "nlevels") <- nlevels(group)
-  attr(finMod, "nitems") <- as.numeric(table(group))     
-  return(finMod)
+  
+  class(repMOD) <- c("modlist", "replist", "pcrfit")
+  attr(repMOD, "nlevels") <- nlevels(group)
+  attr(repMOD, "nitems") <- as.numeric(table(group))
+  attr(repMOD, "group") <- group
+  return(repMOD)
 }

@@ -74,8 +74,9 @@ parSD = list(),
       if (grepl("\\*\\*[[:alnum:]]*", NAME)) colMain <- "blue" 
         else if (grepl("\\*[[:alnum:]]*", NAME)) colMain <- "red"
           else colMain <- "black"
-      do.call(plot, modifyList(list(DATA[, 1], DATA[, 2], main = NAME, cex.main = 0.7, col.main = colMain, type = "p", 
-                 xlab = FALSE, ylab = FALSE, xaxt = "n", yaxt = "n", col = colvec[i]), par2D))
+      TRY <- try(do.call(plot, modifyList(list(DATA[, 1], DATA[, 2], main = NAME, cex.main = 0.7, col.main = colMain, type = "p", 
+                         xlab = FALSE, ylab = FALSE, xaxt = "n", yaxt = "n", col = colvec[i]), par2D)), silent = TRUE)
+      if (inherits(TRY, "try-error")) next      
       if (!is.null(FITTED) && fitted) do.call(lines, modifyList(list(DATA[CYC, 1], FITTED[CYC], col = colvec[i]), par2D))      
     } 
     

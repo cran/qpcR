@@ -1,3 +1,23 @@
+qpcR 1.3 - 4 (07-03-2011) 
+
+Monstrous update!
+
+    * The code to propagate has been revamped.
+    * meltcurve now contains original and analyzed data. More plotting options have been added (i.e. when data was already in first derivative format). Peak areas (by internal function qpcR:::peakArea) can now be calculated and the user can define a cutoff value for the peaks as a quality criterion.
+    * 'minqa' has been removed as a fitting algorithm, because it was never used (Levenberg-Marquardt method is so robust, that 'minqa' was never called...).
+    * Added getPar as a function for quick extraction of efficiencies/threshold cycles from high-throughput data (8500 runs take about 150 seconds). Request from Roman Bruno.
+    * replist has been revamped in its code and now automatically removes unfitted runs and their entries in the 'group' definition.
+    * modlist can now do internal smoothing and scaling. It now tags failed (in respect to sigmoidal structure) fits, so that these, together with the original 'group' definition, are automatically omitted from ratiocalc or ratiobatch.
+    * ratiocalc and ratiobatch can now use vectors of external efficiencies/threshold cycles (as acquired by other methods...) for ratio calculation. Request from Prof. John Fowler.
+    * pcrfit can now handle replicates (as in modlist, but only for one set of replicates!).
+    * Removed baro5, w3 and w4 as sigmoidal models, because they turned out to be of minor importance in sigmoidal fitting to qPCR data => high residuals in fits.
+    * resplot can now do a fancy curve/residuals overlay plot with two y-axes.
+    * The most important changes:
+    * Function pcrimport was completely redesigned. By querying the user through a number of steps, any qPCR data independent of hardware/software can be imported. The data is transformed into the format necessary for qpcR by rotating data (if cycles are in rows), eliminating unneeded columns/rows, normalizing the reporter dye data (i.e. SybrGreen) by a reference dye (i.e. ROX) etc. This way, the user can define a 'format template' which is automatically stored on the hard drive and can be reloaded in future analyses. This also includes the option of batch analyzing many datasets in a directory using the same template. Several datasets (format01.txt and format02a-d, in directories 'add01' and 'add02' of the package) have been added to illustrate the features of the new design. Please read and try the examples given in the 'Examples' section of '?pcrimport'.
+    * Added the two seven-parameter models b7 and l7 (logistic and log-logistic) as a result from a collaboration with Prof Joel Tellinghuisen. These two new models are extremely interesting as they model the important parts of the amplification curve with outstanding small residuals and the overall goodness-of-fit (as measured by R-square, BIC, AICc etc) is significantly better than with all other models. The 7-parameter models are a mixture of a linear model (k1*x), a quadratic model (k2*x^2) and a 5-parameter sigmoidal (see '?b7'). Especially the quadratic term results in a very good fit with small residual values in the important exponential region. Accordingly, mselect has been modified to include these models in model selection. The user is encouraged to try these two new models on his/her data, and observe, if mselect chooses these two models. This is often the case: datasets 'rutledge': 62/120; reps: 20/28; guescini1: 34/84; batsch1: 7/15; sisti1: 28/72; boggy: 11/16.
+    * Through a collaboration with Gregory Boggy, his mechanistic 'mak2' model described here has been implemented within the usual fitting framework as mak2. As a further extension, we developed a mak3 model which improves the performance of mak2 by adding a slope parameter. See '?mak3' for details and also examples The advantage of these implicit models (meaning that the fluorescence is not modeled as being a function the cycle numbers but from the fluorescence value of the preceeding cycle: F(n) = F(n-1) + k*log(F(n-1)/k) ), is that F(0) is deduced from a nonlinear least-squares fitting and makes efficiencies/threshold cycles superfluous. The estimated quantity D0 can be directly used for calibration curve analysis (see paper) and even for direct calculation of expression ratios by R = D01/D02. Because of this, all important functions pcrfit, mselect, pcrbatch, ratiocalc and ratiobatch have been modified to include this model. Please read the documentation to these functions to get more information. 
+
+
 qpcR 1.3 - 3 (03-11-2010) 
 
     *Added dataset 'boggy' from Boggy et al. (2010). 

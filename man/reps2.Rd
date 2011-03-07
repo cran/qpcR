@@ -1,7 +1,7 @@
 \name{reps2}
 \alias{reps2}
 
-\title{qPCR dilution experiments Set \#2 from the package author}
+\title{qPCR dilution experiments Set #2 from the package author}
 
 \description{
 A dilution experiment of two different cDNAs with five 4-fold dilutions of the cDNA, and three replicates for each dilution.

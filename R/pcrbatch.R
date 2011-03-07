@@ -1,145 +1,110 @@
 pcrbatch <- function(
-x, 
-cols = NULL, 
+x,
+cyc = 1,
+fluo = NULL, 
 model = l4, 
-group = NULL, 
+remove = FALSE, 
 type = "cpD2", 
 opt = FALSE, 
-smooth = c("none", "tukey", "lowess"), 
-norm = FALSE, 
-fact = 1, 
-ave = c("mean", "median"), 
-backsub = NULL,  
-crit, 
-plot = TRUE, 
+norm = FALSE,
+backsub = NULL,
+smooth = c("none", "tukey", "lowess", "supsmu", "spline"), 
+span = 0.1, 
+factor = 1, 
+do.mak = FALSE,
+opt.method =  "all",
+nls.method = "all",
+sig.level = 0.05, 
+crit = "ftest", 
+group = NULL,
+plot = TRUE,
 ...) 
 {
-  smooth <- match.arg(smooth)
-  ave <- match.arg(ave)
-  outList <- list()   
+  ### make initial 'modlist'
+  if (class(x) != "modlist") {
+    if (is.null(fluo)) fluo <- 2:ncol(x)
+    if (names(x)[cyc] != "Cycles") stop("Column 1 should be named 'Cycles'!")
+    cat("Creating modlist...\n\n")
+    modLIST <- modlist(x, cyc = cyc, fluo = fluo, model = model, remove = remove, opt = opt, norm = norm, backsub = backsub, 
+                       smooth = smooth, span = span, factor = factor, opt.method = opt.method, nls.method = nls.method, sig.level = sig.level, 
+                       crit = crit, ...)
+  } else modLIST <- x
   
-  if (class(x) != "modlist" && is.null(cols)) cols <- 2:ncol(x)
-  if (class(x) != "modlist" && names(x)[1] != "Cycles") stop("Column 1 should be 'Cycles'!")
-  if (!is.null(backsub) && !is.numeric(backsub)) stop("'backsub' must be either NULL or a numeric sequence!")
-  if (!is.null(cols) && min(cols) == 1) stop("'cols' must be > 1 because Column 1 must be 'Cycles'!")   
+  ### if 'group' is defined, make a 'replist'
+  if (!is.null(group)) {     
+    if (length(group) != length(modLIST)) stop("Length of 'group' and sample number do not match!")
+    repLIST <- try(replist(modLIST, group = group, opt = opt, verbose = TRUE, ...), silent = TRUE)
+    if (inherits(repLIST, "try-error")) cat("There was an error during 'replist'. Continuing with original 'modlist'...")
+      else modLIST <- repLIST
+  }  
   
-  cat("Creating modlist...\n")
-  if (class(x) != "modlist") modList <- modlist(x, fluo = cols) else modList <- x
   flush.console()  
     
-  modList <- SOD(modList, ...)
-             
-  if (plot) plot(modList, which = "single")
-  flush.console()    
- 
-  if (!is.null(group)) {
-    if (class(x) == "modlist") stop("This is a 'modlist'. Use 'replist' for averaging...")
-    group <- as.factor(group)
-    if (length(group) != length(cols)) stop("replicates and column numbers do not match!")
-    if (ave == "mean") centre <- function(x) mean(x, na.rm = TRUE)
-    if (ave == "median") centre <- function(x) median(x, na.rm = TRUE)
-    Cycles <- x[, 1]
-    DATA <- x[, cols, drop = FALSE]     
-    DATA2 <- apply(DATA, 1, function(x) tapply(x, group, function(x) centre(x)))     
-    DATA2 <- t(DATA2)
-    DATA2 <- as.data.frame(DATA2)
-    namevec <- paste("group_", 1:length(levels(group)), sep = "")
-    colnames(DATA2) <- namevec
-    x <- cbind(Cycles, DATA2) 
-    cols <- 2:ncol(x)     
-  }
+  ### plot diagnostics, if selected
+  if (plot) plot(modLIST, which = "single")
+  outLIST <- list() 
+  
+  ### for all single models in the 'modlist' do...
+  for (i in 1:length(modLIST)) {    
+    NAME <- modLIST[[i]]$name
     
-  if (class(x) == "modlist") {
-      dataList <- lapply(x, function(x) x$DATA)
-      modelList <- lapply(x, function(x) x$MODEL)
-      nameList <- lapply(x, function(x) x$names)
-  }
-  else {
-      dataList <- list()
-      modelList <- list()
-      nameList <- list()       
-      for (i in 1:length(cols)) {
-            CC <- complete.cases(x[, cols[i]])
-            dataList[[i]] <- cbind(x[CC, 1], x[CC, cols[i]])
-            modelList[[i]] <- model
-            nameList[[i]] <- colnames(x)[cols[i]]
-      }
-  }
-
-  for (i in 1:length(dataList)) {
-    Cycles <- dataList[[i]][, 1]
-    Fluo <- dataList[[i]][, 2]
+    fitOBJ <- modLIST[[i]]
     
-    if (fact != 1) Fluo <- Fluo * fact
-    if (smooth == "tukey") Fluo <- smooth(Fluo)
-    if (smooth == "lowess") Fluo <- lowess(Fluo, f = 0.1)$y
-    if (norm == TRUE) {
-      Fluo <- Fluo - min(Fluo, na.rm = TRUE)
-      Fluo <- Fluo/max(Fluo, na.rm = TRUE)
-    }
-    if (!is.null(backsub)) {
-      back <- mean(Fluo[backsub], na.rm = TRUE)
-      Fluo <- Fluo - back
-    }
-
-    DATA <- data.frame(Cycles = Cycles, Fluo = Fluo)
+    cat("Analyzing", NAME, "...\n")
     
+    ### sigmoidal model 
+    cat("  Calculating 'eff' and 'ct' from sigmoidal model...\n")
     flush.console()
-    cat("Processing ", nameList[[i]], "...\n", sep = "")
-    cat("   Building sigmoidal model (", modelList[[i]]$name, ")...", sep = "")
-    fitObj <- try(pcrfit(DATA, 1, 2, model = modelList[[i]], ...), silent = TRUE)
-    if (inherits(fitObj, "try-error")) {
-      nameList[[i]] <- "FAIL"
-      cat(" => There was an error in sigmoidal fitting. Skipping...\n") 
-      next
-    }
+    EFF <- try(efficiency(fitOBJ, plot = FALSE, type = type, ...), silent = TRUE)
+    if (!inherits(EFF, "try-error")) EFF <- c(EFF, coef(fitOBJ), model = fitOBJ$MODEL$name) else EFF <- list(eff = NA)
+    names(EFF) <- paste("sig.", names(EFF), sep = "")       
     
-    if (missing(crit)) crit = "ftest" else crit <- crit
-    if (opt) {
- 	    fitObj2 <- try(mselect(fitObj, verbose = FALSE, crit = crit, ...))
-      if (inherits(fitObj2, "try-error")) {
-        fitObj <- fitObj
-        cat(" => ", nameList[[i]], " gave a model selection error!", sep = "")
-      } else {
-        fitObj <- fitObj2
-        cat(" => ", fitObj$MODEL$name, sep = "")
-      }
-    }
-    
-    cat("\n")
-    
-    EFF <- try(efficiency(fitObj, plot = FALSE, type = type, ...), silent = TRUE)
-    if (!inherits(EFF, "try-error")) EFF <- c(EFF, coef(fitObj), model = fitObj$MODEL$name) else EFF <- list(eff = NA)
-    names(EFF) <- paste("sig.", names(EFF), sep = "")
-    
-    cat("   Using window-of-linearity...\n")
-    SLI <- try(sliwin(fitObj, plot = FALSE, ...), silent = TRUE)
+    ### sliding window method
+    cat("  Using window-of-linearity...\n")
+    SLI <- try(sliwin(fitOBJ, plot = FALSE, ...), silent = TRUE)
     if (inherits(SLI, "try-error")) SLI <- list(eff = NA) 
     names(SLI) <- paste("sli.", names(SLI), sep = "")       
             
-    cat("   Fitting exponential model...\n")
-    EXP <- try(expfit(fitObj, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
+    ### exponential model
+    cat("  Fitting exponential model...\n")
+    EXP <- try(expfit(fitOBJ, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
     if (inherits(EXP, "try-error")) EXP <- list(eff = NA)
     names(EXP) <- paste("exp.", names(EXP), sep = "")
-   
-    out.all <- c(EFF, SLI, EXP)
-    outList[[i]] <- out.all   
-  }          
-  
-  allNAMES <- unique(unlist(lapply(outList, function(x) names(x))))     
-  resMat <- data.frame(ROWNAMES = allNAMES)     
     
-  for (i in 1:length(outList)) {
-    outFrame <- t(as.data.frame(outList[[i]]))       
-    outFrame <- cbind(ROWNAMES = rownames(outFrame), outFrame)      
-    resMat <- merge(resMat, outFrame, by.x = "ROWNAMES", by.y = "ROWNAMES", sort = FALSE, all = TRUE)         
+    ### if MAK model selected, make model to attach
+    if (do.mak) {
+      cat("  Fitting mak3 model...\n")
+      MAK <- try(pcrfit(fitOBJ$DATA, 1, 2, mak3), silent = TRUE)
+      if (inherits(MAK, "try-error")) {
+        cat("There was an error in buidling the mak3 model. Continuing without...\n")
+        flush.console()
+        MAK <- list(D0 = NA)
+      } else {
+        MAK <- coef(MAK)
+        names(MAK) <- paste("mak3.", names(MAK), sep = "")
+      }  
+    } else MAK <- NULL
+    
+    cat("\n")  
+   
+    outALL <- c(EFF, SLI, EXP, MAK)     
+    outLIST[[i]] <- outALL
   }     
+    
+  allNAMES <- unique(unlist(lapply(outLIST, function(x) names(x))))  
+  resMAT <- data.frame(ROWNAMES = allNAMES) 
+     
+  ### aggregate all results into a dataframe by 'merge'
+  for (i in 1:length(outLIST)) {
+    tempDAT <- t(as.data.frame(outLIST[[i]]))       
+    tempDAT <- cbind(ROWNAMES = rownames(tempDAT), tempDAT)       
+    resMAT <- merge(resMAT, tempDAT, by.x = "ROWNAMES", by.y = "ROWNAMES", sort = FALSE, all = TRUE)         
+  }   
 
-  nameVec <- unlist(nameList)
-  nameVec <- nameVec[nameVec != "FAIL"]  
-  names(resMat) <- c("Vars", nameVec)       
+  names(resMAT)[1] <- "Vars"  
+  names(resMAT)[-1] <-  sapply(modLIST, function(x) x$name)       
   cat("Writing to clipboard...\n\n")
-  write.table(resMat, file = "clipboard-64000", sep = "\t", row.names = FALSE)
-  class(resMat) <- c("data.frame", "pcrbatch")   
-  return(resMat)
+  write.table(resMAT, file = "clipboard-64000", sep = "\t", row.names = FALSE)
+  class(resMAT) <- c("data.frame", "pcrbatch")   
+  return(resMAT)
 }

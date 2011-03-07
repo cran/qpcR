@@ -24,7 +24,7 @@ data.frame.na(..., row.names = NULL, check.rows = FALSE, check.names = TRUE,
  \item{row.names}{NULL or a single integer or character string specifying a column to be used as row names, or a character or integer vector giving the row names for the data frame.}
  \item{check.rows}{if TRUE then the rows are checked for consistency of length and names.}
  \item{check.names}{logical. If \code{TRUE} then the names of the variables in the data frame are checked to ensure that they are syntactically valid variable names and are not duplicated. If necessary they are adjusted (by \code{\link{make.names}}) so that they are.}
- \item{stringsAsFactors}{logical: should character vectors be converted to factors? The factory-fresh default is \code{TRUE}, but this can be changed by setting \code{options(stringsAsFactors = FALSE)}.}
+ \item{stringsAsFactors}{logical: should character vectors be converted to factors? The default is \code{FALSE}.}
 }
 
 \details{
@@ -62,12 +62,23 @@ rbind.na(a, b) # works, in contrast to original rbind
 
 ## data frame with unequal size vectors
 data.frame.na(A = 1:7, B = 1:5, C = letters[1:3], 
-              D = factor(c(1, 1, 2, 2)), stringsAsFactors = FALSE) 
+              D = factor(c(1, 1, 2, 2))) 
               
 ## convert a list with unequal length list items
 ## to a data frame
 z <- list(a = 1:5, b = letters[1:3], c = matrix(rnorm(20), ncol = 2))
-do.call(data.frame.na, c(z, stringsAsFactors = FALSE))
+do.call(data.frame.na, z)
+
+\dontrun{
+## compare time overhead for length checking
+## in cbind vs. cbind.na
+## roughly 6x slower than 'cbind'
+testList <- vector("list", length = 100000)
+for (i in 1:100000) testList[[i]] <- sample(1:100, sample(1:100))
+system.time(res1 <- do.call(cbind, testList)) 
+gc()   
+system.time(res2 <- do.call(cbind.na, testList))
+}
 }
 
 \keyword{classes}

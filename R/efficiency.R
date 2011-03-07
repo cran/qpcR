@@ -8,17 +8,17 @@ amount = NULL,
 ...) 
 {  
     if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ", "maxRatio"))
-    if (is.numeric(type) && (type < min(object$DATA[, 1], na.rm = TRUE) || type > max(object$DATA[, 1], na.rm = TRUE)))
-      stop("'type' must be within Cycles range!")
-
     if (!is.null(amount) && !is.numeric(amount))
         stop("'amount' must be numeric!")
-
     if (!is.null(thresh) && !is.numeric(thresh))
-        stop("'thresh' must be numeric!")
-    if (is.numeric(thresh) && (thresh < min(object$DATA[, 2], na.rm = TRUE) || thresh > max(object$DATA[, 2], na.rm = TRUE)))
-      stop("'thresh' must be within fluorescence range!")
-    
+        stop("'thresh' must be numeric!")       
+   
+    allCYCS <- object$DATA[, 1]  
+    if (is.numeric(type) && (type < min(allCYCS, na.rm = TRUE) || type > max(allCYCS, na.rm = TRUE))) stop("'type' must be within Cycles range!")
+
+    allFLUO <- object$DATA[, 2]  
+    if (is.numeric(thresh) && (thresh < min(allFLUO, na.rm = TRUE) || thresh > max(allFLUO, na.rm = TRUE))) stop("'thresh' must be within fluorescence range!")
+                
     CYCS <- object$DATA[, 1]    
     EFFobj<- eff(object, ...)
     SEQ <- EFFobj$eff.x      
@@ -48,12 +48,12 @@ amount = NULL,
     }
 
     ### maxE
-    cycmaxEFF <- EFFobj$effmax.x              
     if (type == "maxE") {
+        cycmaxEFF <- EFFobj$effmax.x   
         maxEFF <- EFFseq[(cycmaxEFF + shift - 1) * 100]        
         CYC <- cycmaxEFF + shift
         if (shift != 0) shiftCyc <- cycmaxEFF + shift             
-    }
+    } else cycmaxEFF <- NA
                                 
     ### numeric threshold cycle
     if (is.numeric(type)) {
@@ -64,21 +64,21 @@ amount = NULL,
     }
 
     ### expR
-    expR <- maxD2 - (maxD1 - maxD2)
-    cycEXP <- SEQ[expR]
     if (type == "expR") {
+        expR <- maxD2 - (maxD1 - maxD2)
+        cycEXP <- SEQ[expR]
         maxEFF <- EFFseq[expR + (100 * shift)]
         if (shift != 0) shiftCyc <- cycEXP + shift
         CYC <- cycEXP + shift
-    }          
+    } else cycEXP <- NA         
     
     ### Cy0
-    Cy0reg <- Cy0(object, plot = FALSE) 
     if (type == "Cy0") {
+        Cy0reg <- Cy0(object, plot = FALSE) 
         maxEFF <- EFFseq[(Cy0reg + shift - 1) * 100]
         if (shift != 0) shiftCyc <- Cy0reg + shift
         CYC <- Cy0reg + shift          
-    }
+    } else Cy0reg <- NA
     
     ### numeric threshold fluorescence
     if (!is.null(thresh)) {
@@ -125,7 +125,7 @@ amount = NULL,
         axis(side = 2, at = fluo, labels = round(fluo, 3), col = 1, 
              col.axis = 1, cex.axis = 0.7, las = 1)      
         par(new = TRUE)
-        plot(SEQ, EFFseq, axes = FALSE, xlab = "", ylab = "", type = "l", col = 4, lwd = 1.5)
+        plot(SEQ, EFFseq, axes = FALSE, xlab = "", ylab = "", ylim = c(1, 2.2), type = "l", col = 4, lwd = 1.5)
         axis(side = 4, col = 4, col.axis = 4, col.ticks = 4)            
         points(CYC, maxEFF, col = 4, pch = 16)      
         mtext(side = 4, "Efficiency", line = 2.5, col = 4)         

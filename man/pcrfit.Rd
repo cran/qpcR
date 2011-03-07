@@ -7,38 +7,37 @@
 
 \description{
 This is the main workhorse function of the qpcR package that fits one of the available models to qPCR data using nonlinear least-squares fitting from \code{\link{nls}}, 
- with sensible starting parameters obtained from either \code{\link{nls.lm}} (default), \code{\link{newuoa}} or \code{\link{optim}}.
+ with sensible starting parameters obtained from either \code{\link{nls.lm}} (default) or \code{\link{optim}}.
 }
 
 \usage{
 pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,  
        opt.method = "all", nls.method = "all", 
-       start = NULL, robust = FALSE, control = nls.control(), 
-       weights = NULL, verbose = TRUE, ...)
+       start = NULL, robust = FALSE, weights = NULL, 
+       verbose = TRUE, ...)
 }
 
 \arguments{
   \item{data}{the name of the dataframe containing the qPCR runs.}
   \item{cyc}{the column containing the cycle data. Defaults to 1.}
-  \item{fluo}{the column containing the raw fluorescence data of the run.}
+  \item{fluo}{the column(s) containing the raw fluorescence data of the run(s). If more than one column is given, the model will be built with the replicates. See 'Details' and 'Examples'.}
   \item{model}{the model to be used for the analysis. Defaults to l4.} 
   \item{do.optim}{if \code{FALSE}, refinement of starting values by any of the optimization methods (see 'Details') will be skipped.}
   \item{opt.method}{all or one of the available optimization methods. See 'Details'.}
   \item{nls.method}{all or one of the available methods in \code{\link{nls}}. See 'Details'.}
   \item{start}{a vector of starting values that can be supplied externally.}
-  \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}
-  \item{control}{an optional list of control settings for \code{\link{nls}} or \code{qpcR:::rnls}.}  
-  \item{weights}{a vector with same length as \code{data} containing the weights for the nonlinear fit.} 
+  \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}   
+  \item{weights}{a vector with same length as \code{data} containing possible weights for the nonlinear fit.} 
   \item{verbose}{logical. If \code{TRUE}, fitting and convergence results will be displayed in the console.}
-  \item{...}{other parameters to be passed to \code{optim}, \code{genoud} or \code{nls}.}     
+  \item{...}{other parameters to be passed to \code{nls.lm}, \code{optim} or \code{nls}.}     
 }
 
 \details{
 The fitting procedure works as follows (hopefully ensuring maximum safeness against convergence errors):
 
 1) Approximate starting values are acquired from \code{model$ssfct}.\cr
-2) Starting values are refined by any of the methods available in \code{optim}, the derivative-free quadratic minimization \code{newuoa} from package 'minqa' or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
- The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", "minqa" and "SANN".
+2) Starting values are refined by any of the methods available in \code{optim} or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
+ The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", and "SANN".
  If any of the methods successfully converged, the remaining are skipped and the refined starting values transferred to \code{\link{nls}}.  
  The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to
  each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting 
@@ -46,7 +45,8 @@ The fitting procedure works as follows (hopefully ensuring maximum safeness agai
 3) The refined starting values from 2) are fitted with \code{\link{nls}} using the order "port", "default" (Gauss-Newton) and "plinear".
  Again, if any of the methods converged, the remaining are skipped.    
 
-This function is to be used at the single run level. Otherwise use \code{\link{pcrbatch}} or \code{\link{modlist}}.
+This function is to be used at the single run level or on replicates (by giving several columns). The latter will built a model based on the replicate values,
+ but only one! If many models should be built on a cohort of replicates, use \code{\link{modlist}} and \code{\link{replist}}.
 
 The output from the optim methods is checked by ensuring all eigenvalues from the hessian are positive, otherwise a notice will occur and the next method in queue is used.  
 
@@ -61,7 +61,7 @@ A model of class 'nls' and 'pcrfit' with the following items attached:\cr
   \item{MODEL}{the model used for fitting.} 
   \item{call2}{the call to \code{pcrfit}.} 
   \item{parMat}{the trace of the starting values for each applied method. Can be used to track problems.}
-  \item{opt.method}{the parameter \code{opt.method}.}
+  \item{opt.method}{the successful (convergence) optimization methods.}
 } 
 
 \author{
@@ -89,7 +89,8 @@ M. J. D. Powell.\cr
 
 \examples{
 ## simple l4 fit of F1.1 of the 'reps' dataset
-pcrfit(reps, 1, 2, l4) 
+m1 <- pcrfit(reps, 1, 2, l4) 
+plot(m1)
 
 ## using BFGS and Nelder from 'optim'
 pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder-Mead"))
@@ -99,7 +100,17 @@ pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder-Mead"))
 pcrfit(reps, 1, 2, l4, do.optim = FALSE, start = c(-5, -0.05, 11, 16)) 
 
 ## make a robust model
-pcrfit(reps, 1, 2, l4, robust = TRUE)    
+pcrfit(reps, 1, 2, l4, robust = TRUE)
+
+## make a replicate model
+m2 <- pcrfit(reps, 1, 2:5, l5)
+plot(m2)
+
+## fit a mechanistic mak3 model
+\dontrun{
+m3 <- pcrfit(reps, 1, 2, mak3)
+plot(m3)
+}    
 }
 
 \keyword{models}

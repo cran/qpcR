@@ -50,7 +50,7 @@ Allen DM.\cr
 
 The Prediction Sum of Squares as a Criterion for Selecting Predictor Variables.\cr
 Allen DM.\cr
-Technical Report Number 23 (1971), Department of Statistics, University of Kentucky.\cr
+Technical Report Number 23 (1971), Department of Statistics, University of Kentucky.
 
 Classical and Modern Regression with Applications.\cr
 Myers RH.\cr

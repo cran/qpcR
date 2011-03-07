@@ -1,6 +1,6 @@
 expcomp <- function(object, ...)
 { 	 		
-  fList <- list(b3, b4, b5, l3, l4, l5, w3, w4, baro5)
+  fList <- list(b3, b4, b5, b6, l3, l4, l5, l6)
 	fnList <- lapply(fList, function(x) x$name)
   print("Fitting all sigmoidal models...")
   flush.console()

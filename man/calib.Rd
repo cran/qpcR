@@ -97,22 +97,22 @@ res <- calib(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES)
 ## using a defined treshold value
 res <- calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
 
+\dontrun{
+## using replicates for reference curve
+ml <- modlist(reps, model = l4)
+DIL <- rep(10^(6:0), each = 4)
+res <- calib(refcurve = ml, dil = DIL)
+
 ## iterating the intercept with 50 steps
 par(ask = FALSE)
-res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter", 
-              opt.step = c(50, 0)) 
+res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter",
+              opt.step = c(50, 0))
 
 ## iterating the intercept/slope with 20 steps
-\dontrun{
 par(ask = FALSE)
 res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
               opt.step = c(20, 20)) 
 }
-
-## using replicates for reference curve
-ml <- modlist(reps, model = l4)
-DIL <- rep(10^(6:0),  each = 4) 
-res <- calib(refcurve = ml, dil = DIL)    
 }
 
 \keyword{models}

@@ -2,11 +2,11 @@ LOF.test <- function(object)
 {
   if (any(class(object) == "replist")) object <- object[[1]] else object <- object
 
-  fetchDATA <- fetchData(object)
-  DATA <- fetchDATA$data
+  fetchDATA <- qpcR:::fetchData(object)  
+  DATA <- fetchDATA$data   
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
-  PRED.name <- fetchDATA$pred.name
+  PRED.name <- fetchDATA$pred.name    
 
   if (length(DATA[, PRED.pos]) == length(unique(DATA[, PRED.pos]))) stop("No response value replicates! Consider 'neill.test'...")
 

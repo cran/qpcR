@@ -4,26 +4,23 @@ cbind.na <- function (..., deparse.level = 1)
     deparse.level <- as.integer(deparse.level)
     stopifnot(0 <= deparse.level, deparse.level <= 2)
     argl <- list(...)
-
-    ### determine max length
-    tempLEN <- NULL
-    for (i in 1:length(argl)) {
-      DIM <- dim(argl[[i]])
-      if (is.null(DIM)) tempLEN[i] <- length(argl[[i]])
-      else tempLEN[i] <- max(apply(argl[[i]], 2, function(x) length(x)))
-    }
-    maxLEN <- max(tempLEN)
-    ### added NA fill to max length
-    for (i in 1:length(argl)) {
-      DIM <- dim(argl[[i]])
-      if (is.null(DIM)) argl[[i]] <- c(argl[[i]], rep(NA, maxLEN - length(argl[[i]])))
-      else argl[[i]] <- apply(argl[[i]], 2, function(x) c(x, rep(NA, maxLEN - length(x))))
-    }
-
+      
     while (na > 0 && is.null(argl[[na]])) {
         argl <- argl[-na]
         na <- na - 1
     }
+    
+    ### determine max length/nrow
+    tempLEN <- integer(length = length(argl))
+    for (i in 1:length(argl)) {
+      if (is.null(dim(argl[[i]]))) tempLEN[i] <- length(argl[[i]]) else tempLEN[i] <- nrow(argl[[i]])
+    }    
+    maxLEN <- max(tempLEN, na.rm = TRUE)     
+    ### added NA fill to max length/nrow
+    for (i in 1:length(argl)) {
+      if (is.null(dim(argl[[i]]))) argl[[i]] <- c(argl[[i]], rep(NA, maxLEN - length(argl[[i]])))  
+      else argl[[i]] <- rbind(argl[[i]], matrix(nrow = maxLEN - nrow(argl[[i]]), ncol = ncol(argl[[i]])))
+    }    
     
     if (na == 0)
         return(NULL)
