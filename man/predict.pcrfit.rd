@@ -44,16 +44,16 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
+m1 <- pcrfit(reps, 1, 2, l5)
 
 ## which raw fluorescence value at cycle number = 17?
-predict(m, newdata = data.frame(Cycles = 17))
+predict(m1, newdata = data.frame(Cycles = 17))
 
 ## cycle numbers 20:25, with 95\% confidence?
-predict(m, newdata = data.frame(Cycles = 20:25), interval = "confidence")
+predict(m1, newdata = data.frame(Cycles = 20:25), interval = "confidence")
 
 ## which cycle at Fluo = 4, with 95\% prediction?
-predict(m, newdata = data.frame(Fluo = 4), which = "x", interval = "prediction")
+predict(m1, newdata = data.frame(Fluo = 4), which = "x", interval = "prediction")
 }
 
 \keyword{models}

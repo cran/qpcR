@@ -34,15 +34,15 @@ Andrej-Nikolai Spiess
 
 \examples{
 ## create a 'modlist'
-ml <- modlist(reps, 1, 2:5, l4)
+ml1 <- modlist(reps, 1, 2:5, l4)
 
 ## convert into 'replist'
-rl <- replist(ml, group = rep(1, 4))
+rl1 <- replist(ml1, group = rep(1, 4))
 par(mfrow = c(2, 1))
-plot(rl, main = "A 'replist'")
+plot(rl1, main = "A 'replist'")
 
 ## convert back to a 'modlist'
-ml2 <- rep2mod(rl) 
+ml2 <- rep2mod(rl1) 
 plot(ml2, main = "A 'modlist'")
 }
 

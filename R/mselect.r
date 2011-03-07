@@ -17,7 +17,7 @@ do.all = FALSE,
 
   if (is.null(fctList)) {
     if (mtype %in% c("b3", "b4", "b5", "b6", "b7")) fctLIST <- list(b3, b4, b5, b6, b7)
-    if (mtype %in% c("l3", "l4", "l5", "l6", "l6")) fctLIST <- list(l3, l4, l5, l6, l7)
+    if (mtype %in% c("l3", "l4", "l5", "l6", "l7")) fctLIST <- list(l3, l4, l5, l6, l7)
     if (mtype == "mak2" || mtype == "mak3") fctLIST <- list(mak2, mak3)
   } else fctLIST <- fctList
   
@@ -32,7 +32,7 @@ do.all = FALSE,
   modLIST <- list()
   
   for (i in 1:length(fctLIST)) {
-    tempMOD <- try(pcrfit(object$DATA, 1, 2, fctLIST[[i]], opt.method = object$opt.method), silent = TRUE)
+    tempMOD <- try(pcrfit(object$DATA, 1, 2, fctLIST[[i]], opt.method = object$opt.method, verbose = verbose), silent = TRUE)
     if (inherits(tempMOD, "try-error")) next     
     modLIST[[i]] <- tempMOD
   } 
@@ -88,8 +88,7 @@ do.all = FALSE,
     optMODEL <- fctLIST[[SELECT]]
   }
       
-  cat("\n")
-  optMODEL <- pcrfit(object$DATA, 1, 2, optMODEL, opt.method = object$opt.method)    
+  optMODEL <- pcrfit(object$DATA, 1, 2, optMODEL, opt.method = object$opt.method, verbose = verbose)    
 
   optMODEL$retMat <- retMAT
   return(optMODEL)

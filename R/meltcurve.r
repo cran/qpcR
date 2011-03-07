@@ -3,6 +3,7 @@ data,
 temps = NULL, 
 fluos = NULL, 
 window = NULL, 
+norm = FALSE, 
 span.smooth = 0.05, 
 span.peaks = 51,
 is.deriv = FALSE, 
@@ -26,7 +27,7 @@ cut.Area = 0,
   ### create dataframes with temp and fluo values
   TEMPS <- data[, temps, drop = FALSE]
   FLUOS <- data[, fluos, drop = FALSE]    
-  
+   
   ### define grid 
   if (!is.null(Tm.opt)) {
     SM.seq <- seq(0, 0.2, by = 0.01)
@@ -49,7 +50,10 @@ cut.Area = 0,
       SEL <- which(TEMP <= window[1] | TEMP > window[2])
       TEMP <- TEMP[-SEL]
       FLUO <- FLUO[-SEL]
-    }         
+    }       
+    
+    ### optionally normalize fluo values
+    if (norm) FLUO <- qpcR:::rescale(FLUO, 0, 1)    
     
     ### define result matrix 
     resMAT <- matrix(nrow = nrow(GRID), ncol = 3)
@@ -85,20 +89,22 @@ cut.Area = 0,
         X <- tempDATA[WHICH]
         Y <- derivDATA[WHICH]           
         PEAKAREA <- try(qpcR:::peakArea(X, Y), silent = TRUE)
-        if (inherits(PEAKAREA, "try-error")) PEAKAREA <- NA          
-        PA[k] <- PEAKAREA$area
-        BL <- PEAKAREA$baseline
-        
-        ### remove TMs if peak area < cutoff
-        if (PA[k] < cut.Area) {
-          PA[k] <- NA
-          BL <- NA
-          TMs[k] <- NA
-        }
+        if (!inherits(PEAKAREA, "try-error")) {
+          PA[k] <- PEAKAREA$area
+          BL <- PEAKAREA$baseline
+        } else PA[k] <- BL <- NA     
         
         baseLIST[[k]] <- cbind.na(Temp = X, baseline = BL)                           
       }         
       
+      ### remove TMs if peak area < cutoff
+      SEL <- which(PA < cut.Area | is.na(PA))
+      if (length(SEL) > 0) {
+        PA <- delete(PA, SEL, fill = TRUE)
+        BL <- NA
+        RES$Tm <- delete(RES$Tm, SEL, fill = TRUE)
+      }           
+        
       ### attach peak area values
       RES <- cbind.na(RES, Area = PA)      
       

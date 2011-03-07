@@ -1,24 +1,24 @@
-\name{outlier}
-\alias{outlier}
+\name{takeoff}
+\alias{takeoff}
 
-\title{Calculation of qPCR outlier cycles}
+\title{Calculation of the qPCR takeoff point}
 
 \description{
-Calculates the first significant outlier cycle using the studentized residuals method.
+Calculates the first significant cycle of the exponential region (takeoff point) using the studentized residuals method from Tichopad et al (2003).
 }
 
 \usage{
-outlier(object, pval = 0.05, nsig = 3)
+takeoff(object, pval = 0.05, nsig = 3)
 }
 
 \arguments{
   \item{object}{an object of class 'pcrfit'.}
-  \item{pval}{the p-value for the outlier test.}
-  \item{nsig}{the number of successive outlier tests. See 'Details'.}      
+  \item{pval}{the p-value for the takeoff test.}
+  \item{nsig}{the number of successive takeoff tests. See 'Details'.}      
 }
 
 \details{
-Outliers are calculated essentially as described in the reference below.
+Takeoff points are calculated essentially as described in the reference below.
 The steps are:
 
 1) Fitting a linear model to some background cycles 1:x.\cr
@@ -30,8 +30,8 @@ The steps are:
 
 \value{
 A list with the following components:
-  \item{outl}{the outlier cycle.}
-  \item{f.outl}{the fluorescence at \code{outl}.}    
+  \item{top}{the takeoff point.}
+  \item{f.top}{the fluorescence at \code{top}.}    
 }
 
 \author{
@@ -44,11 +44,11 @@ Tichopad et al., \emph{Nucleic Acids Research}, 2003, \bold{e122}.\cr
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
-out <- outlier(m) 
-plot(m)
-abline(v = out$outl, col = 2)
-abline(h = out$f.outl, col = 2)  
+m1 <- pcrfit(reps, 1, 2, l5)
+res1 <- takeoff(m1) 
+plot(m1)
+abline(v = res1$top, col = 2)
+abline(h = res1$f.top, col = 2)  
 }
 
 \keyword{models}

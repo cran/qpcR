@@ -13,7 +13,8 @@
 pcrsim(cyc = 1:30, model = l4, par = NULL, nsim = 10,        
        error = 0.02, errfun = function(y) 1, plot = TRUE,
        fitmodel = NULL, select = FALSE, 
-       statfun = function(y) mean(y, na.rm = TRUE), ...)
+       statfun = function(y) mean(y, na.rm = TRUE),
+       PRESS = FALSE, ...)
 }
 
 \arguments{
@@ -27,18 +28,16 @@ pcrsim(cyc = 1:30, model = l4, par = NULL, nsim = 10,
   \item{fitmodel}{a model or model list to test against the initial model.} 
   \item{select}{if \code{TRUE}, a matrix is returned with the best model in respect to each of the GOF measures.}  
   \item{statfun}{a function to be finally applied to all collected GOF measures, default is the average.} 
+  \item{PRESS}{logical. If set to \code{TRUE}, the computationally expensive \code{\link{PRESS}} statistic will be calculated.}
   \item{...}{other parameters to be passed on to \code{\link{plot}} or \code{\link{pcrfit}}.}
 }
 
 \details{
-The value defined under \code{error} is just the standard deviation added plainly to each y_i value from the initial model, thus generating
- a dataset with random homoscedastic noise. With aid of \code{errfun}, the distribution of the error along the y_i values can
- be altered and therefore be used to generate heteroscedastic variance along the curve, so that the standard deviation is a function
- of the magnitude.
+The value defined under \code{error} is just the standard deviation added plainly to each y value from the initial model, thus generating a dataset with homoscedastic error. With aid of \code{errfun}, the distribution of the error along the y values can be altered and therefore be used to generate heteroscedastic error along the curve, so that the standard deviation is a function of the magnitude.
  
 Example:\cr
 \code{errfun = function(y) 1}\cr
-same variance for all y_i, as is.\cr
+same variance for all y, as is.\cr
 
 \code{errfun = function(y) y}\cr
 variance as a function of the y-magnitude.\cr
@@ -65,34 +64,30 @@ Andrej-Nikolai Spiess
 
 \examples{
 ## generate initial model
-m <- pcrfit(reps, 1, 2, l4)
+m1 <- pcrfit(reps, 1, 2, l4)
 
 ## simulate homoscedastic error
 ## and test models l4, l5 and l6 
 ## on data
-res <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
+res1 <- pcrsim(cyc = 1:30, model = l4, par = coef(m1),
               error = 0.2, nsim = 20, fitmodel = list(l4, l5, l6))
 
+\dontrun{
 ## use heteroscedastic noise typical for 
 ## qPCR: more noise at lower fluorescence
-\dontrun{
-res2 <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
+res2 <- pcrsim(cyc = 1:30, model = l4, par = coef(m1),
               error = 0.01, errfun = function(y) 1/y,
               nsim = 20, fitmodel = list(l4, l5, l6))
-}
 
 ## get 95\% confidence interval for 
 ## the models GOF in question (l4, l5, l6) 
-\dontrun{
-res <- pcrsim(cyc = 1:30, model = l4, par = coef(m),
+res3 <- pcrsim(cyc = 1:30, model = l4, par = coef(m1),
               error = 0.2, nsim = 20, fitmodel = list(l4, l5, l6),
               statfun = function(y) quantile(y, c(0.025, 0.975)))
 res$statList  
-}  
 
 ## show best model for each simulation
 ## based on different GOF measures
-\dontrun{
 m2 <- pcrfit(reps, 1, 2, l3)
 res <- pcrsim(cyc = 1:30, model = l3, par = coef(m2),
               error = 0.2, nsim = 200, fitmodel = list(l3, l4, l5),

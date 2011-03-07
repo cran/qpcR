@@ -6,7 +6,7 @@
 \description{
 Simple wrapper function to easily import qPCR data from the clipboard (default) or tab-delimited text files.
 In contrast to \code{\link{pcrimport}}, this function has no enhanced formatting features, but is quick and
-easy to use on data that has been pre-formatted, i.e. as in dataset 'reps' ('Cycles' in the first column, all
+easy to use on data that has been pre-formatted, i.e. as in dataset \code{\link{reps}} ('Cycles' in the first column, all
 remaining columns with sensible names.
 }
 

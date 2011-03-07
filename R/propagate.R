@@ -85,7 +85,7 @@ verbose = FALSE,
         resSIM <- datSIM <- confSIM <- allSIM <- NA
       }      
       
-      ### permutation statistics with ties      
+      ### permutation statistics with ties
       if (do.perm) {
         if (is.null(ties)) ties <- 1:ncol(data)
         LEVELS <- unique(ties[!is.na(ties)])
@@ -97,14 +97,14 @@ verbose = FALSE,
             WHICH <- which(ties == LEVELS[j])              
             datPERM[i, WHICH] <- data[SAMPLE[j], WHICH]                       
            }          
-        }  
+        }
                                    
         colnames(datPERM) <- colnames(data)                          
         resPERM <- apply(datPERM, 1, function(x) eval(EXPR, envir = as.list(x)))
-        confPERM <- quantile(unique(resPERM), c(alpha/2, 1 - (alpha/2)), na.rm = TRUE)             
-        
+        confPERM <- quantile(unique(resPERM), c(alpha/2, 1 - (alpha/2)), na.rm = TRUE)
+
         ### permutation hypothesis testing
-        datPERM2 <- datPERM                 
+        datPERM2 <- datPERM
       
         for (i in 1:nrow(datPERM2)) {
           permLEVELS <- sample(LEVELS)
@@ -116,20 +116,20 @@ verbose = FALSE,
         }            
         
         colnames(datPERM2) <- colnames(datPERM)
-        resPERM2 <- apply(datPERM2, 1, function(x) eval(EXPR, envir = as.list(x)))   
-        init <- resPERM 
+        resPERM2 <- apply(datPERM2, 1, function(x) eval(EXPR, envir = as.list(x)))
+        init <- resPERM
         perm <- resPERM2           
         LOGIC <- lapply(perm.crit, function(x) eval(parse(text = x))) 
-        names(LOGIC) <- perm.crit          
-        pvalPERM <- lapply(LOGIC, function(x) sum(x == TRUE, na.rm = TRUE)/(length(x[!is.na(x)])))  
-        names(pvalPERM) <- perm.crit                   
+        names(LOGIC) <- perm.crit
+        pvalPERM <- lapply(LOGIC, function(x) sum(x == TRUE, na.rm = TRUE)/(length(x[!is.na(x)])))
+        names(pvalPERM) <- perm.crit
         datLOGIC <- as.data.frame(LOGIC)           
         allPERM <- cbind(datPERM, resPERM, datPERM2, resPERM2, datLOGIC)                                                 
       } else {
         datPERM <- resPERM <- resPERM2 <- confPERM <- pvalPERM <- allPERM <- NA
-      }        
-                
-      ### error propagation        
+      }
+
+      ### error propagation
       derivs <- try(lapply(colnames(DATA), D, expr = expr), silent = TRUE)
       if (inherits(derivs, "try-error")) stop(paste("Error within derivs:", derivs))      
       meanPROP <- eval(EXPR, envir = as.list(meanvals))
@@ -137,8 +137,8 @@ verbose = FALSE,
       errorPROP <- as.numeric(NDERIVS %*% SIGMA %*% matrix(NDERIVS))        
       confNORM <- abs(qnorm(alpha/2)) * sqrt(errorPROP)       
       confPROP <- c(meanPROP - confNORM, meanPROP + confNORM)
-      distPROP <- rnorm(nsim, meanPROP, sqrt(errorPROP))       
-                                       
+      distPROP <- rnorm(nsim, meanPROP, sqrt(errorPROP))
+
       ### plotting simulations, permutations & propagations
       if (plot) {           
         par(mfrow = c(3, 1))
@@ -147,19 +147,21 @@ verbose = FALSE,
                 
         for (i in 1:3) {
           plotDATA <- switch(i, resSIM, resPERM, distPROP)
-          confDATA <- switch(i, confSIM, confPERM, confPROP)  
+          confDATA <- switch(i, confSIM, confPERM, confPROP)
           
           if (logx) {
             plotDATA <- suppressWarnings(log(plotDATA))  
-            confDATA <- suppressWarnings(log(confDATA))          
-          }     
-                    
+            confDATA <- suppressWarnings(log(confDATA))
+          }
+
           FILTER <- quantile(plotDATA, c(0.01, 0.99), na.rm = TRUE)
           plotDATA <- plotDATA[plotDATA > FILTER[1] & plotDATA < FILTER[2]]
+
+          plotDATA <- plotDATA[!is.na(plotDATA)]
           
           if (length(plotDATA) <= 1) next() 
-          if (!exists("XLIM")) XLIM <- range(plotDATA, na.rm = TRUE)         
-                   
+          if (!exists("XLIM")) XLIM <- range(plotDATA, na.rm = TRUE)
+
           HIST <- hist(plotDATA, xlab = "", ylab = "", col = "gray", yaxt = "n", breaks = 100, 
                        main = MAIN[i], xlim = XLIM, xaxt = "n", ...) 
           aT = axTicks(side = 1)          

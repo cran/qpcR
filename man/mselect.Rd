@@ -42,7 +42,7 @@ Criterion 8), Akaike weights, can be used for nested and non-nested regimes, whi
 For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better.
 The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{LR}}), corrected Akaike weights
  (\code{\link{akaike.weights}}) or reduced chi-square (\code{\link{fitchisq}}) and returned as a new model.
-When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5/b6; l3/l4/l5/l6.
+When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5/b6/b7; l3/l4/l5/l6/l7.
 If supplying nested models, please do this with ascending number of parameters.  
 }
 
@@ -77,9 +77,9 @@ mselect(m3, do.all = TRUE) ## l7 wins by far!
 
 ## on replicated data
 ## using reduced chi-square
-ml <- modlist(reps, fluo = 2:5, model = l4)
-rl <- replist(ml, group = c(1, 1, 1, 1))
-mselect(rl, crit = "chisq")  ## converted to l6!
+ml1 <- modlist(reps, fluo = 2:5, model = l4)
+rl1 <- replist(ml1, group = c(1, 1, 1, 1))
+mselect(rl1, crit = "chisq")  ## converted to l6!
 }
 
 \keyword{models}

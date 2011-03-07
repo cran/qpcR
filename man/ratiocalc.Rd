@@ -3,11 +3,7 @@
 
 \title{Calculation of ratios from qPCR runs with/without reference data}
 
-\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between two samples, 
- using normalization against a reference gene, if supplied. The input can be single qPCR data or (more likely) data containing replicates. 
-Errors and confidence intervals for the obtained ratios can be calculated by Monte-Carlo simulation, a permutation approach
- similar to the popular REST software and by error propagation. 
-Statistical significance for the ratios is calculated by a permutation approach of randomly reallocated vs. non-reallocated data. See 'Details'.
+\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between two samples, using normalization against a reference gene, if supplied. The input can be single qPCR data or (more likely) data containing replicates. Errors and confidence intervals for the obtained ratios can be calculated by Monte-Carlo simulation, a permutation approach similar to the popular REST software and by error propagation. Statistical significance for the ratios is calculated by a permutation approach of randomly reallocated vs. non-reallocated data. See 'Details'.
 }
 
 \usage{
@@ -28,26 +24,21 @@ ratiocalc(data, group = NULL, which.eff = c("sig", "sli", "exp", "mak"),
 }
 
 \details{
-The replicates of the 'pcrbatch' data columns are to be defined as a character vector with the following abbreviations:\cr
+The replicates for the data columns are to be defined as a character vector with the following abbreviations:\cr
 
 "gs":   gene-of-interest in target sample\cr
 "gc":   gene-of-interest in control sample\cr
 "rs":   reference gene in target sample\cr
 "rc":   reference gene in control sample\cr
 
-There is no distinction between the different runs of the same sample, so that three different runs of a gene of interest in
- a target sample are defined as c("gs", "gs", "gs"). The error analysis calculates statistics from ALL replicates, so that
- a further sub-categorization of runs seems superfluous.
-NOTE: If the setup consists of different sample or gene combinations, use \code{\link{ratiobatch}}!
+There is no distinction between the different runs of the same sample, so that three different runs of a gene of interest in a target sample are defined as c("gs", "gs", "gs"). The error analysis calculates statistics from ALL replicates, so that a further sub-categorization of runs seems superfluous. NOTE: If the setup consists of different sample or gene combinations, use \code{\link{ratiobatch}}!
 
 Examples:\cr
 No replicates: NULL.\cr
 2 runs with 2 replicates each, no reference: c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc").\cr
 1 run with two replicates each and reference data:  c("gs", "gs", "gc", "gc", "rs", "rs", "rc", "rc").\cr
 
-\code{type.eff} defines the pre-processing of the efficiencies before being transferred to \code{\link{propagate}}.
-The qPCR community sometimes uses single efficiencies, or averaged over replicates etc., so that different settings
- were implemented. In detail, these are the following:\cr
+\code{type.eff} defines the pre-processing of the efficiencies before being transferred to \code{\link{propagate}}. The qPCR community sometimes uses single efficiencies, or averaged over replicates etc., so that different settings were implemented. In detail, these are the following:\cr
 
 "individual":     The individual efficiencies from each run are used.\cr
 "mean.single":    Efficiencies are averaged over all replicates.\cr
@@ -55,9 +46,7 @@ The qPCR community sometimes uses single efficiencies, or averaged over replicat
 "mean.pair":      Efficiencies are averaged from all replicates of target sample AND control.\cr
 "median.pair":    Same as above but median instead of mean.\cr
 
-Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}.
-The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio 
- calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
+Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}. The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
   
 \code{type.eff = "mean.single"}     # averaging efficiency across replicates\cr
 \code{which.eff = "sli"}            # taking efficiency from the sliding window method\cr
@@ -67,11 +56,7 @@ The ratios are calculated according to the following formulas:\cr
 Without reference PCR: \deqn{\frac{E(gs)^{cp(gs)}}{E(gc)^{cp(gc)}}}
 With reference PCR: \deqn{\frac{E(gs)^{cp(gs)}}{E(gc)^{cp(gc)}}/\frac{E(rs)^{cp(rs)}}{E(rc)^{cp(rc)}}}  
 
-The permutation approach permutates threshold cycles and efficiency replicates within sample and control groups. 
-The sample runs and control runs (and their respective efficiencies) are tied together, which is similar
- to the popular REST software approach ("pairwise-reallocation test"). Ratios are calculated for each permutation and compared to ratios obtained if samples were
- randomly reallocated from the sample to the control group. Three p-values are calculated from all permutations which gave a higher/equal/lower ratio than the original data.
-The resulting p-values are thus an indication for the significance in any direction AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
+The permutation approach permutates threshold cycles and efficiency replicates within sample and control groups. The sample runs and control runs (and their respective efficiencies) are tied together, which is similar to the popular REST software approach ("pairwise-reallocation test"). Ratios are calculated for each permutation and compared to ratios obtained if samples were randomly reallocated from the sample to the control group. Three p-values are calculated from all permutations which gave a higher/equal/lower ratio than the original data. The resulting p-values are thus an indication for the significance in any direction AGAINST the null hypothesis that ratios calculated by permutation are just by chance.
 
 If the mechanistic \code{mak3} model was used in \code{\link{pcrbatch}}, this is automatically recognized and the ratio calculation is conducted from the \code{D0} values of the model:\cr
 Without reference PCR: \deqn{\frac{D0(gs)}{D0(gc)}}
@@ -85,7 +70,7 @@ Propagation:  From the propagated error, assuming normality.
 
 \value{
 A list with the following components:\cr
-\code{data}: the data that was transferred to \code{\link{propagate}} for  the error analysis.\cr
+\code{data}: the data that was transferred to \code{\link{propagate}} for the error analysis.\cr
 \code{data.Sim, data.Perm, data.Prop, derivs, covMat}: The complete output from \code{\link{propagate}}.\cr
 \code{summary}: a summary of the results obtained from the Monte Carlo simulation, permutation and error propagation. 
 }
@@ -95,11 +80,7 @@ Andrej-Nikolai Spiess
 }
 
 \note{
-The error calculated from qPCR data by \code{\link{propagate}} often seems quite high. This largely depends on the error of the exponent (i.e. threshold cycles)
- of the exponential function. The error usually decreases when setting \code{use.cov = TRUE} in the \code{...} part of the function. It can be debated anyhow,
- if the variables 'efficiency' and 'threshold cycles' have a covariance structure. As the efficiency is deduced at the second derivative maximum of the sigmoidal
- curve, variance in the second should show an effect on the first, such that the use of a var-covar matrix might be feasible. It is also commonly encountered
- that the propagated error is much higher when using reference data, as the number of partial derivative functions increases.
+The error calculated from qPCR data by \code{\link{propagate}} often seems quite high. This largely depends on the error of the exponent (i.e. threshold cycles) of the exponential function. The error usually decreases when setting \code{use.cov = TRUE} in the \code{...} part of the function. It can be debated anyhow, if the variables 'efficiency' and 'threshold cycles' have a covariance structure. As the efficiency is deduced at the second derivative maximum of the sigmoidal curve, variance in the second should show an effect on the first, such that the use of a var-covar matrix might be feasible. It is also commonly encountered that the propagated error is much higher when using reference data, as the number of partial derivative functions increases.
 }
 
 \references{
@@ -115,26 +96,36 @@ Pfaffl M \emph{et al.} (2002) Relative expression software tool (REST) for group
 ## no reference, 4 replicates each
 ## individual efficiencies for error
 ## calculation. 
-DAT <- pcrbatch(reps, fluo = 2:9, model = l4)
-GROUP <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
-res <- ratiocalc(DAT, GROUP, which.eff = "sli", 
+DAT1 <- pcrbatch(reps, fluo = 2:9, model = l4)
+GROUP1 <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
+res1 <- ratiocalc(DAT1, group = GROUP1, which.eff = "sli",
                  type.eff = "individual", which.cp = "cpD2")       
-res$summary
+res1$summary
 
 ## Gets even better using averaged efficiencies 
 ## over all replicates.
 ## p-value indicates significant upregulation in 
 ## comparison to randomly reallocated 
 ## samples (similar to REST software)
-res2 <- ratiocalc(DAT, GROUP, which.eff = "sli", 
+res2 <- ratiocalc(DAT1, GROUP1, which.eff = "sli", 
                   type.eff = "mean.single", which.cp = "cpD2")                 
 res2$summary    
 
+## failed fits and sigmoidal outliers 
+## using 'testdat' set.
+## GROUP is automatically reduced to
+## runs that passed checking.
+DAT2 <- pcrbatch(testdat[, 1:9], fluo = 2:9, model = l5)
+GROUP <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
+res_mod <- ratiocalc(DAT2, group = GROUP, which.eff = "sli",
+                 type.eff = "individual", which.cp = "cpD2")       
+res_mod$summary
+
+\dontrun{
 ## Using reference data.
 ## Toy example is same data as above
 ## but replicated as reference such
 ## that the ratio should be 1.
-\dontrun{
 DAT3 <- pcrbatch(reps, fluo = c(2:9, 2:9), model = l4)
 GROUP3 <- c("gs", "gs", "gs", "gs", 
             "gc", "gc", "gc", "gc",
@@ -144,36 +135,13 @@ res3 <- ratiocalc(DAT3, GROUP3, which.eff = "sli",
                   type.eff = "mean.single", which.cp = "cpD2")                  
 res3$summary
 
-## Same as above, but reference data
-## is mirrored such that the ratio 
-## is squared.   
-DAT4 <- pcrbatch(reps, fluo = c(2:9, 9:2), model = l4)
-GROUP4 <- c("gs", "gs", "gs", "gs", 
-            "gc", "gc", "gc", "gc",
-            "rs", "rs", "rs", "rs",
-            "rc", "rc", "rc", "rc")
-res4 <- ratiocalc(DAT4, GROUP4, which.eff = "sli", 
-                  type.eff = "mean.single", which.cp = "cpD2")
-res4$summary
-}
-
 ## Using one of the mechanistic models
 ## => ratios are calculated from the replicate
 ## D0 values. Without/with reference gene.
-\dontrun{
-DAT <- pcrbatch(reps, fluo = 2:9, do.mak = TRUE)
+DAT4 <- pcrbatch(reps, fluo = 2:9, do.mak = TRUE)
 GROUP <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
-res <- ratiocalc(DAT, GROUP, which.eff = "mak")
-res$summary
-
-DAT2 <- pcrbatch(reps, fluo = c(2:9, 2:9), do.mak = TRUE)
-GROUP2 <- c("gs", "gs", "gs", "gs", 
-            "gc", "gc", "gc", "gc",
-            "rs", "rs", "rs", "rs",
-            "rc", "rc", "rc", "rc")
-res2 <- ratiocalc(DAT2, GROUP2, which.eff = "mak")      
-res2$summary
-}    
+res4 <- ratiocalc(DAT4, GROUP, which.eff = "mak")
+res4$summary
 
 ## Example without replicates 
 ## => no Monte-Carlo simulations
@@ -184,7 +152,6 @@ res5 <- ratiocalc(DAT5, GROUP5, which.eff = "sli",
                   type.eff = "individual", which.cp = "cpD2")
 res5$summary
 
-\dontrun{
 ## Using external efficiencies
 DAT6 <- pcrbatch(reps, fluo = 2:9, model = l5)
 GROUP6 <- c("gs", "gs", "gs", "gs", "gc", "gc", "gc", "gc")
@@ -192,7 +159,6 @@ EFF6 <- rep(c(1.72, 1.76), c(4, 4))
 res6 <- ratiocalc(DAT6, GROUP6, which.eff = EFF6, 
                  type.eff = "individual", which.cp = "cpD2")       
 res6$summary
-
 
 ## Using external efficiencies AND
 ## external threshold cycles
@@ -203,7 +169,6 @@ CP7 <- c(15.44, 15.33, 14.84, 15.34, 18.89, 18.71, 18.13, 17.22)
 res7 <- ratiocalc(DAT7, GROUP7, which.eff = EFF7, 
                  type.eff = "individual", which.cp = CP7)       
 res7$summary
-}
 
 ## Compare 'propagate' to REST software
 ## using the data from the REST 2008
@@ -213,38 +178,18 @@ res7$summary
 ## Ties define random reallocation of crossing points
 ## keeping controls and samples together.
 ## See help for 'propagate'.
-\dontrun{
 EXPR <- expression((2.01^(cp.gc - cp.gs)/1.97^(cp.rc - cp.rs)))
 cp.rc <- c(26.74, 26.85, 26.83, 26.68, 27.39, 27.03, 26.78, 27.32)
 cp.rs <- c(26.77, 26.47, 27.03, 26.92, 26.97, 26.97, 26.07, 26.3, 26.14, 26.81)
 cp.gc <- c(27.57, 27.61, 27.82, 27.12, 27.76, 27.74, 26.91, 27.49)
 cp.gs <- c(24.54, 24.95, 24.57, 24.63, 24.66, 24.89, 24.71, 24.9, 24.26, 24.44)
-DAT6 <- cbind.na(cp.rc, cp.rs, cp.gc, cp.gs)
+DAT6 <- qpcR:::cbind.na(cp.rc, cp.rs, cp.gc, cp.gs)
 res6 <- propagate(EXPR, DAT6, do.sim = TRUE, do.perm = TRUE, 
                   ties = c(1, 2, 1, 2), verbose = TRUE)
 res6$summary
 }
+}
 
-## Does error propagation in qPCR quantitation make sense?
-## In ratio calculations based on (E1^cp1)/(E2^cp2),
-## only 2\% error in each of the variables result in
-## over 50\% propagated error!
-\dontrun{
-x <- NULL
-y <- NULL
-for (i in seq(0, 0.1, by = 0.01)) {
-      E1 <- c(1.7, 1.7 * i)
-      cp1 <- c(15, 15 * i)
-      E2 <- c(1.7, 1.7 * i)
-      cp2 <- c(18, 18 * i)
-      DF <- cbind(E1, cp1, E2, cp2)
-      res <- propagate(expression((E1^cp1)/(E2^cp2)), DF, type = "stat", plot = FALSE)
-      x <- c(x, i * 100)       
-      y <- c(y, (res$summary[2, 3]/res$summary[1, 3]) * 100)
-}
-plot(x, y, xlim = c(0, 10), lwd = 2, xlab = "c.v. [%]", ylab = "c.v. prop [%]")
-}
-}
 
 
 

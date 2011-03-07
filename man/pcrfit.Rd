@@ -81,10 +81,6 @@ K. Levenberg.\cr
 An Algorithm for Least-Squares Estimation of Nonlinear Parameters.\cr
 D. Marquardt.\cr
 \emph{SIAM J Appl Math} (1963), \bold{11}: 431-441.\cr
-
-Developments of NEWUOA for minimization without derivatives.\cr
-M. J. D. Powell.\cr
-\emph{IMA Journal of Numerical Analysis} (2008), \bold{28}: 649-664. 
 }
 
 \examples{
@@ -106,8 +102,8 @@ pcrfit(reps, 1, 2, l4, robust = TRUE)
 m2 <- pcrfit(reps, 1, 2:5, l5)
 plot(m2)
 
-## fit a mechanistic mak3 model
 \dontrun{
+## fit a mechanistic mak3 model
 m3 <- pcrfit(reps, 1, 2, mak3)
 plot(m3)
 }    

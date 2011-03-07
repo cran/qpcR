@@ -74,12 +74,12 @@ Boostrap accuracy for non-linear regression models.\cr
 ## too less iterations...
 par(ask = FALSE)
 m1 <- pcrfit(reps, 1, 2, l4)
-res <- pcrboot(m1, B = 20)
+pcrboot(m1, B = 20)
 
 ## jackknifing with leaving
 ## 5 datapoints out
 m2 <- pcrfit(reps, 1, 2, l4)
-res <- pcrboot(m2, type = "jack", njack = 5, B = 20)
+pcrboot(m2, type = "jack", njack = 5, B = 20)
 }
     
 \keyword{models}

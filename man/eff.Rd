@@ -46,18 +46,18 @@ Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
 }  
 
 \examples{
-m <- pcrfit(reps, 1, 7, l5)
+m1 <- pcrfit(reps, 1, 7, l5)
 
 ## with default 100 points per cycle
-eff(m, plot = TRUE) 
+eff(m1, plot = TRUE) 
 
 ## not all data and only 10 points per cycle
-eff(m, sequence = c(5, 35, 0.1), plot = TRUE) 
+eff(m1, sequence = c(5, 35, 0.1), plot = TRUE) 
 
 ## using cubic splines
 ## it is preferred to use the
 ## smoothing option 
-eff(m, type = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
+eff(m1, type = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
 }
 
 \keyword{models}

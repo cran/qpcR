@@ -1,4 +1,4 @@
-outlier <- function(object, pval = 0.05, nsig = 3)
+takeoff <- function(object, pval = 0.05, nsig = 3)
 {
       require(MASS, quietly = TRUE)
       
@@ -16,10 +16,10 @@ outlier <- function(object, pval = 0.05, nsig = 3)
       resl <- sapply(res, function(x) x < pval)       
       resl[is.na(resl)] <- FALSE
            
-      which.outl <- sapply(1:length(resl), function(x) all(resl[x:(x + nsig)]))
-      min.outl <- min(which(which.outl == TRUE), na.rm = TRUE)
-      outl <- as.numeric(names(resl[min.outl]))                    
+      which.top <- sapply(1:length(resl), function(x) all(resl[x:(x + nsig)]))
+      min.top <- min(which(which.top == TRUE), na.rm = TRUE)
+      top <- as.numeric(names(resl[min.top]))                    
       
-      fluo.outlier <- as.numeric(pcrpred(object, newdata = data.frame(Cycles = outl)))
-      return(list(outl = outl, f.outl = fluo.outlier))
+      fluo.top <- as.numeric(predict(object, newdata = data.frame(Cycles = top)))
+      return(list(top = top, f.top = fluo.top))
 }

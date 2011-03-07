@@ -1,6 +1,6 @@
 \name{efficiency}
 \alias{efficiency} 
-\alias{efficiency.modlist} 
+
 
 \title{Calculation of qPCR efficiency and other important qPCR parameters}
 
@@ -35,7 +35,7 @@ fitted curve, but taken from different points at the curve, as to be defined in 
 "cpD2"  taken from the maximum of the second derivative curve,\cr
 "cpD1"  taken from the maximum of the first derivative curve,\cr
 "maxE"  taken from the maximum of the efficiency curve,\cr
-"expR"  taken from the exponential region by \eqn{expR = cpD2-(cpD1-cpD2))},\cr
+"expR"  taken from the exponential region by \eqn{expR = cpD2-(cpD1-cpD2)},\cr
 "CQ"    taken from the 20\% value of the fluorescence at "cpD2" as developed by Corbett Research (comparative quantification),\cr
 "Cy0"   the intersection of a tangent on the first derivative maximum with the abscissa as calculated according to Guescini et al. or\cr
 a numeric value taken from the threshold cycle output of the PCR software, i.e. 15.24  as defined in \code{type} or\cr
@@ -138,8 +138,8 @@ efficiency(m1, type = "maxRatio", baseshift = 0.2)
 \dontrun{
 ## on a modlist with plotting
 ## of the efficiencies
-ml <- modlist(reps, model = l5)
-res <- sapply(ml, function(x) efficiency(x)$eff)
+ml1 <- modlist(reps, model = l5)
+res <- sapply(ml1, function(x) efficiency(x)$eff)
 barplot(as.numeric(res))
 }
 }

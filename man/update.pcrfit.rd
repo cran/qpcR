@@ -30,19 +30,19 @@ The function \code{\link{pcrfit}} in this package.
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l4)
+m1 <- pcrfit(reps, 1, 2, l4)
 
 ## update model
-update(m, model = l5)
+update(m1, model = l5)
 
 ## update qPCR run
-update(m, fluo = 20)
+update(m1, fluo = 20)
 
 ## update data
-update(m, data = guescini1) 
+update(m1, data = guescini1) 
 
 ## update 'optim' method
-update(m, opt.method = "BFGS")   
+update(m1, opt.method = "BFGS")   
 }
 
 \keyword{models}

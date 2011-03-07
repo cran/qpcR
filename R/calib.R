@@ -36,10 +36,10 @@ count = 1)
 
   if (opt != "none") {
     if (stop.crit == "outlier") {
-      outs <- sapply(refcurve, function(x) outlier(x)$outl)
+      outs <- sapply(refcurve, function(x) takeoff(x)$outl)
       outSel <- which.max(outs)
-      end.x <- outlier(refcurve[[outSel]])$outl
-      end.y <- outlier(refcurve[[outSel]])$f.outl
+      end.x <- takeoff(refcurve[[outSel]])$top
+      end.y <- takeoff(refcurve[[outSel]])$f.top
     } 
     if (stop.crit == "midpoint") {
       outs <- sapply(refcurve, function(x) midpoint(x)$cyc.mp)

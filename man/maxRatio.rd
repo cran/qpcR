@@ -26,7 +26,7 @@ maxRatio(x, type = c("spline", "sigfit"), baseshift = NULL,
 In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for
  many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{y_i = y_i + baseshift} (baseline shifting).
  Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{y_n}{y_{n-1}}-1)}.
- \emph{FCN} is then calculated as the cycle number at \emph{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2{MR}}.
+ \emph{FCN} is then calculated as the cycle number at \emph{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2(MR)}.
  Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated.
  This must be resolved by tweaking the \code{baseshift} value.  
 }
@@ -56,14 +56,14 @@ Shain EB & Clemens JM.\cr
 
 \examples{
 ## on single curve
-m <- pcrfit(reps, 1, 2, l5)
-maxRatio(m, baseshift = 0.3)     
+m1 <- pcrfit(reps, 1, 2, l5)
+maxRatio(m1, baseshift = 0.3)     
 
 ## on a 'modlist'
 ## using 'baseline shifting' and 
 \dontrun{
-ml <- modlist(reps, model = l5) 
-maxRatio(ml, baseshift = 0.5)
+ml1 <- modlist(reps, model = l5) 
+maxRatio(ml1, baseshift = 0.5)
 }
 }
 

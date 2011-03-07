@@ -11,9 +11,12 @@
 \alias{b3}   
 \alias{expGrowth}  
 \alias{mak2}
-\alias{mak3}  
+\alias{mak3}
+\alias{mak3n}
+\alias{chag}
 
-\title{The nonlinear models implemented in qpcR}
+
+\title{The nonlinear/mechanistic models implemented in qpcR}
 
 \description{
 A summary of all available models implemented in this package.
@@ -33,10 +36,12 @@ b3
 expGrowth 
 mak2
 mak3
+mak3n
+chag
 }
 
 \details{
-The following nonlinear models are implemented:\cr\cr
+The following nonlinear sigmoidal models are implemented:\cr\cr
 \bold{l7:} \deqn{f(x) = c + k1 \cdot x + k2 \cdot x^2 + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
 \bold{l6:} \deqn{f(x) = c + k \cdot x + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
 \bold{l5:} \deqn{f(x) = c + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
@@ -49,22 +54,24 @@ The following nonlinear models are implemented:\cr\cr
 \bold{b3:} \deqn{f(x) = \frac{d}{1+exp(b(x-e))}} 
 \bold{expGrowth}: \deqn{f(x) = a \cdot exp(b \cdot x) + c}\cr
 
-\bold{mak2} and \bold{mak3}: These are two mechanistic models developed by Gregory Boggy (see references). This is a completely different approach in that
- the response value (fluorescence) is not a function of the predictor value (cycles), but a function of the preceeding response value, that is, \eqn{F_n = f(F_{n-1})}. 
- The implementation of this model in the \emph{qpcR} package is the following:\cr
- 1) Either i) a sigmoidal (l4) model is fit to the overall data or ii) the data is smoothed (depending on \code{makXpar$SS.deriv}).\cr
- 2) The second derivative maximum is calculated from either i) the second derivative maximum of a 4-par sigmoidal fit or ii) from the smoothed data using two-times \code{\link{diff}}.\cr
- 3) All response values above the threshold cycle are removed.\cr
- 4) An exponential growth model is fit to obtain sensible starting values for \code{D0} (initial template fluorescence) and \code{Fb} (background fluorescence).\cr
- 5) A grid of starting values is created from 0.0001 - 10 * \code{D0}, 0.1 - 3 in steps of 0.3 for parameter \code{k}, and \code{Fb}. These are 60 combinations in total.\cr
- 6) For each combination one of the following two models are fit by nonlinear least-squares (Levenberg-Marquardt by default):
- \deqn{F_n = F_{n-1} + k \cdot log(1 + (\frac{F_{n-1}}{k})) + Fb \qquad(\mathbf{mak2})} or
- \deqn{F_n = F_{n-1} + k \cdot log(1 + (\frac{F_{n-1}}{k})) + (slope \cdot n + Fb) \qquad (\mathbf{mak3})}
- 7) For each combination of starting values, the optimized parameters are collected in a parameter matrix together with the residual sum-of-squares (RSS) of the fit.\cr
- 8) The combination is selected that delivered the lowest RSS.\cr
- 9) These values are transferred to \code{\link{pcrfit}}, and the data is refitted with the selected model using the best parameter set from 8).\cr
- 10) Parameter \code{D0} can be used directly to calculate expression ratios, hence making the use of threshold cycles and efficiencies expendable.\cr
- Some parameters for this function can be set in \code{\link{makXpar}}, see also examples there and in \code{\link{pcrfit}}.\cr
+The following mechanistic models are implemented:\cr\cr
+\bold{mak2}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + Fb}
+\bold{mak3 & mak3n}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + (slope \cdot n + Fb)} 
+\bold{chag}: \deqn{F_n = 1 - (1 - F_{n-1}) \cdot \left(\frac{1 - b \cdot  F_{n-1}}{1 + (a - 2) \cdot b \cdot F_{n-1}}\right)^\frac{1}{a - 1}}
+
+\code{mak2} and \code{mak3} are two mechanistic models developed by Gregory Boggy (see references). \code{chag} was developed by Alexander Chagovetz and James Keener.
+
+The mechanistic models are a completely different approach in that the response value (fluorescence) is not a function of the predictor value (cycles), but a function of the preceeding response value, that is, \eqn{F_n = f(F_{n-1})}. These are also called 'recurrence relations' or 'iterative maps'.
+
+The implementation of these models in the 'qpcR'' package is the following:\cr
+1) In case of \code{mak2} or \code{mak3}, all cycles up from the second derivative maximum of a four-parameter log-logistic model (l4) are chopped off. This is because these two models do not fit to a complete sigmoidal curve. For \code{chag} and \code{mak3n}, the sigmoidal curve is also rescaled between [0, 1].\cr 
+2) A grid of sensible starting values is created for all parameters in the model.\cr
+3) For each combination of starting parameters, the model is fit by nonlinear least-squares (Levenberg-Marquardt by default).\cr
+4) The acquired parameters are collected in a parameter matrix together with the residual sum-of-squares (RSS) of the fit.\cr
+5) The parameter combination is selected that delivered the lowest RSS.\cr
+6) These parameters are transferred to \code{\link{pcrfit}}, and the data is refitted.\cr
+7) Parameter \code{D0} can be used directly to calculate expression ratios, hence making the use of threshold cycles and efficiencies expendable.\cr
+Some parameters for this function can be set in \code{\link{parMAK}}, see also examples there and in \code{\link{pcrfit}}.\cr
  
 The functions are defined as a list containing the following items:\cr
 
@@ -87,8 +94,13 @@ Andrej-Nikolai Spiess
 
 \references{
 A Mechanistic Model of PCR for Accurate Quantification of Quantitative PCR Data.\cr
-Boggy GJ and Woolf PJ.\cr
-\emph{PLoS ONE}, \bold{5(8)}: e12355.
+Boggy GJ, Woolf PJ.\cr
+\emph{PLoS ONE} (2010), \bold{5(8)}: e12355.
+
+Kinetic models of qPCR as applied to the problem of low copy numbers.\cr
+Chagovetz AM, Kenner JP.\cr
+Poster presented at the qPCR 2011 Symposium in Munich.\cr
+Can be downloaded at \url{www.dr-spiess.de/temp/Chago.pdf}.
 }
 
 \examples{

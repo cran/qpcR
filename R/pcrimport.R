@@ -23,24 +23,33 @@ needFirst = TRUE,
   ### file destination input
   FILE <- file
   if (is.na(FILE)) {
-    VALID <- FALSE
     while (is.na(FILE)) {
-      cat("Where is the data?\n In a directory with file(s) such as c:\\temp\\ \n or in the clipboard => 1\n")
-      FILE <- scan("", what = "character", nmax = 1, quiet = TRUE)
-      if (FILE == "1") FILE <- "clipboard"
+      cat("Where is the data?\n in a directory with file(s) such as \"c:\\temp\\\" \n in the clipboard => 1\n or a dataframe in the workspace => \"name\"")
+      FILE <- scan("", what = "character", nmax = 1, quiet = TRUE)      
     }
   }
-  if (FILE != "clipboard") {
+  
+  if (FILE == "1" || FILE == "clipboard") {
+    FILE <- "clipboard"
+    isCB <- TRUE
+  } else isCB <- FALSE
+  
+  if(exists(FILE, envir = .GlobalEnv)) {    
+    DATA <- get(FILE, envir = .GlobalEnv)    
+    isWS <- TRUE    
+  } else isWS <- FALSE
+  
+  if (!isWS && !isCB) {
    LF <- list.files(FILE, full.names = TRUE)
    if (length(LF) == 0) stop("Directory does not exist or has no files...Please check!")
    if (length(LF) > 0) {
      FILE <- LF
      cat("Found the following files:", LF, "\n", fill = 1)
    }
-  }
-
+  }   
+  
   ### create output list
-  outLIST <- vector("list", length = length(FILE))
+  outLIST <- vector("list", length = length(FILE))  
   
   ### for all files do...
   for (i in 1:length(FILE)) {
@@ -75,7 +84,7 @@ needFirst = TRUE,
     }
 
     ### check for field separator
-    SEP <- sep
+    SEP <- sep    
     if (is.na(SEP)) {
       while (!(SEP %in% 1:3) || length(SEP) != 1) {
         cat("Data is separated by\n tabs => 1\n commas => 2\n whitespace => 3\n")
@@ -101,8 +110,8 @@ needFirst = TRUE,
     DEC <- switch(DEC, "1" = ".", "2" = ",", dec)
 
     ### read in data
-    DATA <- try(read.delim(FILE[i], header = FALSE, skip = 0, sep = SEP, dec = DEC, colClasses = NA,
-                           quote = "", stringsAsFactors = FALSE, comment.char = "", na.strings = "NA", ...), silent = TRUE)
+    if (!isWS) DATA <- try(read.delim(FILE[i], header = FALSE, skip = 0, sep = SEP, dec = DEC, colClasses = NA,
+                                      quote = "", stringsAsFactors = FALSE, comment.char = "", na.strings = "NA", ...), silent = TRUE)
     if (inherits(DATA, "try-error")) {
        cat("There was an error in importing from", FILE[i], ". Trying next file...\n")
        next
@@ -114,8 +123,7 @@ needFirst = TRUE,
     DELCOL <- delCol
     if (is.na(delCol)) {
       while (is.na(DELCOL) || length(DELCOL) == 0 || !is.numeric(DELCOL)) {    
-        cat("Any columns to delete? (i.e. 1, 2:3, c(1, 40:50), ...)\nNothing to delete => 0\n")
-        cat(" Columns: ")
+        cat("Any columns to delete? (i.e. 1, 2:3, c(1, 40:50), ...)\n nothing to delete => 0\n")
         DELCOL <- scan("", what = "numeric", sep = "\t", nmax = 1, quiet = TRUE)         
         DELCOL <- try(eval(parse(text = DELCOL)), silent = TRUE)         
         if (inherits(DELCOL, "try-error")) DELCOL <- NA          
@@ -129,8 +137,7 @@ needFirst = TRUE,
     DELROW <- delRow
     if (is.na(delRow)) {
       while (is.na(DELROW) || length(DELROW) == 0 || !is.numeric(DELROW)) {    
-        cat("Any rows to delete? (i.e. 1, 2:3, c(1, 40:50), ...)\nNothing to delete => 0\n")
-        cat(" Rows: ")
+        cat("Any rows to delete? (i.e. 1, 2:3, c(1, 40:50), ...)\n nothing to delete => 0\n")
         DELROW <- scan("", what = "numeric", sep = "\t", nmax = 1, quiet = TRUE)         
         DELROW <- try(eval(parse(text = DELROW)), silent = TRUE)         
         if (inherits(DELROW, "try-error")) DELROW <- NA          
@@ -149,7 +156,7 @@ needFirst = TRUE,
     FORMAT <- format
     if (is.na(FORMAT)) {
       while (!(FORMAT %in% 1:2) || length(FORMAT) != 1) {
-        cat("qPCR data is in\n Columns => 1\n Rows => 2\n")
+        cat("qPCR data is in\n columns => 1\n rows => 2\n")
         FORMAT <- scan("", what = "numeric", nmax = 1, quiet = TRUE)   
         FORMAT <- as.numeric(FORMAT)     
       }
@@ -170,7 +177,7 @@ needFirst = TRUE,
     SAMPLE <- sampleDat
     while (is.na(SAMPLE) || length(SAMPLE) == 0 || !is.numeric(SAMPLE)) {    
       cat("Column(s) with reporter dye data (i.e. SybrGreen I)?\n")
-      cat("Any number or sequence such as 1, 1:10, c(4, 5:7), seq(1, 11, by = 2), ...\nAll columns => 0\n")        
+      cat(" any number or sequence such as 1, 1:10, c(4, 5:7), seq(1, 11, by = 2), ...\n all columns => 0\n")        
       SAMPLE <- scan("", what = "numeric", sep = "\t", nmax = 1, quiet = TRUE)   
       SAMPLE <- try(eval(parse(text = SAMPLE)), silent = TRUE)
       if (inherits(SAMPLE, "try-error")) SAMPLE <- NA   
@@ -189,7 +196,7 @@ needFirst = TRUE,
     if (!hasREF) REF <- 0      
     while (is.na(REF) || length(REF) == 0 || !is.numeric(REF)) {    
       cat("Column(s) with reference dye data (i.e. ROX)?\n")
-      cat("Any number or sequence such as 1, 1:10, c(4, 5:7), seq(1, 11, by = 2), ...\nNo reference dye used => 0\nAll remaining columns not defined as sample columns (alongside to sample data) => -1\nSame columns as in sample (stacked under sample data) = -2\n")
+      cat(" any number or sequence such as 1, 1:10, c(4, 5:7), seq(1, 11, by = 2), ...\n no reference dye used => 0\n all remaining columns not defined as sample columns (alongside to sample data) => -1\n same columns as in sample (stacked under sample data) = -2\n")
       REF <- scan("", what = "numeric", nmax = 1, sep = "\t", quiet = TRUE)   
       REF <- try(eval(parse(text = REF)), silent = TRUE)
       if (inherits(REF, "try-error")) REF <- NA   
@@ -205,31 +212,29 @@ needFirst = TRUE,
     ### check for sample names
     NAMES <- names
     while (is.na(NAMES) || length(NAMES) == 0) {        
-        cat("Naming by either\n a row with Sample Names (i.e. 3),\n a name prefix (i.e. Well#),\n or automatically => 0\n")    
-        NAMES <- scan("", what = "character", nmax = 1, quiet = TRUE) 
-        if (is.numeric(NAMES) && length(NAMES) > 1) stop("Please name only by one row!")        
-    }         
-               
-    ### make run names     
-    if (NAMES == "0") {
-      NAMEVEC <- paste("Run.", SAMPLE, sep = "")
-    } else {
-      if (is.na(as.numeric(NAMES))) {
-        NAMEVEC <- paste(NAMES, SAMPLE, sep = ".")
-      } else {
-        NAMES <- as.numeric(NAMES)
-        NAMEVEC <- DATA[NAMES, ]        
-        DATA <- DATA[-NAMES, ]                 
-      }
-    }    
-    colnames(DATA) <- NAMEVEC    
+        cat("Naming by either\n a row or rows with Sample Names/Well ID's, i.e. 3, c(1, 3),\n a name prefix (i.e. Well#),\n or automatically => 0\n")
+        NAMES <- scan("", what = "character", nmax = 1, quiet = TRUE)
+    }
+    
+    ### make run names
+    TEST <- try(eval(parse(text = NAMES)), silent = TRUE)
+    if (inherits(TEST, "try-error")) TEST <- 0
+    if (is.numeric(TEST)) {
+       if (TEST == 0) NAMEVEC <- paste("Run.", SAMPLE, sep = "")
+       else {
+            NAMEVEC <- DATA[TEST, , drop = FALSE]
+            NAMEVEC <- do.call(paste, c(split(NAMEVEC, f = 1:nrow(NAMEVEC)), sep = "."))
+            DATA <- DATA[-TEST, ]
+       }
+    } else NAMEVEC <- paste(NAMES, SAMPLE, sep = ".")
+    colnames(DATA) <- NAMEVEC
     
     if (check) View(DATA, title = paste("Step 4: named dataset =>", FILE[i]))
            
     ### get length of reporter data
     SLEN <- sampleLen
     while (is.na(SLEN) || !is.numeric(SLEN) || length(SLEN) == 0) {
-      cat("In which rows is the sample data (fluorescence values), i.e. 1:40 ?\nAll rows till end of data => 0\n")
+      cat("In which rows is the sample data (fluorescence values), i.e. 1:40 ?\n all rows till end of data => 0\n")
       SLEN <- scan("", what = "numeric", sep = "\t", nmax = 1, quiet = TRUE)   
       SLEN <- try(eval(parse(text = SLEN)), silent = TRUE)
       if (inherits(SLEN, "try-error")) SLEN <- NA       
@@ -243,7 +248,7 @@ needFirst = TRUE,
     if (REF != 0) {
       RLEN <- refLen
         while (is.na(RLEN) || !is.numeric(RLEN) || length(RLEN) == 0) {
-        cat("In which rows is the reference data (fluorescence values), i.e. 1:40 ?\nSame rows as sample data (alongside to samples) => 0\nAll remaining rows till end of data (stacked under samples) => -1\n")
+        cat("In which rows is the reference data (fluorescence values), i.e. 1:40 ?\n same rows as sample data (alongside to samples) => 0\n all remaining rows till end of data (stacked under samples) => -1\n")
         RLEN <- scan("", what = "numeric", sep = "\t", nmax = 1, quiet = TRUE)   
         RLEN <- try(eval(parse(text = RLEN)), silent = TRUE)
         if (inherits(RLEN, "try-error")) RLEN <- NA  

@@ -64,16 +64,16 @@ PRED <- modlist(reps, fluo = c(3, 7, 11), backsub = 1:8)
 ## conduct normal quantification using
 ## the second derivative maximum of 
 ## first curve
-res <- calib2(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES) 
+res1 <- calib2(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES) 
 
 ## using a defined treshold value
-res <- calib2(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
+res2 <- calib2(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
 
 ## using six dilutions with 
 ## four replicates/dilution
 \dontrun{
 CAL2 <- modlist(reps, fluo = 2:25, backsub = 1:8)
-res <- calib2(refcurve = CAL2, predcurve = PRED, thresh = "cpD2", 
+res3 <- calib2(refcurve = CAL2, predcurve = PRED, thresh = "cpD2", 
               dil = COPIES, group = gl(6,4)) 
 } 
 }

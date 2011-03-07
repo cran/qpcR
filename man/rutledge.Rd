@@ -8,7 +8,7 @@ A dilution experiment of a 102 bp amplicon with six 10-fold dilutions, with four
 }
 
 \usage{
-data(rutledge)
+rutledge
 }
 
 \format{

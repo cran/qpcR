@@ -17,10 +17,10 @@ See \code{edit(dyemelt)} for a proper format. The output is a graph displaying t
 
 \usage{
 meltcurve(data, temps = NULL, fluos = NULL, window = NULL, 
-          span.smooth = 0.05, span.peaks = 51, is.deriv = FALSE, 
-          Tm.opt = NULL, Tm.border = c(1, 1), plot = TRUE, 
-          peaklines = TRUE, calc.Area = TRUE, plot.Area = TRUE,
-          cut.Area = 0,...)
+          norm = FALSE, span.smooth = 0.05, span.peaks = 51, 
+          is.deriv = FALSE, Tm.opt = NULL, Tm.border = c(1, 1), 
+          plot = TRUE, peaklines = TRUE, calc.Area = TRUE, 
+          plot.Area = TRUE, cut.Area = 0,...)
 }
 
 \arguments{
@@ -28,6 +28,7 @@ meltcurve(data, temps = NULL, fluos = NULL, window = NULL,
   \item{temps}{a vector of column numbers reflecting the temperature values. If \code{NULL}, they are assumed to be 1, 3, 5, ... .}     
   \item{fluos}{a vector of column numbers reflecting the fluorescence values. If \code{NULL}, they are assumed to be 2, 4, 6, ... .}  	
   \item{window}{a user-defined window for the temperature region to be analyzed. See 'Details'.}
+  \item{norm}{logical. If \code{TRUE}, the fluorescence values are scaled between [0, 1].}
   \item{span.smooth}{the window span for curve smoothing. Can be tweaked to optimize \eqn{T_m} identification.}
   \item{span.peaks}{the window span for peak identification. Can be tweaked to optimize \eqn{T_m} identification. Must be an odd number.}
   \item{is.deriv}{logical. Use \code{TRUE}, if \code{data} is already in first derivative transformed format.}
@@ -44,7 +45,8 @@ meltcurve(data, temps = NULL, fluos = NULL, window = NULL,
 \details{
 The melting curve analysis is conducted with the following steps:\cr
 
-1) Temperature and fluorescence values are selected in a region according to \code{window}.\cr
+1a) Temperature and fluorescence values are selected in a region according to \code{window}.\cr
+1b) If \code{norm = TRUE}, the fluorescence data is scaled into [0, 1] by \code{qpcR:::rescale}.\cr
 Then, the function \code{qpcR:::TmFind} conducts the following steps:\cr
 2a) A cubic spline function (\code{\link{splinefun}}) is fit to the raw fluorescence melt values.\cr
 2b) The first derivative values are calculated from the spline function for each of the temperature values.\cr
@@ -52,7 +54,7 @@ Then, the function \code{qpcR:::TmFind} conducts the following steps:\cr
 2d) Melting peaks (\eqn{T_m}) values are identified by \code{qpcR:::peaks}.\cr
 2e) Raw melt data, first derivative data, best parameters, residual sum-of-squares and identified \eqn{T_m} values are returned.\cr 
 Peak areas are then calculated by \code{qpcR:::peakArea} by:\cr
-3a) A linear regression curve is fit from the leftmost temperature value (\eqn{T_m} - Tm.border[1]) to the rightmost temperature value (\eqn{T_m} + Tm.border[2]) by \code{\link{lm}}.\cr
+3a) A linear regression curve is fit from the leftmost temperature value (\eqn{T_m} - \code{Tm.border}[1]) to the rightmost temperature value (\eqn{T_m} + \code{Tm.border}[2]) by \code{\link{lm}}.\cr
 3b) A baseline curve is calculated from the regression coefficients by \code{\link{predict.lm}}.\cr
 3c) The baseline data is subtracted from the first derivative melt data (baselining).\cr
 3d) A \code{\link{splinefun}} is fit to the baselined data.\cr
@@ -66,7 +68,7 @@ Finally,\cr
 If values are given to \code{Tm.opt} (see 'Examples'), then \code{meltcurve} is iterated over all combinations of \code{span.smooth = seq(0, 0.2, by = 0.01)}
  and \code{span.peaks = seq(11, 201, by = 10)}. For each iteration, \eqn{T_m} values are calculated and compared to those given by measuring the residual
  sum-of-squares between the given values \code{Tm.opt} and the \code{TMs} obtained during the iteration:
- \deqn{RSS = \sum_{i=1}^n{(TMs_i - Tm.opt_i)^2}} 
+ \deqn{RSS = \sum_{i=1}^n{(TM_i - Tm.opt_i)^2}} 
 
 The returned list items containing the resulting data frame each has an attribute \code{"quality"} which is set to "bad" if none of the peaks met
  the \code{cut.Area} criterion (or "good" otherwise).
@@ -89,11 +91,12 @@ Andrej-Nikolai Spiess
 \examples{
 ## default columns
 data(dyemelt)
-res <- meltcurve(dyemelt, window = c(75, 86))
-res
+res1 <- meltcurve(dyemelt, window = c(75, 86))
+res1
 
-## selected columns
-res2 <- meltcurve(dyemelt, temps = c(1, 3), fluos = c(2, 4), window = c(75, 86))  
+## selected columns and normalized fluo values
+res2 <- meltcurve(dyemelt, temps = c(1, 3), fluos = c(2, 4), 
+                  window = c(75, 86), norm = TRUE)  
 
 ## removing peaks based on peak area
 ## => two peaks have smaller areas and are not

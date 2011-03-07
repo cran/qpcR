@@ -40,10 +40,10 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-ml <- modlist(reps, model = l4)
-res <- meanlist(ml, group = gl(7, 4))
-plot(res)
-efficiency(res[[1]])
+ml1 <- modlist(reps, model = l4)
+res1 <- meanlist(ml1, group = gl(7, 4))
+plot(res1)
+efficiency(res1[[1]])
 }
 
 \keyword{models}

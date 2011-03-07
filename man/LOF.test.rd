@@ -51,9 +51,9 @@ Springer Verlag (2004), New York, 2nd Ed.
 \examples{
 ## Example with a 'replist'
 ## no lack-of-fit
-ml <- modlist(reps, fluo = 2:5, model = l5)
-rl <- replist(ml, group = c(1, 1, 1, 1))
-LOF.test(rl)
+ml1 <- modlist(reps, fluo = 2:5, model = l5)
+rl1 <- replist(ml1, group = c(1, 1, 1, 1))
+LOF.test(rl1)
 
 ## Example with a 'nls' fit
 ## => there is a lack-of-fit

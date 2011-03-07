@@ -15,7 +15,7 @@ fitchisq(object, error = NULL)
 
 \arguments{
 \item{object}{a single model of class 'pcrfit', a 'replist' or any fitted model of the above.}
-\item{error}{in case of a model without replicates, error(s) for all response values.}
+\item{error}{in case of a model without replicates, a single error for all response values or a vector of errors for each response value.}
 }
 
 \details{
@@ -58,9 +58,9 @@ Wiley, New York, 1998.
 \examples{
 ## using replicates by making
 ## a 'replist'
-ml <- modlist(reps, fluo = 2:5)
-rl <- replist(ml, group = c(1, 1, 1, 1))
-fitchisq(rl[[1]])
+ml1 <- modlist(reps, fluo = 2:5)
+rl1 <- replist(ml1, group = c(1, 1, 1, 1))
+fitchisq(rl1[[1]])
 
 ## using single model with 
 ## added error

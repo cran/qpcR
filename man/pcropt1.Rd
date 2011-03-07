@@ -46,17 +46,9 @@ The function \code{\link{efficiency}} that is called by this function.
 }
 
 \examples{
-## Using one model throughout
 \dontrun{
-m <- pcrfit(reps, 1, 2, l4)
-pcropt1(m)
-}
-
-## Selecting the best model for each combination
-## by Akaike weights
-\dontrun{
-m <- pcrfit(reps, 1, 2, l4)
-pcropt1(m, opt = TRUE, crit = "weights") 
+m1 <- pcrfit(reps, 1, 2, l4)
+pcropt1(m1)
 }
 }
 

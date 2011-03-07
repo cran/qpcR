@@ -23,7 +23,7 @@ The R-square value of the fit.
 
 \details{
 Uses the most general definition of R-square: \deqn{R^2 \equiv 1 - \frac{RSS}{TSS}} where
- \deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2 } and \deqn{TSS = \sum_{i=1}^{n}w_i \cdot (y_i - \bar{y})^2}
+ \deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2} and \deqn{TSS = \sum_{i=1}^{n}w_i \cdot (y_i - \bar{y})^2}
 using the weighted mean \deqn{\bar{y} = \frac{\sum_{i=1}^{n}w_ix_i}{\sum_{i=1}^{n}w_i}} 
 }
 
@@ -33,8 +33,8 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
-Rsq(m)   
+m1 <- pcrfit(reps, 1, 2, l5)
+Rsq(m1)   
 }
 
 \keyword{models}

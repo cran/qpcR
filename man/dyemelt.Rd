@@ -23,7 +23,6 @@ The melting curve was conducted with AZF deletion-specific primers in a Lightcyc
 }
 
 \examples{
-data(dyemelt)
 plot(dyemelt[, 1], dyemelt[, 2], xlab = "Temperature [°C]", 
      ylab = "Raw fluorescence")  
 }

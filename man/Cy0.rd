@@ -40,18 +40,18 @@ Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
           
 \examples{
 ## single curve with plot
-m <- pcrfit(reps, 1, 2, l5)
-Cy0(m, plot = TRUE)
+m1 <- pcrfit(reps, 1, 2, l5)
+Cy0(m1, plot = TRUE)
 
 ## add to 'efficiency' plot
-efficiency(m)
-Cy0(m, add = TRUE)
+efficiency(m1)
+Cy0(m1, add = TRUE)
 
 ## compare s.d. of replicates between
 ## Cy0 and cpD2 method. cpD2 wins!
-ml <- modlist(reps, model = l4)
-cy0 <- sapply(ml, function(x) Cy0(x))
-cpd2 <- sapply(ml, function(x) efficiency(x, plot = FALSE)$cpD2)
+ml1 <- modlist(reps, model = l4)
+cy0 <- sapply(ml1, function(x) Cy0(x))
+cpd2 <- sapply(ml1, function(x) efficiency(x, plot = FALSE)$cpD2)
 tapply(cy0, gl(7, 4), function(x) sd(x))
 tapply(cpd2, gl(7, 4), function(x) sd(x)) 
 }

@@ -12,13 +12,13 @@ midpoint(object, noise.cyc = 1:5)
 }
 
 \arguments{
-  \item{object}{a fitted object.}
+  \item{object}{a fitted object of class 'pcrfit'.}
   \item{noise.cyc}{the cycles defining the background noise.}      
 }
 
 \details{
-The 'midpoint' region is calculated by \deqn{F_{noise} \times \sqrt{\frac{F_{max}}{F_{noise}}}}
- with Fnoise = the standard deviation of the background cycles and Fmax = the maximal fluorescence.
+The 'midpoint' region is calculated by \deqn{F_{noise} \cdot \sqrt{\frac{F_{max}}{F_{noise}}}}
+ with \eqn{Fnoise} = the standard deviation of the background cycles and \eqn{Fmax} = the maximal fluorescence.
 }
 
 \value{

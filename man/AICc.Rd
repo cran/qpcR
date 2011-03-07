@@ -42,8 +42,8 @@ Hurvich CM & Tsai CL (1989). Regression and Time Series Model Selection in Small
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
-AICc(m)
+m1 <- pcrfit(reps, 1, 2, l5)
+AICc(m1)
 }
 
 \keyword{models}

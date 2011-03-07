@@ -3,14 +3,11 @@ export(
 
 AICc,
 akaike.weights,
-baseline,
 batchstat, 
 calib,
 calib2,
-cbind.na, 
 curvemean,
 Cy0,
-data.frame.na,
 eff,
 efficiency,
 expcomp,
@@ -29,7 +26,8 @@ midpoint,
 modlist,
 mselect,
 neill.test,
-outlier,
+parKOD,
+parMAK,
 pcrbatch,
 pcrboot,
 pcrfit,
@@ -44,7 +42,6 @@ propagate,
 qpcR.news,
 ratiobatch,
 ratiocalc,
-rbind.na,
 rep2mod,
 replist,
 resplot,
@@ -54,7 +51,7 @@ Rsq,
 Rsq.ad,
 RSS,
 sliwin,
-SOD
+takeoff
 
 )
 
@@ -62,6 +59,7 @@ SOD
 S3method(update, pcrfit)
 S3method(predict, pcrfit)
 S3method(plot, pcrfit)
+
 
 
 

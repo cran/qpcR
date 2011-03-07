@@ -30,10 +30,10 @@ Starting from the raw fluorescence values or expression values of a defined curv
  Five different averaging functions can be used:
 
 Expression mean with efficiency = 2 ("cmean1"):
-\deqn{\bar x_{exp} = \frac{-log(\frac{\sum_{i=1}^n2^{-x_i}}{n})}{log(2)}}
+\deqn{\bar x_{exp} = \frac{-log\left(\frac{\sum_{i=1}^n2^{-x_i}}{n}\right)}{log(2)}}
 
 Expression mean with averaged efficiency from the runs ("cmean2"):
-\deqn{\bar x_{exp} = \frac{-log(\frac{\sum_{i=1}^n\bar{E}^{-x_i}}{n})}{log(\bar{E})}}
+\deqn{\bar x_{exp} = \frac{-log\left(\frac{\sum_{i=1}^n\bar{E}^{-x_i}}{n}\right)}{log(\bar{E})}}
 
 Arithmetic mean ("amean"):
 \deqn{\bar x = \frac{\sum_{i=1}^nx_i}{n}} 
@@ -73,22 +73,22 @@ Vandesompele et al., \emph{Genome Biology}, 2002, \bold{3}: research0034.1-0034.
 \examples{
 ## create arithmetic mean curve of four
 ## serial dilutions
-ml <- modlist(reps, fluo = c(2, 6, 10, 14))
-curvemean(ml, mean = "amean")
+ml1 <- modlist(reps, fluo = c(2, 6, 10, 14))
+curvemean(ml1, mean = "amean")
 
 ## effect of normalizing data to [0, 1]:
 ## more averaged datapoints
-ml <- modlist(reps, fluo = c(2, 6, 10, 14), norm = TRUE)
-curvemean(ml, mean = "amean")
+ml2 <- modlist(reps, fluo = c(2, 6, 10, 14), norm = TRUE)
+curvemean(ml2, mean = "amean")
 
 ## averaging the expression value
 ## (i.e. copy numbers)
 ## using efficiency = 2
-curvemean(ml, mean = "cmean1")
+curvemean(ml2, mean = "cmean1")
 
 ## using averaged efficiencies from
 ## all curves at each cycle
-curvemean(ml, mean = "cmean2")
+curvemean(ml2, mean = "cmean2")
 }
 
 \keyword{models}

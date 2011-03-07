@@ -20,8 +20,8 @@ plot = TRUE,
                   
       ### outlier method
       if (method == "outlier") {
-            result <- outlier(object, pval = pval, nsig = n.outl)
-            OUTLIER <- result$outl
+            result <- takeoff(object, pval = pval, nsig = n.outl)
+            OUTLIER <- result$top
             CYCS <- OUTLIER:(OUTLIER + nfit - 1)
       }
       
@@ -49,7 +49,7 @@ plot = TRUE,
       ### calculate exponential model   
       DATA <- cbind(object$DATA[, 1], object$DATA[, 2])
       DATA <- DATA[CYCS, ]
-      expMod <- pcrfit(DATA, 1, 2, expGrowth)         
+      expMod <- pcrfit(DATA, 1, 2, expGrowth, verbose = FALSE)         
       EFF <- exp(as.numeric(coef(expMod)[2])) 
       EFF.cycles <- object$DATA[CYCS, 2]/object$DATA[CYCS - 1, 2]  
       INIT <- as.numeric(coef(expMod)[1]) * as.numeric(exp(coef(expMod)[2]))  

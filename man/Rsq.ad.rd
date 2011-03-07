@@ -21,8 +21,8 @@ The adjusted R-square value of the fit.
 }
 
 \details{
-Calculates the adjusted \eqn{R^2} by \deqn{R_{adj}^2 = 1 - \frac{n - 1}{n - p} * (1 - R^2)}
- with n = sample size, p = number of regressors and \eqn{R^2} = R-square value.
+Calculates the adjusted \eqn{R^2} by \deqn{R_{adj}^2 = 1 - \frac{n - 1}{n - p} \cdot (1 - R^2)}
+ with n = sample size, p = number of parameters and \eqn{R^2} = R-square value.
 }
 
 \author{
@@ -32,13 +32,13 @@ Andrej-Nikolai Spiess
 
 \examples{
 ## single model
-m <- pcrfit(reps, 1, 2, l5)
-Rsq.ad(m)
+m1 <- pcrfit(reps, 1, 2, l5)
+Rsq.ad(m1)
 
 ## compare different models with increasing
 ## number of parameters
-ml <- lapply(list(l3, l4, l5), function(x) pcrfit(reps, 1, 2, x))
-sapply(ml, function(x) Rsq.ad(x)) 
+ml1 <- lapply(list(l3, l4, l5), function(x) pcrfit(reps, 1, 2, x))
+sapply(ml1, function(x) Rsq.ad(x)) 
 }
 
 \keyword{models}

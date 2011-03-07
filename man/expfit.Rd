@@ -29,12 +29,7 @@ expfit(object, method = c("outlier", "midpoint", "ERBCP"), pval = 0.05,
 }
 
 \details{
-The exponential growth function \eqn{f(x) = b * exp(k * x) + e} is fit to the data.
-Calls \code{\link{outlier}} for the calculation of the studentized residuals and 'outlier' cycle, and \code{midpoint}
- for calculation of the exponential phase 'midpoint'. For method 'ERBCP' (Exponential Region By Crossing Points), the exponential region
- is calculated by \eqn{expR = cpD2 - \code{corfact} * (cpD1-cpD2)}. The efficiency is calculated a) from the exponential fit with \eqn{Eff = exp(k)} and b) for each 
- cycle within the exponential region from the raw fluorescence values by \eqn{Eff = \frac{F(n)}{F(n-1)}}. 
- The inital template fluorescence (F0) is derived from \eqn{b * exp(k)}.
+The exponential growth function \eqn{f(x) = b \cdot exp(k \cdot x) + e} is fit to the data. Calls \code{\link{takeoff}} for the calculation of the studentized residuals and 'outlier' cycle, and \code{midpoint} for calculation of the exponential phase 'midpoint'. For method 'ERBCP' (Exponential Region By Crossing Points), the exponential region is calculated by \eqn{expR = cpD2 - \code{corfact} \cdot (cpD1-cpD2)}. The efficiency is calculated a) from the exponential fit with \eqn{Eff = exp(k)} and b) for each cycle within the exponential region from the raw fluorescence values by \eqn{Eff = \frac{F(n)}{F(n-1)}}. The inital template fluorescence (F0) is derived from \eqn{b \cdot exp(k)}.
 }
 
 \value{

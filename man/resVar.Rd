@@ -17,7 +17,8 @@ resVar(object)
  }
 
 \value{
-The residual variance of the fit.
+The residual variance of the fit:
+\deqn{\frac{RSS}{n - p}}
 }
 
 \author{
@@ -26,8 +27,8 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
-resVar(m)
+m1 <- pcrfit(reps, 1, 2, l5)
+resVar(m1)
 }
 
 \keyword{models}

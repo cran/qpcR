@@ -1,72 +1,131 @@
 replist <- function(
 object, 
 group = NULL, 
-remove = TRUE,
+check = "none",
+checkPAR = parKOD(),
+remove = c("none", "KOD"),
+names = c("group", "first"),
 opt = FALSE, 
+optPAR = list(sig.level = 0.05, crit = "ftest"),
 verbose = TRUE, 
 ...)
 {
-  if (class(object) != "modlist") stop("Please supply an object of class 'modlist'!")
+  names <- match.arg(names)  
+  remove <- match.arg(remove)  
+  
+  if (class(object)[1] != "modlist") stop("Please supply an object of class 'modlist'!")
   if (is.null(group)) stop("Please define replicate groups!")
   if (length(group) != length(object)) stop("length of 'group' and 'object' must match!")    
-  
-  if (remove) {
-    CLASS <- sapply(object, function(x) class(x)[2]) 
-    NAMES <- sapply(object, function(x) x$names)  
-    FAILS <- which(is.na(CLASS))     
-    if (length(FAILS) > 0) {
-      cat("Removing tagged runs and updating 'group':", NAMES[FAILS], "\n\n")
-      object <- object[-FAILS]
-      group <- group[-FAILS]
-    }                     
-  } 
+      
+  ## from 1.3-5: removing failed fits from 'modlist' which are sigmoidal outliers
+  NAMES <- sapply(object, function(x) x$names)
+  SEL <- grep("\\*", NAMES)  
+   
+  if (length(SEL) > 0) {
+    cat("Removing", NAMES[SEL], "prior to fitting...\n\n")
+    object <- object[-SEL]
+    group <- group[-SEL]  
+  }
     
-  group <- as.factor(group)  
-  
-  splitVEC <- split(1:length(object), group)      
-  nameVEC <- sapply(object, function(x) x$names)
-  nameVEC <- split(nameVEC, group)  
-  
-  repMOD <- list()
-  
-  for (i in 1:length(splitVEC)) {
+  ## split 'modlist' into subsets  
+  splitLIST <- split(1:length(object), group)
+  repMOD <- vector("list", length = length(splitLIST))
+  remID <- NULL
+  newGROUP <- NULL
+    
+  ## iterate over all subsets
+  for (i in 1:length(splitLIST)) {
     CYCS <- NULL
     FLUO <- NULL  
-     
-    for (j in splitVEC[[i]]) {
-      CYCS <- c(CYCS, object[[j]]$DATA[, 1])     
-      FLUO <- c(FLUO, object[[j]]$DATA[, 2])     
+    
+    modTEMP <- object[splitLIST[[i]]]
+    class(modTEMP) <- c("modlist", "pcrfit")
+      
+    ## from 1.3-5: tagging failed fits from 'modlist' which are kinetic outliers
+    if (check != "none") {
+      kodTEMP <- KOD(modTEMP, method = check, par = checkPAR, 
+                     remove = switch(remove, "none" = FALSE, "KOD" = TRUE))
+      modTEMP <- kodTEMP
+    }
+  
+    ## aggregate data
+    for (j in 1:length(modTEMP)) {
+      CYCS <- c(CYCS, modTEMP[[j]]$DATA[, 1])     
+      FLUO <- c(FLUO, modTEMP[[j]]$DATA[, 2])     
       DATA <- cbind(Cycles = CYCS, Fluo = FLUO)    
     }  
-    
-    if (verbose) cat("Making model for replicates:", nameVEC[[i]], "\n") 
+      
+    ## use model from first item
+    MODEL <- modTEMP[[1]]$MODEL
+    nameMODEL <- MODEL$name
+    nameTEMP <- sapply(modTEMP, function(x) x$names)
+      
+    ## fit replicates
+    if (verbose) cat("Making model for replicates:", nameTEMP, "=>" , nameMODEL, "\n", sep= " ")
     flush.console()
-    fitObj <- try(pcrfit(DATA, 1, 2, model = object[[splitVEC[[i]][1]]]$MODEL), silent = TRUE)
-    if (inherits(fitObj, "try-error")) cat(" => gave a fitting error!\n", sep = "")
-    
+    fitOBJ <- try(pcrfit(DATA, 1, 2, model = MODEL, verbose = FALSE), silent = TRUE)
+      
+    ## return empty list, if fitting failed
+    if (inherits(fitOBJ, "try-error")) {
+      fitOBJ <- list()     
+      if (verbose) cat(" => Fitting failed. Tagging replicates...\n", sep = "")  
+      flush.console()
+      ## from 1.3-5: tag failed replicate fits
+      remID <- c(remID, i)  
+      fitOBJ$isFitted <- FALSE
+      fitOBJ$isOutlier <- FALSE
+      splitLIST[[i]] <- rep(NA, length(splitLIST[[i]]))
+    } else {
+      if (verbose) cat(" => Fitting passed...\n", sep = "")
+      fitOBJ$isFitted <- TRUE
+      fitOBJ$isOutlier <- FALSE
+      flush.console()       
+    }
+      
+    ## optional model selection
     if (opt) {
- 	    fitObj2 <- try(mselect(fitObj, verbose = FALSE, ...))             
-      if (inherits(fitObj2, "try-error")) {
-        fitObj <- fitObj
-        cat(" => gave a model selection error!", sep = "")
+      fitOBJ2 <- try(mselect(fitOBJ, verbose = FALSE, sig.level = optPAR$sig.level, crit = optPAR$crit), silent = TRUE)             
+            
+      if (inherits(fitOBJ2, "try-error")) {
+        if (verbose) cat(" => Model selection failed! Using original model...\n", sep = "")
+        flush.console()
+        fitOBJ <- fitOBJ        
       } else {
-        fitObj <- fitObj2           
+        if (verbose) cat(" => Model selection passed...", sep = "")
+        flush.console()
+        fitOBJ <- fitOBJ2
+        fitOBJ$isFitted <- TRUE
+        fitOBJ$isOutlier <- FALSE
+        if (verbose) cat(" => ", fitOBJ$MODEL$name, "\n", sep = "")
+        flush.console()
       }
-    }     
+    }  
     
-    if (verbose) cat(" => ", fitObj$MODEL$name, "\n\n", sep = "")
-    flush.console()
-    
-    repMOD[[i]] <- fitObj
+    if (verbose) cat("\n")
+      
+    repMOD[[i]] <- fitOBJ
     repMOD[[i]]$isReps <- TRUE
-    repMOD[[i]]$names <- paste("group_", i, sep = "") 
     repMOD[[i]]$DATA <- DATA     
-    repMOD[[i]]$modlist <- object[unlist(splitVEC[i])]     
+    repMOD[[i]]$modlist <- modTEMP    
+    
+    if (names == "group") repMOD[[i]]$names <- paste("group_", i, sep = "") 
+    else repMOD[[i]]$names <- modTEMP[[1]]$names     
+    newGROUP <- c(newGROUP, rep(i, length(modTEMP)))
   }      
+        
+  ## from 1.3-5: remove failed replicate fits  
+  if (!is.null(remID)) { 
+    if (verbose) cat("Removing tagged replicates...\n")
+    repMOD <- repMOD[-remID]
+    SEL <- as.numeric(sapply(remID, function(x) which(newGROUP == x)))
+    newGROUP <- newGROUP[-SEL]    
+  }
   
+  newGROUP <- as.factor(newGROUP)
+      
   class(repMOD) <- c("modlist", "replist", "pcrfit")
-  attr(repMOD, "nlevels") <- nlevels(group)
-  attr(repMOD, "nitems") <- as.numeric(table(group))
-  attr(repMOD, "group") <- group
+  attr(repMOD, "nlevels") <- nlevels(newGROUP)
+  attr(repMOD, "nitems") <- as.numeric(table(newGROUP))
+  attr(repMOD, "group") <- newGROUP
   return(repMOD)
 }

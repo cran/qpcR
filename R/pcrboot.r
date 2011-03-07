@@ -10,73 +10,91 @@ verbose = TRUE,
 ...)
 {
   type <- match.arg(type)
+  
   if (class(object) != "pcrfit") stop("Use only with objects of class 'pcrfit'!")   
     
+  ## get data from object
   fetchDATA <- qpcR:::fetchData(object)
   DATA <- fetchDATA$data
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
   PRED.name <- fetchDATA$pred.name
   
+  ## fitted and residuals
   fitted1 <- fitted(object)    
   resid1 <- residuals(object)   
-  modList <- list()
-  effList <- list()    
-  ndata <- nrow(DATA)  
-  noconv <- 0     
+  modLIST <- vector("list", length = B)
+  effLIST <- vector("list", length = B)    
+  NR <- nrow(DATA)  
+  noCONV <- 0     
   
+  ## for each iteration do...
   for (i in 1:B) {    
-    newDATA <- DATA         
+    newDATA <- DATA   
+    
+    if (verbose) {
+      qpcR:::counter(i) 
+      flush.console()
+    }
+  
     if (type == "boot") newDATA[, RESP.pos] <- fitted1 + sample(scale(resid1, scale = FALSE), replace = TRUE)
     else {
-      sampleVec <- sample(1:ndata, njack)    
+      sampleVec <- sample(1:NR, njack)    
       newDATA <- newDATA[-sampleVec, ]      
-    }                
-  
-    newMODEL <- try(update(object, data = newDATA, verbose = FALSE))      
+    }       
     
+    ## new model based on bootstrap
+    newMODEL <- try(pcrfit(data = newDATA, cyc = 1, fluo = 2, model = object$MODEL, verbose = FALSE), silent = TRUE)  
+       
     if (inherits(newMODEL, "try-error")) {
-      noconv <- noconv + 1
+      noCONV <- noCONV +  1
       next
     }                
     
     if (plot) plot(newMODEL, ...)
     
-    modList[[i]] <- list(coef = coef(newMODEL), sigma = summary(newMODEL)$sigma,
+    modLIST[[i]] <- list(coef = coef(newMODEL), sigma = summary(newMODEL)$sigma,
                          rss = sum(residuals(newMODEL)^2), 
                          dfb = abs(coef(newMODEL) - coef(object))/(summary(object)$parameters[, 2]),
                          gof = pcrGOF(newMODEL)) 
     
-    if (do.eff) effList[[i]] <- efficiency(newMODEL, plot = FALSE, ...)[c(1, 7:18)]     
-    if (verbose) qpcR:::counter(i)    
+    ## get efficiencies
+    if (do.eff) {
+      EFF <- try(efficiency(newMODEL, plot = FALSE, ...)[c(1, 7:18)], silent = TRUE)
+      if (inherits(EFF, "try-error")) effLIST[[i]] <- NA else effLIST[[i]] <- EFF        
+    }
   }
+  
   cat("\n\n")
-  if (verbose) cat("fitting converged in ", 100 - (noconv/B), "% of iterations.\n\n", sep = "")      
+  if (verbose) cat("fitting converged in ", 100 - (noCONV/B), "% of iterations.\n\n", sep = "")      
   
-  COEF <- t(sapply(modList, function(z) z$coef))  
-  RSE <- sapply(modList, function(z) z$sigma)  
-  RSS <- sapply(modList, function(z) z$rss)           
-  GOF <- t(sapply(modList, function(z) unlist(z$gof))) 
+  COEF <- t(sapply(modLIST, function(z) z$coef))  
+  RSE <- sapply(modLIST, function(z) z$sigma)  
+  RSS <- sapply(modLIST, function(z) z$rss)           
+  GOF <- t(sapply(modLIST, function(z) unlist(z$gof))) 
   
-  effDAT <- t(sapply(effList, function(z) unlist(z)))    
- 
-  statList <- list(coef = COEF, rse = RSE, rss = RSS, gof = GOF, eff = effDAT) 
-  confList <- lapply(statList, function(x) t(apply(as.data.frame(x), 2, function(y) quantile(y, c((1 - conf)/2, 1 - (1 - conf)/2), na.rm = TRUE)))) 
+  ## combine data
+  effDAT <- t(sapply(effLIST, function(z) unlist(z)))    
+  statLIST <- list(coef = COEF, rse = RSE, rss = RSS, gof = GOF, eff = effDAT) 
+  confLIST <- lapply(statLIST, function(x) t(apply(as.data.frame(x), 2, function(y) quantile(y, c((1 - conf)/2, 1 - (1 - conf)/2), na.rm = TRUE)))) 
     
   if (plot) {
-    ndata <- sum(rapply(statList, function(x) ncol(x)))
+    ndata <- sum(rapply(statLIST, function(x) ncol(x)))
     par(mfrow = c(6, 5))
     par(mar = c(1, 2, 2, 1))
-    for (i in 1:length(statList)) { 
-      temp <- as.data.frame(statList[[i]])
-      if (is.vector(statList[[i]])) colnames(temp) <- names(statList)[i]
-      for (j in 1:ncol(temp)) {
+    
+    ## boxplot for each parameter
+    for (i in 1:length(statLIST)) { 
+      temp <- as.data.frame(statLIST[[i]])    
+      if (is.vector(statLIST[[i]])) colnames(temp) <- names(statLIST)[i]      
+      for (j in 1:ncol(temp)) {        
         if (all(is.na(temp[, j]))) next 
-        COL <- switch(names(statList)[i], coef = 2, gof = 3, eff = 4)             
+        COL <- switch(names(statLIST)[i], coef = 2, gof = 3, eff = 4)             
         boxplot(temp[, j], main = colnames(temp)[j], col.main = COL, outline = FALSE, ...)  
-        abline(h = confList[[i]][j, ], col = 2, ...)    
+        abline(h = confLIST[[i]][j, ], col = 2, ...)    
       }    
     }           
    }  
-  return(list(ITER = statList, CONF = confList))   
+  
+  return(list(ITER = statLIST, CONF = confLIST))   
 } 

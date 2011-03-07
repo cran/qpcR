@@ -3,11 +3,7 @@
 
 \title{Calculation of ratios in a batch format for multiple genes/samples}
 
-\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between samples, 
- using normalization against one or more reference gene(s), if supplied. The input can be single qPCR data or (more likely) data containing replicates. 
- This is essentially a version of \code{\link{ratiocalc}} that can handle multiple reference and control genes and multiple samples with replicates as found
- in large-scale qPCR runs such as 96- or 384-Well plates. The results are automatically stored as a file or copied into the clipboard. A boxplot representation
- for all Monte-Carlo simulations, permutations and error propagations including 95\% confidence intervals is also given.
+\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between samples, using normalization against one or more reference gene(s), if supplied. The input can be single qPCR data or (more likely) data containing replicates. This is essentially a version of \code{\link{ratiocalc}} that can handle multiple reference and control genes and multiple samples with replicates as found in large-scale qPCR runs such as 96- or 384-Well plates. The results are automatically stored as a file or copied into the clipboard. A boxplot representation for all Monte-Carlo simulations, permutations and error propagations including 95\% confidence intervals is also given.
 }
 
 \usage{
@@ -37,8 +33,7 @@ Similar to \code{\link{ratiocalc}}, the replicates of the 'pcrbatch' data column
 "r1s1":   reference gene #1 in target sample #1\cr
 "r1c1":   reference gene #1 in control sample #1\cr
 
-There is no distinction between the different technical replicates so that three different runs of gene of interest #1 in
- target sample #2 are defined as c("g1s2", "g1s2", "g1s2"). 
+There is no distinction between the different technical replicates so that three different runs of gene of interest #1 in target sample #2 are defined as c("g1s2", "g1s2", "g1s2"). 
 
 Examples:\cr
 1 control with 2 gene-of-interests (2 technical replicates), 2 samples with 2 gene-of-interest (2 technical replicates):\cr
@@ -46,8 +41,7 @@ Examples:\cr
 See also 'Examples'.  
 
 The ratios are calculated for all pairwise 'rc:gc' and 'rs:gs' combinations according to:\cr
-For all control samples \eqn{i = 1 \ldots I} and treatment samples \eqn{j = 1 \ldots J}, reference genes \eqn{k = 1 \ldots K} and gene-of-interests \eqn{l = 1 \ldots L}
-calculate\cr
+For all control samples \eqn{i = 1 \ldots I} and treatment samples \eqn{j = 1 \ldots J}, reference genes \eqn{k = 1 \ldots K} and gene-of-interests \eqn{l = 1 \ldots L}, calculate\cr
 
 Without reference PCR: \deqn{\frac{E(g_is_j)^{cp(g_is_j)}}{E(g_kc_l)^{cp(g_kc_l)}}}
 With reference PCR: \deqn{\frac{E(g_is_j)^{cp(g_is_j)}}{E(g_kc_l)^{cp(g_kc_l)}}/\frac{E(r_ms_n)^{cp(r_ms_n)}}{E(r_oc_p)^{cp(r_oc_p)}}}  
@@ -57,17 +51,13 @@ For the mechanistic model \code{mak3} the following is calculated:\cr
 Without reference PCR: \deqn{\frac{D0(g_is_j)}{D0(g_kc_l)}}
 With reference PCR: \deqn{\frac{D0(g_is_j)}{D0(g_kc_l)}/\frac{D0(r_ms_n)}{D0(r_oc_p)}}
 
-Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}.
-It is also possible to give external efficiencies (i.e. acquired by some calibration curve) to the function. See 'Examples'.
-The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio 
- calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
+Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}. It is also possible to give external efficiencies (i.e. acquired by some calibration curve) to the function. See 'Examples'. The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
   
 \code{type.eff = "mean.single"}     # averaging efficiency across replicates\cr
 \code{which.eff = "sli"}            # taking efficiency from the sliding window method\cr
 \code{which.cp = "sig"}             # using the second derivative maximum of a sigmoidal fit\cr 
 
-This is also the default setup in the function. The lowest variance can be obtained for the threshold cycles if the asymmetric 5-parameter \code{l5} model is used
- in the \code{\link{pcrbatch}} function. 
+This is also the default setup in the function. The lowest variance can be obtained for the threshold cycles if the asymmetric 5-parameter \code{l5} model is used in the \code{\link{pcrbatch}} function. 
 
 There are three different combination setups possible when calculating the pairwise ratios:
 
@@ -77,8 +67,7 @@ There are three different combination setups possible when calculating the pairw
 \code{combs = "all"}: reference genes, genes-of-interest, control and treatment samples are all combinated, i.e. 
  \eqn{i \neq k, m \neq o, j \neq n, l \neq p}.
 
-The last setting rarely makes sense and is very time-intensive. \code{combs = "same"} is the most common setting, but \code{combs = "across"}
- also makes sense if different gene-of-interests and reference gene combinations should be calculated for the same samples.
+The last setting rarely makes sense and is very time-intensive. \code{combs = "same"} is the most common setting, but \code{combs = "across"} also makes sense if different gene-of-interests and reference gene combinations should be calculated for the same samples.
 }
 
 \value{
@@ -94,10 +83,7 @@ Andrej-Nikolai Spiess
 }
 
 \note{
-This function can be used quite conveniently when the raw fluorescence data from the 96- or 384-well runs come from Excel with
- 'Cycles' in the first column and run descriptions as explained above in the remaining column descriptions (such as 'r1c6'). Examples for
- a proper format can be found under \url{http://www.dr-spiess.de//qpcR//datasets.html}. This data may then be imported into \R by
- \code{dat <- pcrimport()}.
+This function can be used quite conveniently when the raw fluorescence data from the 96- or 384-well runs come from Excel with 'Cycles' in the first column and run descriptions as explained above in the remaining column descriptions (such as 'r1c6'). Examples for a proper format can be found under \url{http://www.dr-spiess.de//qpcR//datasets.html}. This data may then be imported into \R by \code{dat <- pcrimport()}.
 }
 
 \examples{
@@ -105,11 +91,11 @@ This function can be used quite conveniently when the raw fluorescence data from
 ## One control, two samples, one gene-of-interest, 
 ## two reference genes, two replicates each.
 ## Replicates are averaged.
-DAT <- pcrbatch(reps, fluo = 2:19, model = l5)
+DAT1 <- pcrbatch(reps, fluo = 2:19, model = l5)
 GROUP <- c("r1c1", "r1c1", "r2c1", "r2c1", "g1c1", "g1c1",
            "r1s1", "r1s1", "r1s2", "r1s2", "r2s1", "r2s1",
            "r2s2", "r2s2", "g1s1", "g1s1", "g1s2", "g1s2") 
-res <- ratiobatch(DAT, GROUP)    
+res1 <- ratiobatch(DAT1, GROUP)    
 
 ## Two controls, one sample, one gene-of-interest,
 ## one reference gene, no replicates.
@@ -140,15 +126,15 @@ res4 <- ratiobatch(DAT4, GROUP4, which.eff = "mak",
 ## calibration curve. Can be supplied by the
 ## user from external calibration (or likewise),
 ## but in this example acquired by function 'calib'.
-ml <- modlist(reps, model = l5)
-dil <- rep(10^(6:0), each = 4) 
-eff <- calib(refcurve = ml, dil = dil)$eff   
-pba <- pcrbatch(ml)
+ml1 <- modlist(reps, model = l5)
+DIL <- rep(10^(6:0), each = 4) 
+EFF <- calib(refcurve = ml1, dil = DIL)$eff   
+pba <- pcrbatch(ml1)
 GROUP5 <- c(rep("g1s1", 4), rep("g1s2", 4),
             rep("g1s3", 4), rep("g1s4", 4), 
             rep("g1s5", 4), rep("g1s6", 4), 
             rep("g1c1", 4)) 
-res5 <- ratiobatch(pba, GROUP5, which.eff = eff)
+res5 <- ratiobatch(pba, GROUP5, which.eff = EFF)
 }        
 }
 

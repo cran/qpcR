@@ -39,12 +39,17 @@ verbose = TRUE,
   ## get attribute 'subset' transferred from ssFct
   ## (as is the case in mak2/mak3 model, when only curve
   ## up till second derivative max is taken)
+  ## or mak3n/chag model with rescaling within [0, 1]
+  SCALE <- attr(ssVal, "scale")
+  if (!is.null(SCALE)) Fluo <- qpcR:::rescale(Fluo, SCALE[1], SCALE[2])
+  
   SUB <- attr(ssVal, "subset")
   if (!is.null(SUB)) {
     Cycles <- Cycles[SUB]
     Fluo <- Fluo[SUB]
+    weights <- weights[SUB]
   }
-     
+       
   ## initialize parameter matrix
   ssValMat <- NULL
   ssValMat <- rbind(ssValMat, c("start", ssVal))

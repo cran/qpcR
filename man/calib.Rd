@@ -92,25 +92,25 @@ PRED <- modlist(reps, fluo = c(3, 7, 11), backsub = 1:8)
 ## conduct normal quantification using
 ## the second derivative maximum of 
 ## first curve
-res <- calib(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES) 
+res1 <- calib(refcurve = CAL, predcurve = PRED, thresh = "cpD2", dil = COPIES) 
 
 ## using a defined treshold value
-res <- calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
+res2 <- calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
 
 \dontrun{
 ## using replicates for reference curve
-ml <- modlist(reps, model = l4)
+ml1 <- modlist(reps, model = l4)
 DIL <- rep(10^(6:0), each = 4)
-res <- calib(refcurve = ml, dil = DIL)
+res1 <- calib(refcurve = ml1, dil = DIL)
 
 ## iterating the intercept with 50 steps
 par(ask = FALSE)
-res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter",
+res2 <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "inter",
               opt.step = c(50, 0))
 
 ## iterating the intercept/slope with 20 steps
 par(ask = FALSE)
-res <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
+res3 <- calib(refcurve = CAL, predcurve = PRED, dil = COPIES, opt = "slope", 
               opt.step = c(20, 20)) 
 }
 }

@@ -25,7 +25,7 @@ Let the total number of observations be denoted by \eqn{\sum{n_i}} and let \eqn{
 where \eqn{j_{n_{i}}} is an \eqn{n_i \times 1} vector of ones, \eqn{i = 1,2, \ldots, M}. Also, \eqn{Y = (Y_{11}, \ldots, Y_{1n_{1}}, \ldots, Y_{Mn_{m}})'}
  and \eqn{\bar{Y} = (\bar{Y}_{1 \cdot j_{n_{1}}'}, \ldots, \bar{Y}_{M \cdot j_{n_{M}}'})'}.
  To test \deqn{H_0: E(Y) = \bar{G}(\theta)} vs. \deqn{H_{\alpha}: E(Y) \neq \bar{G}(\theta)} let the statistic \eqn{F} be defined by
- \deqn{F = [(N - M)/(M - p)](\parallel \bar{Y} - \bar{G}(\hat{\theta}) \parallel^2 / \parallel Y - \bar{Y} \parallel^2)},
+ \deqn{F = \frac{N - M}{M - p} \cdot \frac{\left(\parallel \bar{Y} - \bar{G}(\hat{\theta}) \parallel \right) ^2}{\left( \parallel Y - \bar{Y} \parallel \right) ^2}},
  where \eqn{\hat{\theta}} is the least-squares parameter estimator of \eqn{\theta}. Reject \eqn{H_0} if observed \eqn{F > F_{M-p, N-M}^\alpha}.
  This is a nonlinear analogue to the Lack-of-fit test in linear models with replication.
 }
@@ -48,7 +48,7 @@ Testing for lack-of-fit in nonlinear regression.\cr
 \cr
 Ritz C, Martinussen T.\cr
 Lack-of-fit tests for assessing mean structures for continuous dose-response data.\cr
-\emph{Environ Ecol Stat} (2010), \bold{xx}, xxx-xxx.  
+\emph{Environ Ecol Stat} (2011), \bold{18}, 349-366.  
 }
 
 \examples{

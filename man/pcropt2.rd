@@ -51,23 +51,18 @@ The function \code{\link{pcropt1}} that removes cycles sequentially from both si
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l4)
 ## which cycles have low influence
 ## on parameter 'c' (the lower
 ## asymptote)?
-pcropt2(m, which.par = "c", quan = 0.3, delete = "low")
+m1 <- pcrfit(reps, 1, 2, l4)
+pcropt2(m1, which.par = "c", quan = 0.3, delete = "low")
 
 ## and on 'b' and 'e'?
-m <- pcrfit(reps, 1, 2, l4)
-pcropt2(m, which.par = c("b", "e"), quan = 0.3, delete = "low")
+pcropt2(m1, which.par = c("b", "e"), quan = 0.3, delete = "low")
 
 ## very high influence on 'd'
 ## (upper asymptote)?
-m <- pcrfit(reps, 1, 2, l4)
-m2 <- pcropt2(m, which.par = c("d"), quan = 0.1, delete = "high") 
-
-## plot new model
-plot(m2) 
+pcropt2(m1, which.par = c("d"), quan = 0.1, delete = "high") 
 }
 
 

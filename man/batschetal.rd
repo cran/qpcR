@@ -44,9 +44,8 @@ Batsch A et al., \emph{BMC Bioinformatics}, 2008, \bold{9}: 95.
 }
 
 \examples{
-data(batsch1)
-ml <- modlist(batsch1, model = l4)
-plot(ml)    
+ml1 <- modlist(batsch1, model = l4)
+plot(ml1)    
 }
 
 \keyword{models}

@@ -15,11 +15,7 @@ plot = TRUE)
   }       
    
   COMPL <- complete.cases(DATA)
-  DATA <- DATA[COMPL, ]    
-  
-  gmean <- function(x) prod(x, na.rm = TRUE)^(1/length(x[!is.na(x)]))
-  hmean <- function(x) length(x[!is.na(x)])/sum(1/x, na.rm = TRUE) 
-  cmean <- function(x, E) (-log(mean(E^-x, na.rm = TRUE))/log(E))
+  DATA <- DATA[COMPL, ]   
       
   MEAN <- vector(length = nrow(DATA))
   CYCS <- DATA[, 1]

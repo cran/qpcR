@@ -8,7 +8,7 @@ The data was obtained from cDNA reverse transcribed from the isolated RNA of 15 
 }
 
 \usage{
-data(S27)
+S27
 }
 
 \format{
@@ -25,7 +25,6 @@ Andrej-Nikolai Spiess & Caroline Feig, Department of Andrology, University Hospi
 }
 
 \examples{
-data(S27)
 m1 <- pcrfit(S27, 1, 2, l5)
 plot(m1)     
 }

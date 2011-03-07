@@ -27,9 +27,9 @@ This is done by using the following formulae:
 
 delta AICs: \deqn{\Delta_i(AIC) = AIC_i - min(AIC)}
 
-relative likelihood: \deqn{L \propto exp\left\{-\frac{1}{2}\Delta_i(AIC)\right\}}
+relative likelihood: \deqn{L \propto exp\left(-\frac{1}{2}\Delta_i(AIC)\right)}
 
-Akaike weights: \deqn{w_i(AIC) = \frac{exp\left\{-\frac{1}{2}\Delta_i(AIC)\right\}}{\sum_{k=1}^K exp\left\{-\frac{1}{2}\Delta_k(AIC)\right\}}}
+Akaike weights: \deqn{w_i(AIC) = \frac{exp\left(-\frac{1}{2}\Delta_i(AIC)\right)}{\sum_{k=1}^K exp\left(-\frac{1}{2}\Delta_k(AIC)\right)}}
 }
 
 \value{

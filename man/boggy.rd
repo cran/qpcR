@@ -8,7 +8,7 @@ A dilution experiment with six 10-fold dilutions of a synthetic template, and tw
 }
 
 \usage{
-data(boggy)
+boggy
 }
 
 \format{
@@ -32,7 +32,6 @@ Boggy GJ and Woolf PJ.\cr
 }
 
 \examples{
-data(boggy)
 m1 <- pcrfit(boggy, 1, 2, l5)
 plot(m1)    
 }

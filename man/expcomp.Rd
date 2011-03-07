@@ -20,7 +20,7 @@ expcomp(object, ...)
 
 \details{
 The following sigmoidal models are fitted:
-b3, b4, b5, b6, l3, l4, l5, l6
+b3, b4, b5, b6, b7, l3, l4, l5, l6, l7
 }
 
 
@@ -33,8 +33,8 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-m <- pcrfit(reps, 1, 2, l4)
-expcomp(m)
+m1 <- pcrfit(reps, 1, 2, l4)
+expcomp(m1)
 }
 
 \keyword{models}

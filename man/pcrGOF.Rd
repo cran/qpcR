@@ -37,8 +37,9 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-m <- pcrfit(reps, 1, 2, l5)
-pcrGOF(m, PRESS = TRUE)   
+## all measures, inclusing PRESS
+m1 <- pcrfit(reps, 1, 2, l5)
+pcrGOF(m1, PRESS = TRUE)   
 }
 
 \keyword{models}
