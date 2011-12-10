@@ -3,15 +3,15 @@
 
 \title{Calculation of ratios in a batch format for multiple genes/samples}
 
-\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between samples, using normalization against one or more reference gene(s), if supplied. By default, multiple reference genes are averaged according to Vandesompele \emph{et al}. (2002). The input can be single qPCR data or (more likely) data containing replicates. This is essentially a version of \code{\link{ratiocalc}} that can handle multiple reference genes and genes-of-interest with multiple (replicated) samples as found in large-scale qPCR runs such as 96- or 384-Well plates. The results are automatically stored as a file or copied into the clipboard. A boxplot representation for all Monte-Carlo simulations, permutations and error propagations including 95\% confidence intervals is also given.
+\description{For multiple qPCR data from type 'pcrbatch', this function calculates ratios between samples, using normalization against one or more reference gene(s), if supplied. Multiple reference genes can be averaged according to Vandesompele \emph{et al}. (2002). The input may be single qPCR data or (more likely) data containing replicates. This is essentially a version of \code{\link{ratiocalc}} that can handle multiple reference genes and genes-of-interest with multiple (replicated) samples as found in large-scale qPCR runs such as 96- or 384-Well plates. A boxplot representation for all Monte-Carlo simulations, permutations and error propagations including 95\% confidence intervals is calculated for each ratio calculation.
 }
 
 \usage{
 ratiobatch(data, group = NULL, plot = TRUE, 
            combs = c("same", "across", "all"), 
            type.eff = "mean.single", which.cp = "cpD2", 
-           which.eff = "sli", refmean = TRUE,
-           dataout = "clip", verbose = TRUE, ...)
+           which.eff = "sli", refmean = FALSE,
+           dataout = NULL, verbose = TRUE, ...)
 }
 
 \arguments{
@@ -22,7 +22,7 @@ ratiobatch(data, group = NULL, plot = TRUE,
   \item{type.eff}{type of efficiency averaging used. Same as in \code{\link{ratiocalc}}.}
   \item{which.eff}{efficiency obtained from which method. Same as in \code{\link{ratiocalc}}.}
   \item{which.cp}{threshold cycle obtained from which method. Same as in \code{\link{ratiocalc}}.}   
-  \item{dataout}{where to store the result dataframe. Either it is copied to the clipboard (default) or any path + filename such as \code{c:\\temp\\result.txt}.}   
+  \item{dataout}{an optional file path where to store the result dataframe.}   
   \item{refmean}{logical. If \code{TRUE}, multiple reference are averaged before calculating the ratios. See 'Details'.}
   \item{verbose}{logical. If \code{TRUE}, the steps of analysis are shown in the console window}
   \item{...}{other parameters to be passed to \code{\link{ratiocalc}}.}
@@ -45,13 +45,12 @@ Example:\cr
 The ratios are calculated for all pairwise 'rc:gc' and 'rs:gs' combinations according to:\cr
 For all control samples \eqn{i = 1 \ldots I} and treatment samples \eqn{j = 1 \ldots J}, reference genes \eqn{k = 1 \ldots K} and genes-of-interest \eqn{l = 1 \ldots L}, calculate\cr
 
-Without reference genes: \deqn{\frac{E_{g_is_j}^{cp_{g_is_j}}}{E_{g_kc_l}^{cp_{g_kc_l}}}}
-With reference genes: \deqn{\frac{E_{g_is_j}^{cp_{g_is_j}}}{E_{g_kc_l}^{cp_{g_kc_l}}}/\frac{E_{r_ms_n}^{cp_{r_ms_n}}}{E_{r_oc_p}^{cp_{r_oc_p}}}}  
+Without reference genes:  \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls_j)}}}
+With reference genes: \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls_j)}}/\frac{E(r_kc_i)^{cp(r_kc_i)}}{E(r_ks_j)^{cp(r_ks_j)}}}
+For the mechanistic models \code{makX/cm3} the following is calculated:\cr
 
-For the mechanistic model \code{mak3} the following is calculated:\cr
-
-Without reference genes: \deqn{\frac{D0_{g_is_j}}{D0_{g_kc_l}}}
-With reference genes: \deqn{\frac{D0_{g_is_j}}{D0_{g_kc_l}}/\frac{D0_{r_ms_n}}{D0_{r_oc_p}}}
+Without reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}} 
+With reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}/\frac{D0(r_ks_j)}{D0(r_kc_i)}}
 
 Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}. It is also possible to give external efficiencies (i.e. acquired by some calibration curve) to the function. See 'Examples'. The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
   
@@ -68,7 +67,7 @@ There are three different combination setups possible when calculating the pairw
 
 The last setting rarely makes sense and is very time-intensive. \code{combs = "same"} is the most common setting, but \code{combs = "across"} also makes sense if different genes-of-interest and reference gene combinations should be calculated for the same samples.
 
-From version 1.3-6, \code{ratiobatch} has the option of averaging several reference genes, as described in Vandesompele \emph{et al.} (2002). Threshold cycles and efficiency values for any \eqn{i} reference genes with \eqn{j} replicates are averaged before calculating the ratios using the averaged value \eqn{\mu_r} for all reference genes in a control/treatment sample. The overall error \eqn{\sigma_r} is obtained by error propagation. The whole procedure is accomplished by function \code{\link{refmean}}, which can be used as a stand-alone function, but is most conveniently used inside \code{ratiobatch} setting \code{refmean = TRUE}. See also Example #2 in 'Examples'. For details about reference gene averaging by \code{\link{refmean}}, see there. The default setting is \code{refmean = TRUE}, so that the number of reference genes is checked by \code{\link{refmean}}. If none or only one per sample is found, the data is analyzed without using reference gene averaging/error propagation.
+From version 1.3-6, \code{ratiobatch} has the option of averaging several reference genes, as described in Vandesompele \emph{et al.} (2002). Threshold cycles and efficiency values for any \eqn{i} reference genes with \eqn{j} replicates are averaged before calculating the ratios using the averaged value \eqn{\mu_r} for all reference genes in a control/treatment sample. The overall error \eqn{\sigma_r} is obtained by error propagation. The whole procedure is accomplished by function \code{\link{refmean}}, which can be used as a stand-alone function, but is most conveniently used inside \code{ratiobatch} setting \code{refmean = TRUE}. See in 'Examples'. For details about reference gene averaging by \code{\link{refmean}}, see there. If none or only one per sample is found, the data is analyzed without using reference gene averaging/error propagation.
 }
 
 \value{
@@ -94,45 +93,75 @@ Vandesompele J, De Preter K, Pattyn F, Poppe B, Van Roy N, De Paepe A, Speleman 
 }
 
 \examples{
+## One reference gene, one gene of interest,
+## one control and one treatment sample with 
+## 4 replicates each => 1 x Ratio = 1.
+DAT1 <- pcrbatch(reps, fluo = c(2:9, 2:9), model = l5)
+GROUP1 <- c("g1c1", "g1c1", "g1c1", "g1c1",
+            "g1s1", "g1s1", "g1s1", "g1s1", 
+            "r1c1", "r1c1", "r1c1", "r1c1",
+            "r1s1", "r1s1", "r1s1", "r1s1") 
+RES1 <- ratiobatch(DAT1, GROUP1, refmean = FALSE)  
+
 \dontrun{
-## One control sample, two treatment samples, 
-## one gene-of-interest, two reference genes, 
-## two replicates each. Replicates are averaged,
-## but reference genes not, so that we have 4 ratios.
-DAT1 <- pcrbatch(reps, fluo = 2:19, model = l5)
-GROUP1 <- c("r1c1", "r1c1", "r2c1", "r2c1", "g1c1", "g1c1",
-           "r1s1", "r1s1", "r1s2", "r1s2", "r2s1", "r2s1",
-           "r2s2", "r2s2", "g1s1", "g1s1", "g1s2", "g1s2") 
-RES1 <- ratiobatch(DAT1, GROUP1, refmean = FALSE)    
+## One reference gene, one gene of interest,
+## two control and two treatment samples with 
+## 2 replicates each => 4 x Ratio = 1.
+DAT2 <- pcrbatch(reps, fluo = c(2:9, 2:9), model = l5)
+GROUP2 <- c("g1c1", "g1c1", "g1c2", "g1c2",
+            "g1s1", "g1s1", "g1s2", "g1s2", 
+            "r1c1", "r1c1", "r1c2", "r1c2",
+            "r1s1", "r1s1", "r1s2", "r1s2") 
+RES2 <- ratiobatch(DAT2, GROUP2, refmean = FALSE)
 
-## Same as above, but now we average the two
-## reference genes, so that we have 2 ratios
-RES2 <- ratiobatch(DAT1, GROUP1, refmean = TRUE)
+## Two reference genes, one gene of interest,
+## one control and one treatment samples with 
+## 4 replicates each => 2 x Ratio = 1.
+DAT3 <- pcrbatch(reps, fluo = c(2:9, 2:9, 2:9), model = l5)
+GROUP3 <- c("g1c1", "g1c1", "g1c1", "g1c1",
+            "g1s1", "g1s1", "g1s1", "g1s1", 
+            "r1c1", "r1c1", "r1c1", "r1c1",
+            "r1s1", "r1s1", "r1s1", "r1s1",
+            "r2c1", "r2c1", "r2c1", "r2c1",
+            "r2s1", "r2s1", "r2s1", "r2s1") 
+RES3 <- ratiobatch(DAT3, GROUP3, refmean = FALSE)
 
-## Two control samples, one treatment sample, 
-## one gene-of-interest, one reference gene, 
-## no replicates. Use same efficiency E = 2.         
-DAT3 <- pcrbatch(reps, fluo = 2:7, model = l5)
-GROUP3 <- c("r1c1", "r1c2", "g1c1", "g1c2", 
-            "r1s1", "g1s1") 
-RES3 <- ratiobatch(DAT3, GROUP3, which.eff = 2) 
+## Two reference genes, one gene of interest,
+## one control and one treatment samples with 
+## 4 replicates each.
+## Reference genes are averaged => 1 x Ratio = 1.
+DAT4 <- pcrbatch(reps, fluo = c(2:9, 2:9, 2:9), model = l5)
+GROUP4 <- c("g1c1", "g1c1", "g1c1", "g1c1",
+            "g1s1", "g1s1", "g1s1", "g1s1", 
+            "r1c1", "r1c1", "r1c1", "r1c1",
+            "r1s1", "r1s1", "r1s1", "r1s1",
+            "r2c1", "r2c1", "r2c1", "r2c1",
+            "r2s1", "r2s1", "r2s1", "r2s1") 
+RES4 <- ratiobatch(DAT4, GROUP4, refmean = TRUE)
+
+## Same as above, but use same efficiency E = 2.         
+RES5 <- ratiobatch(DAT4, GROUP4, which.eff = 2) 
                    
-## One control sample, one treatment sample, 
-## three genes-of-interest, no reference gene, 
-## three replicates. Using efficiency from sigmoidal model. 
-DAT4 <- pcrbatch(reps, fluo = 2:19, model = l5)
-GROUP4 <- c("g1c1", "g1c1", "g1c1", "g2c1", "g2c1", "g2c1", "g3c1", "g3c1", "g3c1",
-            "g1s1", "g1s1", "g1s1", "g2s1", "g2s1", "g2s1", "g3s1", "g3s1", "g3s1")
-RES4 <- ratiobatch(DAT4, GROUP4, which.eff = "sig")
+## No reference genes, two genes-of-interest, 
+## two control and two treatment samples with
+## 2 replicates each, efficiency from sigmoidal model. 
+DAT6 <- pcrbatch(reps, fluo = 2:17, model = l5)
+GROUP6 <- c("g1s1", "g1s1", "g1s2", "g1s2",
+            "g2s1", "g2s1", "g2s2", "g2s2",
+            "g1c1", "g1c1", "g1c2", "g1c2",
+            "g2c1", "g2c1", "g2c2", "g2c2")            
+RES6 <- ratiobatch(DAT6, GROUP6, which.eff = "sig")
 
-## Using a mechanistic model (mak3).
+## Same as above, but using a mechanistic model (mak3).
 ## BEWARE: type.eff must be "individual"!
-DAT5 <- pcrbatch(reps, fluo = 2:19, do.mak = "mak3")
-GROUP5 <- c("r1c1", "r1c1", "r2c1", "r2c1", "g1c1", "g1c1",
-           "r1s1", "r1s1", "r1s2", "r1s2", "r2s1", "r2s1",
-           "r2s2", "r2s2", "g1s1", "g1s1", "g1s2", "g1s2")
-RES5 <- ratiobatch(DAT5, GROUP5, which.eff = "mak", 
-                  type.eff = "individual")
+DAT7 <- pcrbatch(reps, fluo = 2:17, model = l5,
+                 methods = c("sigfit", "mak3"))
+GROUP7 <- c("g1s1", "g1s1", "g1s2", "g1s2",
+            "g2s1", "g2s1", "g2s2", "g2s2",
+            "g1c1", "g1c1", "g1c2", "g1c2",
+            "g2c1", "g2c1", "g2c2", "g2c2")
+RES7 <- ratiobatch(DAT7, GROUP7, which.eff = "mak", 
+                   type.eff = "individual")
 
 ## Using external efficiencies from a 
 ## calibration curve. Can be supplied by the
@@ -142,12 +171,12 @@ ml1 <- modlist(reps, model = l5)
 DIL <- rep(10^(6:0), each = 4) 
 EFF <- calib(refcurve = ml1, dil = DIL)$eff   
 pba <- pcrbatch(ml1)
-GROUP6 <- c(rep("g1s1", 4), rep("g1s2", 4),
+GROUP8 <- c(rep("g1s1", 4), rep("g1s2", 4),
             rep("g1s3", 4), rep("g1s4", 4), 
             rep("g1s5", 4), rep("g1s6", 4), 
             rep("g1c1", 4)) 
-RES6 <- ratiobatch(pba, GROUP6, which.eff = EFF)
-}        
+RES8 <- ratiobatch(pba, GROUP8, which.eff = EFF)
+}
 }
 
 

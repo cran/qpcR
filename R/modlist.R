@@ -9,7 +9,8 @@ remove = c("none", "fit", "KOD"),
 exclude = NULL,
 labels = NULL, 
 norm = FALSE,
-backsub = NULL,
+baseline = FALSE,
+basefac = 1,
 smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
 smoothPAR = list(span = 0.1), 
 factor = 1,
@@ -30,10 +31,7 @@ verbose = TRUE,
   }                         
   
   if (is.null(fluo)) fluo <- 2:ncol(x) 
-        
-  if (!is.null(backsub) & !is.numeric(backsub)) 
-      stop("'backsub' must be either 'NULL'' or a numeric sequence!")   
-  
+    
   ## from 1.3-5: define label vector
   if (!is.null(labels)) {
     LABNAME <- deparse(substitute(labels))     
@@ -68,12 +66,17 @@ verbose = TRUE,
     ## normalization
     if (norm) FLUO <- rescale(FLUO, 0, 1)    
     
-    ## background subtraction
-    if (!is.null(backsub)) {
-      BACK <- mean(FLUO[backsub], na.rm = TRUE)
-      FLUO <- FLUO - BACK
-    }  
-      
+    ## from 1.3-7: baseline correction by average of first cycles or single value
+    if (is.numeric(baseline)) {
+      if (length(baseline) == 1) BASE <- baseline 
+      else if (length(baseline > 1)) {
+        amatch <- function(x, y) as.numeric(sapply(x, function(z) which(z == y)))
+        SEL <- amatch(baseline, CYCLES)
+        BASE <- mean(FLUO[SEL], na.rm = TRUE) * basefac        
+      }   
+    FLUO <- FLUO - BASE
+    }    
+          
     ## smoothing
     if (smooth != "none") {
       if (smooth == "smooth") FLUO <- as.numeric(smooth(FLUO))
@@ -85,12 +88,21 @@ verbose = TRUE,
     ## changing magnitude
     if (factor != 1) FLUO <- FLUO * factor                
         
+    ## fit model
     DATA <- data.frame(Cycles = CYCLES, Fluo = FLUO)    
       
     if (verbose) cat("Making model for ", NAME, " (", model$name, ")\n", sep= "")  
     flush.console()
     
     fitOBJ <- try(pcrfit(DATA, 1, 2, model, verbose = FALSE, ...), silent = TRUE)
+    
+    ## from 1.3-7: baseline by 'c' parameter of sigmoidal model
+    if (!is.numeric(baseline) && baseline) {
+      BASE <- coef(fitOBJ)["c"]    
+      newDATA <- fitOBJ$DATA
+      newDATA[, 2] <- newDATA[, 2] - BASE
+      fitOBJ <- try(update(fitOBJ, data = newDATA, cyc = 1, fluo = 2), silent = TRUE)
+    }
        
     ## tag names if fit failed
     if (inherits(fitOBJ, "try-error")) {  
@@ -131,9 +143,7 @@ verbose = TRUE,
     if (verbose) cat("\n")    
     
     fitOBJ$call2$model <- fitOBJ$MODEL
-    fitOBJ$call2$opt.method <- "all"
-    fitOBJ$call2$nls.method <- "all"       
-           
+               
     modLIST[[i]] <- fitOBJ
     modLIST[[i]]$names <- NAME    
   }  
@@ -148,16 +158,19 @@ verbose = TRUE,
   ## from 1.3-5: remove failed fits, update label vector, assign new vector to global environment
   if (remove != "none") {
     logVEC <- vector("numeric", length = length(modLIST))
+    
     ## set failed fits to 1
     if (remove %in% c("fit", "KOD")) {
       SEL <- sapply(modLIST, function(x) x$isFitted)
       logVEC[SEL == FALSE] <- 1      
     }
+    
     ## set KOD's to 1
     if (remove == "KOD") {      
       SEL <- sapply(modLIST, function(x) x$isOutlier)
       logVEC[SEL == TRUE] <- 1      
     }
+    
     ## remove and update LABELS vector
     SEL <- which(logVEC == 1)
     

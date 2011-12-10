@@ -32,7 +32,7 @@ do.all = FALSE,
   modLIST <- list()
   
   for (i in 1:length(fctLIST)) {
-    tempMOD <- try(pcrfit(object$DATA, 1, 2, fctLIST[[i]], opt.method = object$opt.method, verbose = verbose), silent = TRUE)
+    tempMOD <- try(pcrfit(object$DATA, 1, 2, fctLIST[[i]], verbose = verbose), silent = TRUE)
     if (inherits(tempMOD, "try-error")) next     
     modLIST[[i]] <- tempMOD
   } 
@@ -88,7 +88,7 @@ do.all = FALSE,
     optMODEL <- fctLIST[[SELECT]]
   }
       
-  optMODEL <- pcrfit(object$DATA, 1, 2, optMODEL, opt.method = object$opt.method, verbose = verbose)    
+  optMODEL <- pcrfit(object$DATA, 1, 2, optMODEL, verbose = verbose)    
 
   optMODEL$retMat <- retMAT
   return(optMODEL)

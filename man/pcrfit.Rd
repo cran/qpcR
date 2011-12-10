@@ -6,14 +6,12 @@
 \title{Workhorse function for qPCR model fitting}
 
 \description{
-This is the main workhorse function of the qpcR package that fits one of the available models to qPCR data using nonlinear least-squares fitting from \code{\link{nls}}, with sensible starting parameters obtained from either \code{\link{nls.lm}} (default) or \code{\link{optim}}.
+This is the workhorse function of the qpcR package that fits one of the available models to qPCR data using (weighted) nonlinear least-squares (Levenberg-Marquardt) fitting from \code{\link{nlsLM}} of the 'minpack.lm' package.
 }
 
 \usage{
-pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,  
-       opt.method = "all", nls.method = "all", 
-       start = NULL, robust = FALSE, weights = NULL, 
-       verbose = TRUE, ...)
+pcrfit(data, cyc = 1, fluo, model = l4, start = NULL, 
+       offset = 0, weights = NULL, verbose = TRUE, ...)
 }
 
 \arguments{
@@ -21,28 +19,33 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
   \item{cyc}{the column containing the cycle data. Defaults to 1.}
   \item{fluo}{the column(s) containing the raw fluorescence data of the run(s). If more than one column is given, the model will be built with the replicates. See 'Details' and 'Examples'.}
   \item{model}{the model to be used for the analysis. Defaults to 'l4'.} 
-  \item{do.optim}{if \code{FALSE}, refinement of starting values by any of the optimization methods (see 'Details') will be skipped.}
-  \item{opt.method}{all or one of the available optimization methods. See 'Details'.}
-  \item{nls.method}{all or one of the available methods in \code{\link{nls}}. See 'Details'.}
   \item{start}{a vector of starting values that can be supplied externally.}
-  \item{robust}{logical. If \code{TRUE}, robust nonlinear regression is used. See 'Details'.}   
-  \item{weights}{a vector with same length as \code{data} containing possible weights for the nonlinear fit.} 
+  \item{offset}{an offset cycle number from the second derivative cut-off cycle for all \code{MAK} methods. See 'Details' and 'Example'.}
+  \item{weights}{a vector with same length as \code{data} containing possible weights for the nonlinear fit, or an expression to calculate weights from. See 'Details'.} 
   \item{verbose}{logical. If \code{TRUE}, fitting and convergence results will be displayed in the console.}
-  \item{...}{other parameters to be passed to \code{nls.lm}, \code{optim} or \code{nls}.}     
+  \item{...}{other parameters to be passed to \code{\link{nlsLM}}.}     
 }
 
 \details{
-The fitting procedure works as follows (ensuring maximum safeness against convergence errors):
-
-1) Approximate starting values are acquired from \code{model$ssfct}.\cr
-2) Starting values are refined by any of the methods available in \code{optim} or the Levenberg-Marquardt algorithm (\code{nls.lm}). The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", and "SANN". If any of the methods successfully converged, the remaining are skipped and the refined starting values transferred to \code{\link{nls}}. The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default first method.\cr 
-3) The refined starting values from 2) are fitted with \code{\link{nls}} using the order "port", "default" (Gauss-Newton) and "plinear". Again, if any of the methods converged, the remaining are skipped.    
+This is a newer (from qpcR 1.3-7 upwards) version of \code{pcrfit}. It is a much simpler implementation containing only the LM-Algorithm for fitting, but this fitting routine has proven to be so robust that other optimization routines (such as in \code{\link{optim}}) could safely be removed. The fitting is done with the new \code{\link{nlsLM}} function of the 'minpack.lm' package, which gives a model of class 'nls' as output.  
 
 This function is to be used at the single run level or on replicates (by giving several columns). The latter will build a single model based on the replicate values. If many models should be built on a cohort of replicates, use \code{\link{modlist}} and \code{\link{replist}}.
 
-The output from the optim methods is checked by ensuring all eigenvalues from the hessian are positive, otherwise a notice will occur and the next method in queue is used.  
+The \code{offset} value defines the offset cycles from the second derivative maximum that is used as a cut-off criterion in the \code{MAK} methods. See 'Examples'.
 
-If \code{robust = TRUE}, robust nonlinear fitting will be used. To do this, the internal function \code{qpcR:::rnls} is called which is a modification of the \code{nlrob} function of the 'robustbase' package. Modifications were done such that all available generic functions for objects of class 'nls' can be used on the output of \code{qpcR:::rnls}, such as \code{predict}, \code{confint} etc.
+Since version 1.3-7, an expression given as a character string can be supplied to the \code{weights} argument.
+This expression, which is transferred to \code{qpcR:::wfct}, defines how the vector of weights is calculated from the data. In principle, five different parameters can be used to define weights:\cr
+\code{"x"} relates to the cycles \eqn{x_i},\cr
+\code{"y"} relates to the raw fluorescence values \eqn{y_i},\cr
+\code{"error"} relates to the error \eqn{\sigma(y_{i, j})} of replicates \eqn{j},\cr
+\code{"fitted"} relates to the fitted values \eqn{\hat{y}_i} of the fit,\cr
+\code{"resid"} relates to the residuals \eqn{y_i - \hat{y}_i} of the fit.\cr
+For \code{"fitted"} and \code{"resid"}, the model is fit unweighted by \code{\link{pcrfit}}, the fitted/residual values extracted and these subsequently used for refitting the model with weights.
+These parameters can be used solely or combined to create a weights vector for different regimes. The most commonly used are (see also 'Examples'):\cr
+Inverse of response (raw fluorescence) \eqn{\frac{1}{y_i}}: \code{"1/y"}\cr
+Square root of predictor (Cycles) \eqn{\sqrt{x_i}}: \code{"sqrt(x)"}\cr
+Inverse square of fitted values: \eqn{\frac{1}{\hat{y}^2_i}}: \code{"1/fitted^2"}\cr
+Inverse variance \eqn{\frac{1}{\sigma^2(y_{i, j})}}: \code{"1/error^2"}
 }
 
 \value{
@@ -50,14 +53,13 @@ A model of class 'nls' and 'pcrfit' with the following items attached:\cr
   \item{DATA}{the initial data used for fitting.}
   \item{MODEL}{the model used for fitting.} 
   \item{call2}{the call to \code{pcrfit}.} 
-  \item{parMat}{the trace of the starting values for each applied method. Can be used to track problems.}
-  \item{opt.method}{the successful (convergence) optimization methods.}
+  \item{parMat}{the trace of the parameter values. Can be used to track problems.}
+  \item{opt.method}{defaults to \code{"LM"}.}
 } 
 
 \author{
 Andrej-Nikolai Spiess
 }
-
 
 \references{
 Bioassay analysis using R.\cr
@@ -78,25 +80,18 @@ D. Marquardt.\cr
 m1 <- pcrfit(reps, 1, 2, l4) 
 plot(m1)
 
-## using BFGS and Nelder from 'optim'
-pcrfit(reps, 1, 2, l5, opt.method = c("BFGS", "Nelder-Mead"))
+## supply own starting values
+pcrfit(reps, 1, 2, l4, start = c(-5, -0.05, 11, 16)) 
 
-## skip 'optim' method and supply
-## own starting values
-pcrfit(reps, 1, 2, l4, do.optim = FALSE, start = c(-5, -0.05, 11, 16)) 
-
-## make a robust model
-pcrfit(reps, 1, 2, l4, robust = TRUE)
-
-## make a replicate model
-m2 <- pcrfit(reps, 1, 2:5, l5)
+## make a replicate model,
+## use inverse variance as weights
+m2 <- pcrfit(reps, 1, 2:5, l5, weights = "1/error^2")
 plot(m2)
 
-\dontrun{
-## fit a mechanistic mak3 model
-m3 <- pcrfit(reps, 1, 2, mak3)
+## fit a mechanistic 'mak2' model
+## to -1 cycle from SDM
+m3 <- pcrfit(reps, 1, 2, mak2, offset = -1)
 plot(m3)
-}    
 }
 
 \keyword{models}

@@ -14,11 +14,19 @@ verbose = TRUE,
   if (!is.numeric(which.eff)) which.eff <- match.arg(which.eff)
   type.eff <- match.arg(type.eff)
   
-  ## exchange numeric which.eff variable
+  ## from 1.3-7: exchange numeric efficiencies/threshold cycles
   if (is.numeric(which.eff)) {
-    numEFF <- which.eff
-    which.eff <- "sig"
-  } else numEFF <- NULL
+    effDAT <- matrix(c("ext.eff", which.eff), nrow = 1) 
+    colnames(effDAT) <- colnames(data)
+    data <- rbind(data, effDAT)
+    which.eff <- "ext" 
+  } 
+  if (is.numeric(which.cp)) {
+    cpDAT <- matrix(c("sig.ext", which.cp), nrow = 1) 
+    colnames(cpDAT) <- colnames(data)
+    data <- rbind(data, cpDAT)
+    which.cp <- "ext" 
+  }
   
   ## get 'group' name
   GROUPNAME <- deparse(substitute(group))  
@@ -31,29 +39,11 @@ verbose = TRUE,
   if (length(group) != ncol(DATA)) stop("Length of 'group' and 'data' do not match!")
   
   ## check for number of reference genes, control samples and treatment samples
-  if (verbose) cat("Checking for number of control samples,\ntreatment samples and reference genes:\n")
   numCon <- unique(na.omit(as.numeric(sub("g\\d*c(\\d*)", "\\1", group, perl = TRUE))))
-  if (verbose) cat(" Found", length(numCon), "control sample(s)...\n")
   numSamp <- unique(na.omit(as.numeric(sub("g\\d*s(\\d*)", "\\1", group, perl = TRUE))))  
-  if (verbose) cat(" Found", length(numSamp), "treatment sample(s)...\n")
   RefInCon <- unique(na.omit(as.numeric(sub("r(\\d*)c\\d*", "\\1", group, perl = TRUE))))
-  if (verbose) cat(" Found", length(RefInCon), "reference genes in control sample(s)...\n")
   RefInSamp <- unique(na.omit(as.numeric(sub("r(\\d*)s\\d*", "\\1", group, perl = TRUE))))
-  if (verbose) {
-    cat(" Found", length(RefInSamp), "reference genes in treatment sample(s)...\n")
-    cat("\n")
-  }
-  
-  ## check equal use of reference genes in controls and treatments
-  if (!all(RefInCon == RefInSamp)) stop("Unequal number of reference genes in control and treatment samples!")
-      
-  ## return without analysis if only one reference gene exists
-  if (all(RefInCon <= 1) && all(RefInSamp <= 1)) {    
-    DATA <- data
-    attr(DATA, "group") <- group
-    return(DATA)
-  }  
-  
+    
   ## initialize variables  
   matMEAN <- NULL
   matSD <- NULL
@@ -62,7 +52,7 @@ verbose = TRUE,
   ## averaging of reference genes in control and treatment samples 
   for (k in c("c", "s")) {
   for (i in switch(k, "c" = numCon, "s" = numSamp)) {
-    if (verbose) cat("Calculating statistics (mean & sd) for: ")
+    if (verbose) cat(" Calculating statistics (mean & sd) for: ")
     for (j in switch(k, "c" = RefInCon, "s" = RefInSamp)) {      
       STR <- paste("r", j, k, i, sep = "")   
       if (verbose) cat(STR, "")
@@ -75,8 +65,10 @@ verbose = TRUE,
       colnames(MEAN) <- STR      
       SD <- apply(tempDAT, 1, function(x) tapply(as.numeric(x), GROUP, function(y) sd(y, na.rm = TRUE)))
       SD <- matrix(SD)    
+      
       ## replace NA values in SD that occur when sd is done on single runs
       if (all(is.na(SD))) SD <- matrix(0, nrow = nrow(SD), ncol = 1)
+      
       ## if reference values are taken as all with the same average or is numeric, set s.d. = 0 
       if (type.eff == "mean.single" || is.numeric(which.eff)) SD <- matrix(rep(0, nrow(SD)))
       colnames(SD) <- STR
@@ -91,15 +83,14 @@ verbose = TRUE,
     EXPR <- parse(text = TEXT2)  
       
     ## error propagation of averaged efficiencies
-    selEFF <- which(ANNO == paste(which.eff, "eff", sep = "."))
+    selEFF <- which(ANNO == paste(which.eff, "eff", sep = "."))      
     meanEFF <- matMEAN[selEFF, , drop = FALSE]      
-    if (!is.null(numEFF)) meanEFF[1, ] <- numEFF
     sdEFF <- matSD[selEFF, ]     
     statEFF <- rbind(meanEFF, sdEFF) 
     if (verbose) cat("  => error propagation for", colnames(statEFF), "(efficiencies)...\n")
     colnames(statEFF) <- paste("a", 1:ncol(statEFF), sep = "")    
     propEFF <- propagate(EXPR, statEFF, type = "stat", plot = FALSE, ...)    
-    newEFF <- makeStat(length(allSEL), propEFF$summary[1, "Prop"], propEFF$summary[2, "Prop"])
+    newEFF <- qpcR:::makeStat(length(allSEL), propEFF$summary[1, "Prop"], propEFF$summary[2, "Prop"])
     if (verbose) cat("  => replacing with new values...\n")
     DATA[selEFF, allSEL] <- round(newEFF, 6)
     
@@ -111,7 +102,7 @@ verbose = TRUE,
     if (verbose) cat("  => error propagation for", colnames(statCP), "(threshold cycles)...\n")
     colnames(statCP) <- paste("a", 1:ncol(statCP), sep = "")    
     propCP <- propagate(EXPR, statCP, type = "stat", plot = FALSE, ...)
-    newCP <- makeStat(length(allSEL), propCP$summary[1, "Prop"], propCP$summary[2, "Prop"])
+    newCP <- qpcR:::makeStat(length(allSEL), propCP$summary[1, "Prop"], propCP$summary[2, "Prop"])
     if (verbose) cat("  => replacing with new values...\n")
     DATA[selCP, allSEL] <- round(newCP, 2)
     

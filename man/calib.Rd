@@ -4,8 +4,7 @@
 \title{Calculation of qPCR efficiency by dilution curve analysis}
 
 \description{
-This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the 
- logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}. A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve.  
+This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}. A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve.  
 The threshold cycles are calculated either by some arbitrary fluorescence value (i.e. as given by the qPCR software) or calculated from the second derivative maximum of the first (highest concentration) curve. If values to be predicted are given, they are calculated from the curve and also displayed within. An iterative search of the optimal threshold border can be conducted, thereby going through all slopes and intercepts and selecting the combination that minimizes the AIC of the acquired linear regression curves. See 'Details' for more information on this (maybe controversial) procedure.   
 } 
 
@@ -70,15 +69,21 @@ ATTENTION: If iterations were used, the values reflect the analysis of the best 
 Andrej-Nikolai Spiess
 }       
 
+\references{
+A new mathematical model for relative quantification in real-time RT-PCR.\cr
+Pfaffl MW.\cr
+\emph{Nucleic Acids Res} (2001), \bold{29}:e45.
+}
+
 \examples{
 ## Define calibration curves,
 ## dilutions (or copy numbers) 
 ## and curves to be predicted.
 ## Do background subtraction using
 ## average of first 8 cycles
-CAL <- modlist(reps, fluo = c(2, 6, 10, 14, 18, 22), backsub = 1:8)
+CAL <- modlist(reps, fluo = c(2, 6, 10, 14, 18, 22), baseline = 1:8)
 COPIES <- c(100000, 10000, 1000, 100, 10, 1)
-PRED <- modlist(reps, fluo = c(3, 7, 11), backsub = 1:8)
+PRED <- modlist(reps, fluo = c(3, 7, 11), baseline = 1:8)
 
 ## conduct normal quantification using
 ## the second derivative maximum of 

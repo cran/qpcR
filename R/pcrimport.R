@@ -24,7 +24,7 @@ needFirst = TRUE,
   FILE <- file
   if (is.na(FILE)) {
     while (is.na(FILE)) {
-      cat("Where is the data?\n in a directory with file(s) such as \"c:\\temp\\\" \n in the clipboard => 1\n or a dataframe in the workspace => \"name\"")
+      cat("Where is the data?\n in a directory with file(s) such as \"c:\\temp\\\" \n in the clipboard => 1\n or a dataframe in the workspace => \"name\"\n")
       FILE <- scan("", what = "character", nmax = 1, quiet = TRUE)      
     }
   }

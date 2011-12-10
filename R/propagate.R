@@ -3,6 +3,7 @@ expr,
 data, 
 type = c("raw", "stat"),  
 do.sim = FALSE, 
+dist.sim = c("norm", "tnorm"),
 use.cov = FALSE, 
 nsim = 10000,
 do.perm = FALSE, 
@@ -16,8 +17,9 @@ verbose = FALSE,
 ...
 )
 {            
-      require(MASS, quietly = TRUE)      
+      require(MASS, quietly = TRUE)       
       type <- match.arg(type)
+      dist.sim = match.arg(dist.sim)
       if (!is.expression(expr) && !is.call(expr)) stop("'expr' must be an expression")
       crit.all <- c("perm > init", "perm == init", "perm < init")
       if (is.null(perm.crit)) perm.crit <- crit.all
@@ -50,7 +52,7 @@ verbose = FALSE,
         meanvals <- DATA[1, ]
         sdvals <- DATA[2, ] 
       }                
-      
+            
       if (type == "raw" && use.cov == TRUE) SIGMA <- cov(DATA, use = "complete.obs")
       if (type == "raw" && use.cov == FALSE) SIGMA <- diag(diag(cov(DATA, use = "complete.obs")))
       if (type == "stat") SIGMA <- diag(DATA[2, ]^2) 
@@ -72,10 +74,19 @@ verbose = FALSE,
       
       colnames(SIGMA) <- colnames(DATA)
       rownames(SIGMA) <- colnames(DATA)         
-            
+      
       ### Monte-Carlo simulation
-      if (do.sim && isCov) {                    
+      if (do.sim && isCov) {   
         datSIM <- mvrnorm(nsim, mu = meanvals, Sigma = SIGMA, empirical = TRUE)
+        
+        ## version 1.3-7: included truncated multivariate normal using 95% confidence values
+        ## from multivariate normal
+        if (dist.sim == "tnorm") {
+          LOWER <- apply(datSIM, 2, function(x) quantile(x, 0.025))
+          UPPER <- apply(datSIM, 2, function(x) quantile(x, 0.975))
+          datSIM <- tmvrnorm(nsim, mean = meanvals, sigma = SIGMA, lower = LOWER, upper = UPPER)           
+        }
+        
         colnames(datSIM) <- colnames(DATA)
         resSIM <- apply(datSIM, 1, function(x) eval(EXPR, envir = as.list(x)))
         confSIM <- quantile(resSIM, c(alpha/2, 1 - (alpha/2)), na.rm = TRUE)  
@@ -173,13 +184,13 @@ verbose = FALSE,
           abline(v = confDATA, lwd = 2, col = 4, ...)                              
         }
       }
-            
-      outDAT <- data.frame.na(Sim = mean(resSIM, na.rm = TRUE), Perm = mean(resPERM, na.rm = TRUE), Prop = meanPROP)          
-      outDAT <- rbind.na(outDAT, c(sd(resSIM, na.rm = TRUE), sd(resPERM, na.rm = TRUE), sqrt(errorPROP)))
-      outDAT <- rbind.na(outDAT, c(median(resSIM, na.rm = TRUE), median(resPERM, na.rm = TRUE)))
-      outDAT <- rbind.na(outDAT, c(mad(resSIM, na.rm = TRUE), mad(resPERM, na.rm = TRUE)))    
-      outDAT <- rbind.na(outDAT, c(confSIM[1], confPERM[1], confPROP[1]))
-      outDAT <- rbind.na(outDAT, c(confSIM[2], confPERM[2], confPROP[2]))     
+          
+      outDAT <- qpcR:::data.frame.na(Sim = mean(resSIM, na.rm = TRUE), Perm = mean(resPERM, na.rm = TRUE), Prop = meanPROP)          
+      outDAT <- qpcR:::rbind.na(outDAT, c(sd(resSIM, na.rm = TRUE), sd(resPERM, na.rm = TRUE), sqrt(errorPROP)))
+      outDAT <- qpcR:::rbind.na(outDAT, c(median(resSIM, na.rm = TRUE), median(resPERM, na.rm = TRUE)))
+      outDAT <- qpcR:::rbind.na(outDAT, c(mad(resSIM, na.rm = TRUE), mad(resPERM, na.rm = TRUE)))    
+      outDAT <- qpcR:::rbind.na(outDAT, c(confSIM[1], confPERM[1], confPROP[1]))
+      outDAT <- qpcR:::rbind.na(outDAT, c(confSIM[2], confPERM[2], confPROP[2]))     
       row.names(outDAT) <- c("Mean", "Std.dev.", "Median", "MAD", "Conf.lower", "Conf.upper")       
            
       if (!all(is.na(pvalPERM))) {
@@ -189,7 +200,7 @@ verbose = FALSE,
         pMAT[, WHICH] <- pVALS          
         rownames(pMAT) <- names(pvalPERM)
         colnames(pMAT) <- colnames(outDAT)              
-        outDAT <- rbind.na(outDAT, pMAT)
+        outDAT <- qpcR:::rbind.na(outDAT, pMAT)
       }            
            
       if (verbose) OUT <- list(data.Sim = allSIM, data.Perm = allPERM, data.Prop = distPROP, derivs = derivs, covMat = SIGMA, summary = outDAT)

@@ -4,14 +4,14 @@
 \title{Create nonlinear models from a dataframe and coerce them into a list}
 
 \description{
-Essential function to create a list of nonlinear models from the columns (runs) of a qPCR dataframe. This function houses different methods for curve transformation prior to fitting, such as normalization in [0, 1], smoothing, background subtraction etc. Runs that failed to fit or that have been identified as kinetic outliers (by default: lack of sigmoidal structure) can be removed automatically as well as their entries in an optionally supplied label vector. 
+Essential function to create a list of nonlinear models from the columns (runs) of a qPCR dataframe. This function houses different methods for curve transformation prior to fitting, such as normalization in [0, 1], smoothing, baseline subtraction etc. Runs that failed to fit or that have been identified as kinetic outliers (by default: lack of sigmoidal structure) can be removed automatically as well as their entries in an optionally supplied label vector. 
 }
 
 \usage{
 modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2", 
         checkPAR = parKOD(), remove = c("none", "fit", "KOD"), 
-        exclude = NULL, labels = NULL, norm = FALSE, backsub = NULL, 
-        smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
+        exclude = NULL, labels = NULL, norm = FALSE, baseline = FALSE,
+        basefac = 1, smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
         smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
         optPAR = list(sig.level = 0.05, crit = "ftest"), verbose = TRUE, ...)
 }
@@ -27,7 +27,8 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
   \item{exclude}{either \code{""} for samples with missing column names or a regular expression defining columns (samples) to be excluded from \code{modlist}. See 'Details'.} 
   \item{labels}{a vector containing labels, i.e. for defining replicate groups prior to \code{\link{ratiobatch}}.}
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
-  \item{backsub}{background subtraction. An optional numeric sequence defining the cycle numbers for background averaging and subtraction, such as \code{1:8}.}
+  \item{baseline}{type of baseline subtraction. Same as in \code{\link{efficiency}}.}
+  \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
   \item{smooth}{which curve smoothing method to use. See 'Details'.}
   \item{smoothPAR}{parameters to be supplied to the smoothing functions. See 'Details'.}
   \item{factor}{a multiplication factor for the fluorescence response values (barely useful, but who knows...).}
@@ -55,11 +56,12 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## calculate efficiencies for each run in
-## the 'reps' data
-## subtract background using the first 8 cycles
-ml1 <- modlist(reps, model = l5, backsub = 1:8)
-sapply(ml1, function(x) efficiency(x, plot = FALSE)$eff)
+## calculate efficiencies and ct values 
+## for each run in the 'reps' data, 
+## subtract baseline using the 
+## first 8 cycles.
+ml1 <- modlist(reps, model = l5, baseline = 1:8)
+getPar(ml1, type = "curve")
 
 ## 'crossing points' for the first 3 runs (normalized)
 ##  and using best model from Akaike weights
@@ -92,6 +94,11 @@ sapply(ml6, function(x) coef(x)[1])
 ## replicate group of dataset 'reps'
 ml7 <- modlist(reps, exclude = ".1")
 plot(ml7, which = "single")
+
+## using weighted fitting:
+## weighted by inverse residuals
+ml8 <- modlist(reps, weights = "1/abs(resid)")
+plot(ml8, which = "single")
 }
 }
 

@@ -8,13 +8,13 @@ The maximum ratio (MR) is determined along the cubic spline interpolated curve o
 }
 
 \usage{
-maxRatio(x, type = c("spline", "sigfit"), baseshift = NULL, 
+maxRatio(x, method = c("spline", "sigfit"), baseshift = NULL, 
          smooth = TRUE, plot = TRUE, ...)
 }
 
 \arguments{
   \item{x}{an object of class 'pcrfit' (single run) or 'modlist' (multiple runs).}
-  \item{type}{the parameters are either calculated from the cubic spline interpolation (default) or a sigmoidal fit.}
+  \item{method}{the parameters are either calculated from the cubic spline interpolation (default) or a sigmoidal fit.}
   \item{baseshift}{numerical. Shift value in case of \code{type = "spline"}. See 'Details'.}
   \item{smooth}{logical. If \code{TRUE} and \code{type = "spline"}, invokes a 5-point convolution filter (\code{\link{filter}}). See 'Details'.} 
   \item{plot}{Should diagnostic plots be displayed?}

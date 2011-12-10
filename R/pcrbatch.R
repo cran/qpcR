@@ -11,7 +11,8 @@ exclude = NULL,
 type = "cpD2",
 labels = NULL, 
 norm = FALSE,
-backsub = NULL,
+baseline = FALSE,
+basefac = 1,
 smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
 smoothPAR = list(span = 0.1), 
 factor = 1,
@@ -31,9 +32,9 @@ verbose = TRUE,
   if (class(x) != "modlist") {  
     if (names(x)[cyc] != "Cycles") stop("Column 1 should be named 'Cycles'!")
     modLIST <- try(modlist(x = x, cyc = cyc, fluo = fluo, model = model, check = check, checkPAR = checkPAR,
-                       remove = remove, exclude = exclude, labels = labels, norm = norm, backsub = backsub, 
-                       smooth = smooth, smoothPAR = smoothPAR, factor = factor, opt = opt, optPAR = optPAR, 
-                       verbose = verbose, ...), silent = TRUE)   
+                       remove = remove, exclude = exclude, labels = labels, norm = norm, baseline = baseline, 
+                       basefac = basefac, smooth = smooth, smoothPAR = smoothPAR, factor = factor, 
+                       opt = opt, optPAR = optPAR, verbose = verbose, ...), silent = TRUE)   
     if (inherits(modLIST, "try-error")) stop("There was an error during 'modlist' creation.")
   } else modLIST <- x 
                            
@@ -79,7 +80,7 @@ verbose = TRUE,
     ## exponential model
     if ("expfit" %in% methods) {
       cat("  Fitting exponential model...\n")
-      EXP <- try(expfit(fitOBJ, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
+      EXP <- try(expfit(fitOBJ, plot = FALSE, ...)[-c(2, 8)], silent = TRUE)
       if (inherits(EXP, "try-error")) EXP <- list(eff = NA)
       names(EXP) <- paste("exp.", names(EXP), sep = "")
     } else EXP <- NULL
@@ -92,10 +93,11 @@ verbose = TRUE,
       names(LRES) <- paste("LRE.", names(LRES), sep = "")       
     } else LRES <- NULL    
       
-    ## from 1.3-4: attach any of the MAK models 
-    if (length(pos <- grep("mak", methods))) {
-      TEXT <- methods[pos]
-      TEXT <- match.arg(TEXT, c("mak2", "mak3", "mak3n"))
+    ## from 1.3-4: attach any of the 'mak' models
+    if (any(c("mak2", "mak2i", "mak3", "mak3i") %in% methods)) {
+      SEL <- match(methods, c("mak2", "mak2i", "mak3", "mak3i"))
+      SEL <- SEL[!is.na(SEL)]
+      TEXT <- c("mak2", "mak2i", "mak3", "mak3i", "cm3")[SEL]
       MODEL <- get(TEXT)
       cat("  Fitting", TEXT, "model...\n")
       MAK <- try(pcrfit(fitOBJ$DATA, 1, 2, MODEL, verbose = FALSE), silent = TRUE)
@@ -106,10 +108,24 @@ verbose = TRUE,
       } else {
         MAK <- coef(MAK)
         names(MAK) <- paste(TEXT, ".", names(MAK), sep = "")
-      }  
+      }
     } else MAK <- NULL
+      
+    ## from 1.3-7: attach 'cm3' model
+    if ("cm3" %in% methods) {
+      cat("  Fitting cm3 model...\n")
+      CM3 <- try(pcrfit(fitOBJ$DATA, 1, 2, cm3, verbose = FALSE), silent = TRUE)
+      if (inherits(CM3, "try-error")) {
+        cat("There was an error in buidling the cm3 model. Continuing without...\n")
+        flush.console()
+        CM3 <- list(D0 = NA)
+      } else {
+        CM3 <- coef(CM3)
+        names(CM3) <- paste("cm3.", names(CM3), sep = "")
+      }
+    } else CM3 <- NULL    
   
-    outALL <- c(EFF, SLI, EXP, LRES, MAK)     
+    outALL <- c(EFF, SLI, EXP, LRES, MAK, CM3)     
     outLIST[[i]] <- outALL
     
     cat("\n")
@@ -129,8 +145,6 @@ verbose = TRUE,
   
   colnames(resMAT)[1] <- "Vars"
   names(resMAT)[-1] <-  sapply(modLIST, function(x) x$name)       
-  cat("Writing to clipboard...\n\n")
-  write.table(resMAT, file = "clipboard-64000", sep = "\t", row.names = FALSE)
   class(resMAT) <- c("data.frame", "pcrbatch")   
   return(resMAT)
 }

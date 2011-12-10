@@ -6,21 +6,12 @@
 
 \description{
 A general function for the calculation of errors. Can be used for qPCR data, but any data that should be subjected to error analysis will do. The different error types can be calculated for any given expression from either replicates or from statistical summary data (mean & standard deviation). 
-These are:\cr\cr
-1) \bold{Monte-Carlo simulation:}\cr
-For each variable in the dataset, simulated data with \code{nsim} samples is generated from a multivariate normal distribution using the mean \eqn{\mu} and standard deviation \eqn{\sigma} of each variable. All data is coerced into a new dataset that has the same covariance structure as the initial dataset. Each row of the simulated dataset is evaluated and statistics are calculated from the \code{nsim} evaluations.
-
-2) \bold{Permutation approach:}\cr
-The data of the original dataset is permutated \code{nperm} times by binding observations together according to \code{ties}. The \code{ties} bind observations that can be independent measurements from the same sample. In qPCR terms, this would be a real-time PCR for two different genes on the same sample. If \code{ties} is omitted, the observations are shuffled independently. In detail, two datasets are created for each permutation: Dataset1 samples the rows (replicates) of the data according to \code{ties}. Dataset2 is obtained by sampling the columns (samples), also binding columns as in \code{ties}. For both datasets, the permutations are evaluated and statistics are collected. The confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all permutations that follow \code{perm.crit}, whereby \code{init} reflects the permutations of the initial data and \code{perm} the permutations of the randomly reallocated samples. Thus, the p-value gives a measure against the null hypothesis that the result in the initial group is just by chance. See 'Details' and 'Examples'.
- 
-3) \bold{Error propagation:}\cr
-For all variables in the original dataset, \eqn{\mu} and \eqn{\sigma} are calculated. Through gaussian error propagation (first-order Taylor expansion), the propagated error is calculated using a matrix approach (see 'Details') by either omitting or including the dataset covariance structure.   
 }
 
 \usage{
 propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE, 
-          use.cov = FALSE, nsim = 10000, do.perm = FALSE, 
-          perm.crit = NULL, ties = NULL, nperm = 2000, 
+          dist.sim = c("norm", "tnorm"), use.cov = FALSE, nsim = 10000, 
+          do.perm = FALSE, perm.crit = NULL, ties = NULL, nperm = 2000, 
           alpha = 0.05, plot = TRUE, logx = FALSE, verbose = FALSE, ...)  
 }
 
@@ -29,6 +20,7 @@ propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE,
   \item{data}{a dataframe or matrix containing either a) the replicates in columns or b) the means in the first row and the standard deviations in the second row. The variable names must be defined in the column headers.}
   \item{type}{either \code{raw} if replicates are given, or \code{stat} if means and standard deviations are supplied.}
   \item{do.sim}{logical. Should Monte Carlo error analysis be applied?}
+  \item{dist.sim}{\code{"norm"} will use a multivariate normal distribution, \code{"tnorm"} a multivariate truncated normal distribution. See 'Details'.}
   \item{use.cov}{logical or variance-covariance matrix with the same column descriptions and column order as \code{data}. If \code{TRUE} together with replicates, the covariances are calculated from these and used within the Monte-Carlo simulation and error propagation. If \code{type = "stat"}, a square variance-covariance matrix can be supplied in the right dimensions (n x n, n = number of variables). If \code{FALSE}, the Monte-Carlo simulation and error propagation use only the diagonal (variances).}
   \item{nsim}{the number of simulations to be performed, minimum is 5000.}  
   \item{do.perm}{logical. Should permutation error analysis be applied?}     
@@ -43,11 +35,18 @@ propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE,
 }
 
 \details{
-The propagated error is calculated by gaussian error propagation. Often omitted, but important in models where the variables are dependent (i.e. linear regression), is the second covariance term.
-\deqn{\sigma_Y^2 = \sum_{i}\left(\frac{\partial f}{\partial X_i} \right)^2 \sigma_i^2 + \sum_{i \neq j}\sum_{j \neq i}\left(\frac{\partial f}{\partial X_i} \right)\left(\frac{\partial f}{\partial X_j} \right) \sigma_{ij}} 
-\code{propagate} calculates the propagated error either with or without covariances by using the matrix representation \deqn{C_Y = F_XC_XF_X^T} with \eqn{C_Y} = the propagated error, \eqn{F_X} = the p x n matrix with the results from the partial derivatives, \eqn{C_X} = the p x p variance-covariance matrix and \eqn{F_X^T} = the n x p transposed matrix of \eqn{F_X}. Depending on the input formula, the error propagation may result in an error that is not normally distributed. The Monte Carlo simulation, starting with normal distributions of the variables, can clarify this. The plots obtained from this function will also clarify this potential caveat. A high tendency from deviation of normality is encountered in formulas where the error of the denominator is relatively high or in exponential models where the exponent has a high error. This is one of the problems that is inherent in real-time PCR analysis, as the classical ratio calculation with efficiencies (i.e. by the delta-ct method) is usually of the exponential type. 
+The implemented methods are:\cr\cr
+1) \bold{Monte-Carlo simulation:}\cr
+For each variable in the dataset, simulated data with \code{nsim} samples is generated from a multivariate normal distribution using the mean \eqn{\mu} and standard deviation \eqn{\sigma} of each variable. All data is coerced into a new dataset that has the same covariance structure as the initial dataset. Each row of the simulated dataset is evaluated and statistics are calculated from the \code{nsim} evaluations. In scenarios that are nonlinear in nature (i.e. exponential setups) the distribution of the result values can be extremely skewed, mainly due to the simulated values at the extreme end of the normal distribution. Setting \code{dist.sim = "tnorm"} will fit a multivariate normal distribution,  calculate the lower/upper 2.5\% quantile on each side for each input variable and use these as bounds for simulating from a multivariate truncated normal distribution. This will (in part) remove some of the skewness in the result distribution. 
 
-The criterium for the permutation p-value (\code{perm.crit}) has to be defined by the user. For example, let's say we calculate some value 0.2 which is a ratio between two groups. We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). The default (\code{NULL}) is to test all three variants \code{perm.crit = c("perm > init", "perm == init", "perm < init")}. 
+2) \bold{Permutation approach:}\cr
+The data of the original dataset is permutated \code{nperm} times by binding observations together according to \code{ties}. The \code{ties} bind observations that can be independent measurements from the same sample. In qPCR terms, this would be a real-time PCR for two different genes on the same sample. If \code{ties} is omitted, the observations are shuffled independently. In detail, two datasets are created for each permutation: Dataset1 samples the rows (replicates) of the data according to \code{ties}. Dataset2 is obtained by sampling the columns (samples), also binding columns as in \code{ties}. For both datasets, the permutations are evaluated and statistics are collected. The confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all permutations that follow \code{perm.crit}, whereby \code{init} reflects the permutations of the initial data and \code{perm} the permutations of the randomly reallocated samples. Thus, the p-value gives a measure against the null hypothesis that the result in the initial group is just by chance. See also 'Examples'.\cr
+The criterium for the permutation p-value (\code{perm.crit}) has to be defined by the user. For example, let's say we calculate some value 0.2 which is a ratio between two groups. We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). The default (\code{NULL}) is to test all three variants "perm > init", "perm == init" and "perm < init".
+ 
+3) \bold{Error propagation:}\cr
+The propagated error is calculated by gaussian error propagation (first-order Taylor expansion) using a matrix approach. Often omitted, but important in models where the variables are dependent (i.e. linear regression), is the second covariance term.
+\deqn{\sigma_Y^2 = \sum_{i}\left(\frac{\partial f}{\partial X_i} \right)^2 \sigma_i^2 + \sum_{i \neq j}\sum_{j \neq i}\left(\frac{\partial f}{\partial X_i} \right)\left(\frac{\partial f}{\partial X_j} \right) \sigma_{ij}} 
+\code{propagate} calculates the propagated error either with or without covariances by using the matrix representation \deqn{C_Y = F_XC_XF_X^T} with \eqn{C_Y} = the propagated error, \eqn{F_X} = the p x n matrix with the results from the partial derivatives, \eqn{C_X} = the p x p variance-covariance matrix and \eqn{F_X^T} = the n x p transposed matrix of \eqn{F_X}. Depending on the input formula, the error propagation may result in an error that is not normally distributed. The Monte Carlo simulation, starting with normal distributions of the variables, can clarify this. The plots obtained from this function will also clarify this potential caveat. A high tendency from deviation of normality is encountered in formulas where the error of the denominator is relatively high or in exponential models where the exponent has a high error. This is one of the problems that is inherent in real-time PCR analysis, as the classical ratio calculation with efficiencies (i.e. by the delta-ct method) is usually of the exponential type.  
 }
 
 \value{
@@ -147,7 +146,7 @@ the <- c(-0.1, 0.41)
 as <- c(11.5E-6, 1.2E-6)
 dt <- c(0, 0.029)
 DF <- cbind(ls, d, da, the, as, dt)
-GUM.1 <- propagate(expr = EXPR, data = DF, type = "stat", 
+propagate(expr = EXPR, data = DF, type = "stat", 
                     do.sim = TRUE, verbose = TRUE)
 ## => u = 31.71 (GUM says 32).  
 

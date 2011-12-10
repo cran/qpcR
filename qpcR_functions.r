@@ -52,13 +52,9 @@ l7 <- list(
             (e^b + x^b)^2 * (1 + e^-b * x^b)^f + b^2 * (c - d) * f * x^b * (e^b - f * x^b)))/x^2
       },
       inv = function(y, parm) {
-            b <- parm[1]
-            c <- parm[2]
-            d <- parm[3]
-            e <- parm[4]
-            f <- parm[5]
-            k1 <- parm[6]
-            k2 <- parm[7]
+            x <- 1:100
+            fn <- function(x, parm) l7$fct(x, parm) - y 
+            uniroot(fn, interval = c(1, 100), parm)$root
       },
       expr.grad = expression(c + (k1 * Cycles) + (k2 * Cycles^2) + (d - c)/((1 + exp(b * (log(Cycles) - log(e))))^f)),
       inv.grad =  NULL,
@@ -114,12 +110,9 @@ l6 <- list(
             -b * (c - d) * e^-(2 * b) * f * x^(-2 + b) * (1 + e^-b * x^b)^(-2-f) * (-(-1 + b) * e^b + (1 + b * f) * x^b)   
       },
       inv = function(y, parm) {
-            b <- parm[1]
-            c <- parm[2]
-            d <- parm[3]
-            e <- parm[4]
-            f <- parm[5]
-            k <- parm[6]             
+            x <- 1:100
+            fn <- function(x, parm) l6$fct(x, parm) - y 
+            uniroot(fn, interval = c(1, 100), parm)$root    
       },
       expr.grad = expression(c + (k * Cycles) + (d - c)/((1 + exp(b * (log(Cycles) - log(e))))^f)),
       inv.grad =  NULL,
@@ -335,13 +328,9 @@ b7 <- list(
             2 * (1 + exp(b * (-e + x)))^(2 + f) * k2)
       },
       inv = function(y, parm) {
-            b <- parm[1]
-            c <- parm[2]
-            d <- parm[3]
-            e <- parm[4]
-            f <- parm[5]
-            k1 <- parm[6]
-            k2 <- parm[7]
+            x <- 1:100
+            fn <- function(x, parm) b7$fct(x, parm) - y 
+            uniroot(fn, interval = c(1, 100), parm)$root
       },
       expr.grad = expression(c + (k1 * Cycles) + (k2 * Cycles^2) + (d - c)/((1 + exp(b * (Cycles - e)))^f)),
       inv.grad =  NULL,
@@ -397,13 +386,9 @@ b6 <- list(
             -b^2 * (c - d) * exp(b * (-e + x)) * (1 + exp(b * (-e + x)))^(-2-f) * f * (-1 + exp(b * (-e + x)) * f)     
       },
       inv = function(y, parm) {
-            b <- parm[1]
-            c <- parm[2]
-            d <- parm[3]
-            e <- parm[4]
-            f <- parm[5]
-            k <- parm[6]
-            
+            x <- 1:100
+            fn <- function(x, parm) b6$fct(x, parm) - y 
+            uniroot(fn, interval = c(1, 100), parm)$root            
       },
       expr.grad = expression(c + (k * Cycles) + (d - c)/((1 + exp(b * (Cycles - e)))^f)),
       inv.grad =  NULL,
@@ -567,441 +552,481 @@ b3 <- list(
 )
 
 expGrowth <- list(
-      expr = "Fluo ~ a * exp(b * Cycles) + c", 
-      fct = function(x, parm) {
-            a <- parm[1]
-            b <- parm[2]
-            c <- parm[3]
-            a * exp(b * x) + c
-      },  
-      ssFct = function (x, y) {             
-            plateau <- 0.95 * min(y)
-            span <- max(y) - plateau
-            tempY <- log((y - plateau))
-            coefVec <- coef(rlm(tempY ~ x))
-            span <- exp(coefVec[1])
-            K <- coefVec[2] 
-            ssVal <- c(span, K, plateau)
-            names(ssVal) <- expGrowth$parnames             
-            return(ssVal)
-      },     
-      d1 = function(x, parm) {
-            a <- parm[1]
-            b <- parm[2]
-            c <- parm[3]
-            a * b * exp(b * x)
-      },     
-      d2 = function(x, parm) {
-            a <- parm[1]
-            b <- parm[2]
-            c <- parm[3]
-             a * b^2 * exp(b * x)
-      },        
-      inv = function(y, parm) {
-            a <- parm[1]
-            b <- parm[2]
-            c <- parm[3]               
-            log((-c + y)/a)/b
-      },       
-      expr.grad = expression(a * exp(b * Cycles) + c), 
-      inv.grad = expression(log((-c + Fluo)/a)/b),
-      parnames = c("a", "b", "c"),       
-      name = "expGrowth",
-      type = "exponential growth model"
-)
-
-mak3 <- list(
-      expr = "Fluo ~ mak3$fct(Cycles, ssVal)",
-      fct = function(x, parm) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]
-            slope <- parm[4]
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + (slope * (1:length(Fn)) + Fb)
-            return(Fn)
-      },         
-      fct_ssFct = function(parm, x, y, method) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]
-            slope <- parm[4]
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + (slope * (1:length(Fn)) + Fb)
-            if (method == "LM") res <- y - Fn else res <- sum(y - Fn)^2
-            return(res)            
-      },
-      ssFct = function(x, y) {
-            ## get parMAKs parameters from global environment or use
-            ## standard ones
-            if (exists("parMAKs", envir = .GlobalEnv)) {
-              PARS <- get("parMAKs", envir = .GlobalEnv)
-            } else PARS <- parMAK()            
-            
-            D2.offset <- PARS$SS.offset 
-            method <- PARS$SS.method 
-            cutter <- PARS$SS.deriv          
-            cutter <- match.arg(cutter, c("sigfit", "spline"))
-            
-            # select cut-off method
-            sigDAT <- cbind(Cycles = x, Fluo = y)
-            if (cutter == "sigfit") {
-              t1 <- supsmu(x = 1:length(y), y = y, span = 0.1)$y
-              t2 <- diff(t1)
-              t3 <- diff(t2)
-              cpD2 <- which.max(t3) + D2.offset
-            } else {               
-              m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
-              cpD2 <- efficiency(m, plot = FALSE)$cpD2 + D2.offset 
-            }              
-            # cut off all cycles beyond...
-            sigDAT <- sigDAT[1:floor(cpD2), ]
-            # exchange 0 with small value
-            sigDAT[,2][sigDAT[, 2] == 0] <- 1E-6
-            # exponential fit for Fb and D0 start estimates
-            m2 <- pcrfit(sigDAT, 1, 2, expGrowth, verbose = FALSE)
-            # make grid of start estimates
-            D0.start <- coef(m2)[1] * 10^(-4:1)
-            k.start <- seq(0.1, 3, by = 0.3)
-            Fb.start <- coef(m2)[3]
-            slope.start <- coef(lm(sigDAT[1:5, 2] ~ I(1:5)))[2]
-            ### create grid of initial parameter values
-            ### to optimize over
-            START <- expand.grid(D0.start, k.start, Fb.start, slope.start)
-            ### initialize parameter matrix
-            parMAT <- matrix(nrow = nrow(START), ncol = 5)
-            colnames(parMAT) <- c("D0", "k", "Fb", "slope", "RSS")              
-            ### nonlinear fitting
-            for (i in 1:nrow(START)) {
-              PARM <- as.numeric(START[i, ])
-              if (method == "LM") OUT <- try(nls.lm(PARM, mak3$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = nls.lm.control(maxiter = 1000)), silent = TRUE)
-              else OUT <- try(optim(PARM, mak3$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = list(maxit = 1000)), silent = TRUE)
-              if (inherits(OUT, "try-error")) next
-              RSS <- if(method == "LM") sum(OUT$fvec^2) else OUT$value
-              parMAT[i, ] <- c(OUT$par, RSS)
-              qpcR:::counter(i)
-            }
-            cat("\n")
-            ### best value fit
-            ORDER <- order(parMAT[, 5])
-            parMAT <- parMAT[ORDER, ]
-            parBEST <- parMAT[1, 1:4]
-            
-            names(parBEST) <- mak3$parnames
-                         
-            ## attach 'subset' attribute to result,
-            ## so <pcrfit> knows which subset values to fit on.      
-            attr(parBEST, "subset") <- 1:nrow(sigDAT)
-            return(parBEST)
-      },
-      d1 = function(x, parm) {                 
-      },
-      d2 = function(x, parm) {            
-      },
-      inv = function(y, parm) {            
-      },
-      expr.grad = expression(mak3$fct(Cycles, ssVal)),
-      inv.grad =  NULL,
-      parnames = c("D0", "k", "Fb", "slope"),
-      name = "mak3",
-      type = "three-parameter mechanistic model"
+  expr = "Fluo ~ a * exp(b * Cycles) + c", 
+  fct = function(x, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    a * exp(b * x) + c
+  },  
+  ssFct = function (x, y) {  
+    y[y == 0] <- 1E-12
+    c <- 0.95 * min(y)     
+    tempY <- log((y - c))    
+    coefVec <- coef(rlm(tempY ~ x))
+    a <- exp(coefVec[1])
+    b <- coefVec[2] 
+    ssVal <- c(a, b, c)
+    names(ssVal) <- expGrowth$parnames             
+    return(ssVal)
+  },     
+  d1 = function(x, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    a * b * exp(b * x)
+  },     
+  d2 = function(x, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    a * b^2 * exp(b * x)
+  },        
+  inv = function(y, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]               
+    log((-c + y)/a)/b
+  },       
+  expr.grad = expression(a * exp(b * Cycles) + c), 
+  inv.grad = expression(log((-c + Fluo)/a)/b),
+  parnames = c("a", "b", "c"),       
+  name = "expGrowth",
+  type = "exponential growth model"
 )
 
 mak2 <- list(
-      expr = "Fluo ~ mak2$fct(Cycles, ssVal)",
-      fct = function(x, parm) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]             
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + Fb
-            return(Fn)
-      },         
-      fct_ssFct = function(parm, x, y, method) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]              
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + Fb
-            if (method == "LM") res <- y - Fn else res <- sum(y - Fn)^2
-            return(res)            
-      },
-      ssFct = function(x, y) {
-            ## get parMAKs parameters from global environment or use
-            ## standard ones
-            if (exists("parMAKs", envir = .GlobalEnv)) {
-              PARS <- get("parMAKs", envir = .GlobalEnv)
-            } else PARS <- parMAK()
-                       
-            D2.offset <- PARS$SS.offset 
-            method <- PARS$SS.method 
-            cutter <- PARS$SS.deriv          
-            cutter <- match.arg(cutter, c("sigfit", "spline"))
-                        
-            # select cut-off method
-            sigDAT <- cbind(Cycles = x, Fluo = y)
-                        
-            if (cutter == "sigfit") {
-              t1 <- supsmu(x = 1:length(y), y = y, span = 0.1)$y
-              t2 <- diff(t1)
-              t3 <- diff(t2)
-              cpD2 <- which.max(t3) + D2.offset
-            } else {             
-              m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
-              cpD2 <- efficiency(m, plot = FALSE)$cpD2 + D2.offset 
-            }
-                     
-            # cut off all cycles beyond...
-            sigDAT <- sigDAT[1:floor(cpD2), ]
-            # exchange 0 with small value
-            sigDAT[,2][sigDAT[, 2] == 0] <- 1E-6
-            # exponential fit for Fb and D0 start estimates
-            m2 <- pcrfit(sigDAT, 1, 2, expGrowth, verbose = FALSE)
-            # make grid of start estimates
-            D0.start <- coef(m2)[1] * 10^(-4:1)
-            k.start <- seq(0.1, 3, by = 0.3)
-            Fb.start <- coef(m2)[3]             
-            ### create grid of initial parameter values
-            ### to optimize over
-            START <- expand.grid(D0.start, k.start, Fb.start)
-            ### initialize parameter matrix
-            parMAT <- matrix(nrow = nrow(START), ncol = 4)
-            colnames(parMAT) <- c("D0", "k", "Fb", "RSS")              
-            ### nonlinear fitting
-            for (i in 1:nrow(START)) {
-              PARM <- as.numeric(START[i, ])            
-              if (method == "LM") OUT <- try(nls.lm(PARM, mak2$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = nls.lm.control(maxiter = 1000)), silent = TRUE)
-              else OUT <- try(optim(PARM, mak2$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = list(maxit = 1000)), silent = TRUE)
-              if (inherits(OUT, "try-error")) next
-              RSS <- if(method == "LM") sum(OUT$fvec^2) else OUT$value
-              parMAT[i, ] <- c(OUT$par, RSS)
-              qpcR:::counter(i)
-            }
-            cat("\n")
-            ### best value fit
-            ORDER <- order(parMAT[, 4])
-            parMAT <- parMAT[ORDER, ]
-            parBEST <- parMAT[1, 1:3]
-            names(parBEST) <- mak2$parnames
-                         
-            ## attach 'subset' attribute to result,
-            ## so <pcrfit> knows which subset values to fit on.      
-            attr(parBEST, "subset") <- 1:nrow(sigDAT)
-            return(parBEST)
-      },
-      d1 = function(x, parm) {           
-      },
-      d2 = function(x, parm) {            
-      },
-      inv = function(y, parm) {            
-      },
-      expr.grad = expression(mak2$fct(Cycles, ssVal)),
-      inv.grad =  NULL,
-      parnames = c("D0", "k", "Fb"),
-      name = "mak2",
-      type = "two-parameter mechanistic model"
+  expr = "Fluo ~ mak2$fct(Cycles, c(D0, k, Fb))",
+  fct = function(x, parm) {   
+    D0 <- parm[1]
+    k <- parm[2]
+    if (k < 0.01) return(NA)
+    Fb <- parm[3]      
+    Fn <- vector(mode = "numeric", length = length(x))
+    for (i in 1:length(x)) {
+      if (i == 1) Fn[i] <- D0 + k * log(1 + (D0/k)) else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
+    }
+    Fn <- Fn + Fb    
+    return(Fn)    
+  },      
+  ssFct = function(x, y) {
+    sigDAT <- cbind(Cycles = x, Fluo = y)
+    
+    ## obtain cpD2 + offset and cut off all cycles beyond
+    m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
+    cpD2 <- efficiency(m, plot = FALSE)$cpD2 
+    sigDAT <- sigDAT[1:floor(cpD2), ] 
+      
+    ## start estimates
+    D0 <- 0.0001 
+    k <- max(y, na.rm = TRUE)/10
+    Fb <- min(y, na.rm = TRUE)    
+    
+    ssVal <- c(D0, k, Fb)
+    names(ssVal) <- mak2$parnames    
+    
+    ## attach 'subset' attribute to result,
+    ## so <pcrfit> knows which subset values to fit on.      
+    attr(ssVal, "subset") <- 1:nrow(sigDAT)
+    return(ssVal)    
+  },
+  d1 = function(x, parm) {           
+  },
+  d2 = function(x, parm) {            
+  },
+  inv = function(y, parm) {            
+  },
+  expr.grad = expression(mak2$fct(Cycles, c(D0, k, Fb))),
+  inv.grad =  NULL,
+  parnames = c("D0", "k", "Fb"),
+  name = "mak2",
+  type = "two-parameter mechanistic model"
 )
 
-chag <- list(
-      expr = "Fluo ~ chag$fct(Cycles, ssVal)",
-      fct = function(x, parm) {
-            d0 <- parm[1]
-            a <- parm[2]
-            b <- parm[3]            
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- 1 - (1 - Fn[i-1]) * ((1 - b * Fn[i-1])/(1 + (a - 2) * b * Fn[i-1]))^(1/(a-1))
-            }
-            return(Fn)
-      },         
-      fct_ssFct = function(parm, x, y, method) {
-            d0 <- parm[1]
-            a <- parm[2]
-            b <- parm[3]
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                 if (i == 1) Fn[i] <- d0 else Fn[i] <- 1 - (1 - Fn[i-1]) * ((1 - b * Fn[i-1])/(1 + (a - 2) * b * Fn[i-1]))^(1/(a-1))
-            }            
-            if (method == "LM") res <- y - Fn else res <- sum(y - Fn)^2
-            return(res)            
-      },
-      ssFct = function(x, y) {   
-            ## get parMAKs parameters from global environment or use
-            ## standard ones
-            if (exists("parMAKs", envir = .GlobalEnv)) {
-              PARS <- get("parMAKs", envir = .GlobalEnv)
-            } else PARS <- parMAK()             
-           
-            method <- PARS$SS.method              
+mak2i <- list(
+  expr = "Fluo ~ mak2i$fct(Cycles, c(D0, k, Fb))",
+  fct = function(x, parm, y = NULL) {    
+    D0 <- parm[1]
+    k <- parm[2]
+    if (k < 0.01) return(NA)
+    Fb <- parm[3]             
+    Fn <- vector(mode = "numeric", length = length(x))
+    for (i in 1:length(x)) {
+      if (i == 1) Fn[i] <- D0 + k * log(1 + (D0/k)) else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
+    }
+    Fn <- Fn + Fb
+    if (is.null(y)) return(Fn) else return(y - Fn)    
+  },      
+  ssFct = function(x, y) {
+    sigDAT <- cbind(Cycles = x, Fluo = y)
+    
+    ## obtain cpD2 + offset and cut off all cycles beyond
+    m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
+    cpD2 <- efficiency(m, plot = FALSE)$cpD2 
+    sigDAT <- sigDAT[1:floor(cpD2), ]    
+       
+    ## make grid of start estimates
+    D0.start <- 10^(-3:-12) 
+    k.start <- seq(0.01, max(y, na.rm = TRUE)/10, length.out = 10)
+    Fb.start <- min(y, na.rm = TRUE) 
         
-            ### baseline subtraction of cycles 3-8
-            LM <- lm(y[3:8] ~ x[3:8])
-            y <- y - coef(LM)[1]        
-            ### normalize fluorescence values within [0, 1]
-            y <- qpcR:::rescale(y, 0, 1)           
-            # make grid of start estimates
-            D0.start <- 10^(-3:-12)
-            a.start <- seq(1, 10, by = 3)
-            b.start <- seq(0.5, 2, by = 0.5)            
-            ### create grid of initial parameter values
-            ### to optimize over
-            START <- expand.grid(D0.start, a.start, b.start)            
-            ### initialize parameter matrix
-            parMAT <- matrix(nrow = nrow(START), ncol = 4)
-            colnames(parMAT) <- c("D0", "a", "b", "RSS")              
-            ### nonlinear fitting
-            for (i in 1:nrow(START)) {
-              PARM <- as.numeric(START[i, ])
-              if (method == "LM") OUT <- try(nls.lm(PARM, chag$fct_ssFct, x = x, y = y, method = method, control = nls.lm.control(maxiter = 1000)), silent = TRUE)
-              else OUT <- try(optim(PARM, chag$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = list(maxit = 1000)), silent = TRUE)
-              if (inherits(OUT, "try-error")) next
-              RSS <- sum(OUT$fvec^2)
-              parMAT[i, ] <- c(OUT$par, RSS)
-              qpcR:::counter(i)
-            }            
-            cat("\n")
-                        
-            ### best value fit
-            ORDER <- order(parMAT[, 4])
-            parMAT <- parMAT[ORDER, ]
-            parBEST <- parMAT[1, 1:3]            
-            
-            names(parBEST) <- chag$parnames       
-            
-            ## attach 'subset' attribute to result,
-            ## so <pcrfit> knows which subset values to fit on.      
-            attr(parBEST, "scale") <- c(0, 1)
-            return(parBEST)
-      },
-      d1 = function(x, parm) {                 
-      },
-      d2 = function(x, parm) {            
-      },
-      inv = function(y, parm) {            
-      },
-      expr.grad = expression(chag$fct(Cycles, ssVal)),
-      inv.grad =  NULL,
-      parnames = c("D0", "a", "b"),
-      name = "chag",
-      type = "Chagovetz's iterative map"
+    ## create grid of initial parameter values
+    ## to optimize over
+    START <- expand.grid(D0.start, k.start, Fb.start)
+    
+    ## initialize parameter matrix
+    parMAT <- matrix(nrow = nrow(START), ncol = 4)
+    colnames(parMAT) <- c("D0", "k", "Fb", "RSS")  
+    
+    ## nonlinear fitting of grid parameters
+    for (i in 1:nrow(START)) {
+      qpcR:::counter(i)
+      PARM <- as.numeric(START[i, ]) 
+      OUT <- try(nls.lm(par = PARM, fn = mak2i$fct, x = sigDAT[, 1], y = sigDAT[, 2], control = nls.lm.control(maxiter = 1000)), silent = TRUE)
+      if (inherits(OUT, "try-error")) next
+      RSS <- sum(OUT$fvec^2)
+      parMAT[i, ] <- c(OUT$par, RSS)     
+    }
+    cat("\n")
+    
+    ## best value fit
+    ORDER <- order(parMAT[, 4])
+    parMAT <- parMAT[ORDER, ]
+    parBEST <- parMAT[1, 1:3]
+    names(parBEST) <- mak2i$parnames
+    
+    ## attach 'subset' attribute to result,
+    ## so <pcrfit> knows which subset values to fit on.      
+    attr(parBEST, "subset") <- 1:nrow(sigDAT)
+    return(parBEST)
+  },
+  d1 = function(x, parm) {           
+  },
+  d2 = function(x, parm) {            
+  },
+  inv = function(y, parm) {            
+  },
+  expr.grad = expression(mak2i$fct(Cycles, c(D0, k, Fb))),
+  inv.grad =  NULL,
+  parnames = c("D0", "k", "Fb"),
+  name = "mak2i",
+  type = "(grid-searched) two-parameter mechanistic model"
 )
 
-mak3n <- list(
-      expr = "Fluo ~ mak3n$fct(Cycles, ssVal)",
-      fct = function(x, parm) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]
-            slope <- parm[4]
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + (slope * (1:length(Fn)) + Fb)
-            return(Fn)
-      },         
-      fct_ssFct = function(parm, x, y, method = method) {
-            d0 <- parm[1]
-            k <- parm[2]
-            Fb <- parm[3]
-            slope <- parm[4]
-            Fn <- vector(mode = "numeric", length = length(x))
-            for (i in 1:length(x)) {
-                if (i == 1) Fn[i] <- d0 else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
-            }
-            Fn <- Fn + (slope * (1:length(Fn)) + Fb)
-            if (method == "LM") res <- y - Fn else res <- sum(y - Fn)^2
-            return(res)            
-      },
-      ssFct = function(x, y) {
-            
-            ## get parMAKs parameters from global environment or use
-            ## standard ones
-            if (exists("parMAKs", envir = .GlobalEnv)) {
-              PARS <- get("parMAKs", envir = .GlobalEnv)
-            } else PARS <- parMAK()
-                       
-            D2.offset <- PARS$SS.offset 
-            method <- PARS$SS.method 
-            cutter <- PARS$SS.deriv          
-            cutter <- match.arg(cutter, c("sigfit", "spline"))
-                
-            # select cut-off method
-            y <- qpcR:::rescale(y, 0, 1)
-            sigDAT <- cbind(Cycles = x, Fluo = y)
-            if (cutter == "sigfit") {
-              t1 <- supsmu(x = 1:length(y), y = y, span = 0.1)$y
-              t2 <- diff(t1)
-              t3 <- diff(t2)
-              cpD2 <- which.max(t3) + D2.offset
-            } else {               
-              m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
-              cpD2 <- efficiency(m, plot = FALSE)$cpD2 + D2.offset 
-            }              
-            # cut off all cycles beyond...
-            sigDAT <- sigDAT[1:floor(cpD2), ]
-            # exchange 0 with small value
-            sigDAT[,2][sigDAT[, 2] == 0] <- 1E-6
-            # exponential fit for Fb and D0 start estimates
-            #m2 <- pcrfit(sigDAT, 1, 2, expGrowth, verbose = FALSE)
-            # make grid of start estimates
-            D0.start <- 10^-(4:12)
-            k.start <- 0.01
-            Fb.start <- 0.001
-            slope.start <- 0.001
-            ### create grid of initial parameter values
-            ### to optimize over
-            START <- expand.grid(D0.start, k.start, Fb.start, slope.start)            
-            ### initialize parameter matrix
-            parMAT <- matrix(nrow = nrow(START), ncol = 5)
-            colnames(parMAT) <- c("D0", "k", "Fb", "slope", "RSS")              
-            ### nonlinear fitting
-            for (i in 1:nrow(START)) {
-              PARM <- as.numeric(START[i, ])
-              if (method == "LM") OUT <- try(nls.lm(PARM, mak3n$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = nls.lm.control(maxiter = 1000)), silent = TRUE)
-              else OUT <- try(optim(PARM, mak3n$fct_ssFct, x = sigDAT[, 1], y = sigDAT[, 2], method = method, control = list(maxit = 1000)), silent = TRUE)
-              if (inherits(OUT, "try-error")) next
-              RSS <- if(method == "LM") sum(OUT$fvec^2) else OUT$value
-              parMAT[i, ] <- c(OUT$par, RSS)
-              qpcR:::counter(i)
-            }
-            cat("\n")
-            ### best value fit
-            ORDER <- order(parMAT[, 5])
-            parMAT <- parMAT[ORDER, ]
-            parBEST <- parMAT[1, 1:4]
-            
-            names(parBEST) <- mak3n$parnames
-                         
-            ## attach 'subset' attribute to result,
-            ## so <pcrfit> knows which subset values to fit on.
-            attr(parBEST, "scale") <- c(0, 1)
-            attr(parBEST, "subset") <- 1:nrow(sigDAT)
-            return(parBEST)
-      },
-      d1 = function(x, parm) {                 
-      },
-      d2 = function(x, parm) {            
-      },
-      inv = function(y, parm) {            
-      },
-      expr.grad = expression(mak3n$fct(Cycles, ssVal)),
-      inv.grad =  NULL,
-      parnames = c("D0", "k", "Fb", "slope"),
-      name = "mak3",
-      type = "three-parameter mechanistic model"
+mak3 <- list(
+  expr = "Fluo ~ mak3$fct(Cycles, c(D0, k, Fb, slope))",
+  fct = function(x, parm) {    
+    D0 <- parm[1]
+    k <- parm[2]
+    if (k < 0.01) return(NA)
+    Fb <- parm[3] 
+    slope <- parm[4]
+    Fn <- vector(mode = "numeric", length = length(x))
+    for (i in 1:length(x)) {
+      if (i == 1) Fn[i] <- D0 + k * log(1 + (D0/k)) else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
+    }
+    Fn <- Fn + Fb
+    Fn <- Fn + (slope * (1:length(Fn)))
+    
+    return(Fn)    
+  },      
+  ssFct = function(x, y) {
+    sigDAT <- cbind(Cycles = x, Fluo = y)
+    
+    ## obtain cpD2 + offset and cut off all cycles beyond
+    m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
+    cpD2 <- efficiency(m, plot = FALSE)$cpD2 
+    sigDAT <- sigDAT[1:floor(cpD2), ]    
+    
+    ## start estimates
+    D0 <- 0.0001 
+    k <- max(y, na.rm = TRUE)/10
+    Fb <- min(y, na.rm = TRUE)
+    slope <- coef(lm(sigDAT[1:8, 2] ~ I(1:8)))[2]
+    
+    ssVal <- c(D0, k, Fb, slope)
+    names(ssVal) <- mak3$parnames
+    
+    ## attach 'subset' attribute to result,
+    ## so <pcrfit> knows which subset values to fit on.      
+    attr(ssVal, "subset") <- 1:nrow(sigDAT)
+    return(ssVal)
+  },
+  d1 = function(x, parm) {           
+  },
+  d2 = function(x, parm) {            
+  },
+  inv = function(y, parm) {            
+  },
+  expr.grad = expression(mak3$fct(Cycles, c(D0, k, Fb, slope))),
+  inv.grad =  NULL,
+  parnames = c("D0", "k", "Fb", "slope"),
+  name = "mak3",
+  type = "three-parameter mechanistic model"
+)
+
+mak3i <- list(
+  expr = "Fluo ~ mak3i$fct(Cycles, c(D0, k, Fb, slope))",
+  fct = function(x, parm, y = NULL) {    
+    D0 <- parm[1]
+    k <- parm[2]
+    if (k < 0.01) return(NA)
+    Fb <- parm[3] 
+    slope <- parm[4]
+    Fn <- vector(mode = "numeric", length = length(x))
+    for (i in 1:length(x)) {
+      if (i == 1) Fn[i] <- D0 + k * log(1 + (D0/k)) else Fn[i] <- Fn[i-1] + k * log(1 + (Fn[i-1]/k))
+    }
+    Fn <- Fn + Fb
+    Fn <- Fn + (slope * (1:length(Fn)))
+    
+    if (is.null(y)) return(Fn) else return(y - Fn)    
+  },      
+  ssFct = function(x, y) {
+    sigDAT <- cbind(Cycles = x, Fluo = y)
+    
+    ## obtain cpD2 + offset and cut off all cycles beyond
+    m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)             
+    cpD2 <- efficiency(m, plot = FALSE)$cpD2 
+    sigDAT <- sigDAT[1:floor(cpD2), ]    
+    
+    ## make grid of start estimates
+    D0.start <- 10^(-3:-12) 
+    k.start <- seq(0.01, max(y, na.rm = TRUE)/10, length.out = 10)
+    Fb.start <- min(y, na.rm = TRUE) 
+    slope <- coef(lm(sigDAT[1:8, 2] ~ I(1:8)))[2]
+    
+    ## create grid of initial parameter values
+    ## to optimize over
+    START <- expand.grid(D0.start, k.start, Fb.start, slope)
+    
+    ## initialize parameter matrix
+    parMAT <- matrix(nrow = nrow(START), ncol = 5)
+    colnames(parMAT) <- c("D0", "k", "Fb", "slope", "RSS")  
+    
+    ## nonlinear fitting of grid parameters
+    for (i in 1:nrow(START)) {
+      qpcR:::counter(i)
+      PARM <- as.numeric(START[i, ]) 
+      OUT <- try(nls.lm(par = PARM, fn = mak3i$fct, x = sigDAT[, 1], y = sigDAT[, 2], control = nls.lm.control(maxiter = 1000)), silent = TRUE)
+      if (inherits(OUT, "try-error")) next
+      RSS <- sum(OUT$fvec^2)
+      parMAT[i, ] <- c(OUT$par, RSS)     
+    }
+    cat("\n")
+    
+    ## best value fit
+    ORDER <- order(parMAT[, 5])
+    parMAT <- parMAT[ORDER, ]
+    parBEST <- parMAT[1, 1:4]
+    names(parBEST) <- mak3i$parnames
+    
+    ## attach 'subset' attribute to result,
+    ## so <pcrfit> knows which subset values to fit on.      
+    attr(parBEST, "subset") <- 1:nrow(sigDAT)
+    return(parBEST)
+  },
+  d1 = function(x, parm) {           
+  },
+  d2 = function(x, parm) {            
+  },
+  inv = function(y, parm) {            
+  },
+  expr.grad = expression(mak3i$fct(Cycles, c(D0, k, Fb, slope))),
+  inv.grad =  NULL,
+  parnames = c("D0", "k", "Fb", "slope"),
+  name = "mak3i",
+  type = "(grid-searched) three-parameter mechanistic model"
+)
+
+lin2 <- list(
+  expr = "Fluo ~ eta * log(exp(a1 * (Cycles - tau)/eta) + exp(a2 * (Cycles - tau)/eta)) + c", 
+  fct = function(x, parm) {
+    c <- parm[1]
+    eta <- parm[2]
+    tau <- parm[3]
+    a1 <- parm[4]
+    a2 <- parm[5]
+    eta * log(exp(a1 * (x - tau)/eta) + exp(a2 * (x - tau)/eta)) + c
+  },  
+  ssFct = function (x, y) {
+    sigDAT <- cbind(Cycles = x, Fluo = y)
+    m <- pcrfit(sigDAT, 1, 2, l4, verbose = FALSE)
+    cpD2 <- efficiency(m, plot = FALSE)$cpD2
+    cpD2 <- floor(cpD2)
+    c <- min(y) - 0.001
+    sub1 <- 1:(cpD2 - 5)
+    fit1 <- lm(y[sub1] ~ x[sub1])  
+    a1 <- coef(fit1)[2]
+    sub2 <- cpD2:(cpD2 + 3)
+    fit2 <- lm(y[sub2] ~ x[sub2])    
+    a2 <- coef(fit2)[2]
+    tau <- cpD2
+    eta <- a2 - a1
+    ssVal <- as.numeric(c(c, eta, tau, a1, a2))
+    names(ssVal) <- lin2$parnames
+    attr(ssVal, "subset") <- 1:(cpD2 + 3)
+    return(ssVal)
+  },     
+  d1 = function(x, parm) {
+    c <- parm[1]
+    eta <- parm[2]
+    tau <- parm[3]
+    a1 <- parm[4]
+    a2 <- parm[5]
+    eta * ((exp(a1 * (x - tau)/eta) * (a1/eta) + 
+      exp(a2 * (x - tau)/eta) * (a2/eta))/(exp(a1 * (x - tau)/eta) + 
+      exp(a2 * (x - tau)/eta)))    
+  },        
+  d2 = function(x, parm) {
+    c <- parm[1]
+    eta <- parm[2]
+    tau <- parm[3]
+    a1 <- parm[4]
+    a2 <- parm[5]
+    eta * ((exp(a1 * (x - tau)/eta) * (a1/eta) * (a1/eta) + 
+      exp(a2 * (x - tau)/eta) * (a2/eta) * (a2/eta))/(exp(a1 * 
+      (x - tau)/eta) + exp(a2 * (x - tau)/eta)) - (exp(a1 * 
+      (x - tau)/eta) * (a1/eta) + exp(a2 * (x - tau)/eta) * 
+      (a2/eta)) * (exp(a1 * (x - tau)/eta) * (a1/eta) + exp(a2 * 
+      (x - tau)/eta) * (a2/eta))/(exp(a1 * (x - tau)/eta) + 
+      exp(a2 * (x - tau)/eta))^2)    
+  },  
+  inv = function(y, parm) {
+    x <- 1:100
+    fn <- function(x, parm) lin2$fct(x, parm) - y
+    uniroot(fn, interval = c(1, 100), parm)$root
+  },
+  expr.grad = NULL,
+  inv.grad =  NULL,      
+  parnames = c("c", "eta", "tau", "a1", "a2"),
+  name = "lin2",
+  type = "bilinear model"
+)
+
+cm3 <- list(
+  expr = "Fluo ~ cm3$fct(Cycles, c(D0, max, Kd, Fb))",
+  fct = function(x, parm) {    
+    D0 <- parm[1]
+    if (D0 <= 0) return(NA)
+    max <- parm[2]
+    Kd <- parm[3] 
+    if (Kd <= 0) return(NA)
+    Fb <- parm[4]
+    Fn <- vector(mode = "numeric", length = length(x))
+    for (i in 1:length(x)) {
+      if (i == 1) Fn[i] <- D0 * (1 + ((max - D0)/max) - (D0/(Kd + D0))) else Fn[i] <- Fn[i - 1] * (1 + ((max - Fn[i - 1])/max) - (Fn[i - 1]/(Kd + Fn[i - 1])))  
+    }
+    Fn <- Fn + Fb
+    return(Fn)    
+  },      
+  ssFct = function(x, y) {
+    ## start estimates
+    D0 <- 0.00001 
+    max <- 3 * max(y, na.rm = TRUE)
+    Kd <- 0.5 * max(y, na.rm = TRUE)
+    LM <- lm(y[1:8] ~ x[1:8]) 
+    Fb <- coef(LM)[2] + 0.01
+    ssVal <- c(D0, max, Kd, Fb)
+    names(ssVal) <- cm3$parnames    
+    return(ssVal)
+  },
+  d1 = function(x, parm) {           
+  },
+  d2 = function(x, parm) {            
+  },
+  inv = function(y, parm) {
+    x <- 1:100
+    fn <- function(x, parm) cm3$fct(x, parm) - y
+    uniroot(fn, interval = c(1, 100), parm)$root
+  },
+  expr.grad = expression(cm3$fct(Cycles, c(D0, max, Kd, Fb))),
+  inv.grad =  NULL,
+  parnames = c("D0", "max", "Kd", "Fb"),
+  name = "cm3",
+  type = "three-parameter mechanistic model"
+)
+
+linexp <- list(
+  expr = "Fluo ~ a * exp(b * Cycles) + (k * Cycles) + c",
+  fct = function (x, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    k <- parm[4]
+    a * exp(b * x) + (k * x) + c
+  },
+  ssFct = function (x, y) {
+    DATA <- data.frame(Cycles = x, Fluo = y)
+    FIT <- pcrfit(DATA, 1, 2, expGrowth, verbose = FALSE)
+    COEF <- coef(FIT)
+    lmFit <- rlm(y[1:10] ~ x[1:10])
+    k <- coef(lmFit)[2]
+    ssVal <- c(COEF, k)
+    names(ssVal) <- linexp$parnames
+    return(ssVal)
+  },
+  d1 = function (x, parm) {
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    k <- parm[4]
+    a * (exp(b * x) * b) + k
+  },
+  d2 = function (x, parm) { 
+    a <- parm[1]
+    b <- parm[2]
+    c <- parm[3]
+    k <- parm[4]
+    a * (exp(b * x) * b * b)
+  },
+  inv = function (y, parm) {
+    x <- 1:100
+    fn <- function(x, parm) linexp$fct(x, parm) - y
+    uniroot(fn, interval = c(1, 100), parm)$root
+  },
+  expr.grad = expression(a * exp(b * Cycles) + (k * Cycles) + c),
+  inv.grad = NULL,
+  parnames = c("a", "b", "c", "k"),
+  name = "linexp",
+  type = "linear-exponential growth model"
+)
+
+spl3 <- list(
+  expr = "Fluo ~ spl3$fct(Cycles, c(spar), Fluo)",
+  fct = function(x, parm, yvec = NULL) { 
+    spar <- parm[1]   
+    if (length(x) != length(yvec)) {     
+      SPL <- smooth.spline(1:length(yvec), yvec, spar = spar) 
+      PRED <- predict(SPL, x)
+      return(PRED$y)
+    }
+    SPL <- smooth.spline(x, yvec, spar = spar)
+    Fn <- SPL$y   
+    return(Fn)   
+  },     
+  ssFct = function(x, y) {
+    ## start estimates
+    spar <- 1
+    assign("yvec", y, envir = .GlobalEnv)
+    ssVal <- c(spar) 
+    names(ssVal) <- spl3$parnames   
+    return(ssVal)
+  },  
+  d1 = function(x, parm) {          
+  },
+  d2 = function(x, parm) {           
+  },
+  inv = function(y, parm, yvec) {
+    x <- 1:100
+    fn <- function(x, parm, yvec) spl3$fct(x, parm, yvec) - y    
+    uniroot(fn, interval = c(1, 100), parm, yvec)$root
+  },
+  expr.grad = expression(spl3$fct(Cycles, c(spar))),
+  inv.grad =  NULL,
+  parnames = c("spar"),
+  name = "spl3",
+  type = "cubic smoothing spline"
 )
 
 ########################

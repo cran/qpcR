@@ -5,13 +5,12 @@
 \title{Calculation of qPCR efficiency and other important qPCR parameters}
 
 \description{
-This function calculates the PCR efficiency of a model of class 'pcrfit', including several other 
- important values for qPCR quantification like the first and second derivatives and the corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit. Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC), the residual variance and the \eqn{R^2} value.   
+This function calculates the PCR efficiency of a model of class 'pcrfit', including several other important values for qPCR quantification like the first and second derivatives and the corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit. Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC), the residual variance and the \eqn{R^2} value.   
 }
 
 \usage{
 efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL, 
-           shift = 0, amount = NULL, ...)
+           shift = 0, amount = NULL, baseline = FALSE, basefac = 1, ...)
 }
 
 \arguments{
@@ -21,7 +20,9 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
   \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
   \item{shift}{a user defined shift in cycles from the values defined by \code{type}. See 'Examples'.}
   \item{amount}{the template amount or molecule number for quantitative calibration.}
-  \item{...}{additional parameters to be passed to \code{\link{eff}} or \code{\link{plot.pcrfit}}.}
+  \item{baseline}{type of baseline subtraction. See 'Details'.}
+  \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
+  \item{...}{other parameters to be passed to \code{\link{eff}} or \code{\link{plot.pcrfit}}.}
 }
 
 \details{
@@ -39,6 +40,8 @@ a numeric value taken from the fluorescence threshold output of the PCR software
 The initial fluorescence \eqn{F_0} for relative or absolute quantification is either calculated by setting \eqn{x = 0} in the sigmoidal model of \code{object} giving \code{init1} or by calculating an exponential model down (\code{init2}) with \eqn{F_0 = \frac{F_n}{E^n}}, with \eqn{F_n} = raw fluorescence, \eqn{E} = PCR efficiency and \eqn{n} = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F_0}} is given. The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
 
 If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic spline interpolated raw fluorescence values and therefore NOT from the sigmoidal fit. This is a different paradigm and will usually result in fairly the same threshold cycles as with \code{type = "cpD2"}, but the efficiencies are generally lower. See documentation to \code{\link{maxRatio}}. This method is usually not applied for calculating efficiencies that are to be used for relative quantification, but one might try...  
+
+\code{baseline} subtraction is done by either subtracting the baseline parameter 'c' of the sigmoidal model and refitting (\code{"TRUE"}), using a single value (i.e. \code{0.5}) or the averaged values from a defined range of cycles, i.e. \code{1:8}. It is switched off by default, but in case of data with a high baseline (such as in TaqMan PCR), it should be turned on as otherwise this will give highly underestimated efficiencies and hence wrong \code{init2} values.
 }
 
 \value{
@@ -82,6 +85,8 @@ Guescini M, Sisti D, Rocchi MB, Stocchi L & Stocchi V.\cr
 }
 
 \note{
+In some curves that are fitted with the 'b5'/'l5' models, the 'f' (asymmetry) parameter can be extremely high due to severe asymmetric structure. The efficiency curve deduced from the coefficients of the fit can then be very extreme in the exponential region. It is strongly advised to use \code{efficiency(object, method = "spline")} so that \code{\link{eff}} calculates the curve from a cubic spline of the original data points (see 'Examples').
+
 Three parameter models ('b3' or 'l3') do not work very well in calculating the PCR efficiency. It is advisable not to take too many cycles of the plateau phase prior to fitting the model as this has a strong effect on the validity of the efficiency estimates. 
 }
 
@@ -123,6 +128,10 @@ efficiency(m2, amount = 1E3)
 ## using 'maxRatio' method from Shain et al. (2008)
 ## baseshifting essential!
 efficiency(m1, type = "maxRatio", baseshift = 0.2)
+
+## using the efficiency from a cubic spline fit
+## of the 'eff' function
+efficiency(m1, method = "spline")
 
 \dontrun{
 ## on a modlist with plotting

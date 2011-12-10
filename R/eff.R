@@ -1,12 +1,12 @@
 eff <- function(
 object, 
-type = c("sigfit", "spline"), 
+method = c("sigfit", "spline"), 
 sequence = NULL,
 baseshift = NULL, 
 smooth = FALSE,   
 plot = FALSE) 
 {
-    type <- match.arg(type)
+    method <- match.arg(method)
         
     if (is.null(sequence)) {
       MIN <- min(object$DATA[, 1], na.rm = TRUE)
@@ -17,20 +17,20 @@ plot = FALSE)
       MAX <- sequence[2]
       DIVS <- sequence[3]      
     }    
-    SEQ <- seq(MIN, MAX, by = DIVS) 
+    SEQ <- seq(MIN, MAX, by = DIVS)     
     
-    if (type == "sigfit") {            
-      coefVec <- coef(object)       
+    if (method == "sigfit") {            
+      coefVec <- coef(object)        
       FCT <- object$MODEL$fct 
-      F1 <- FCT(SEQ, coefVec)       
-      F2 <- FCT(SEQ - 1, coefVec)  
-      EFFres <- F1/F2          
+      F1 <- FCT(SEQ, coefVec)  
+      F2 <- FCT(SEQ - 1, coefVec)     
+      EFFres <- F1/F2
       maxCYC <-  SEQ[which.max(EFFres)]
       EFFres.D1 <- NULL
       EFFres.D2 <- NULL     
     }
     
-    if (type == "spline") {
+    if (method == "spline") {
       X <- object$DATA[, 1]       
       Y <- object$DATA[, 2]      
         

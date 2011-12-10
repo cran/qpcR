@@ -4,7 +4,7 @@
 \title{An (overlayed) residuals barplot}
 
 \description{
-A plotting function which displays a barplot of the residuals. The bars are colour-coded with heat colours proportional to the residual value. As default, the residuals are displayed together with the points of the fitted PCR curve. 
+A plotting function which displays a barplot of the (standardized) residuals. The bars are colour-coded with heat colours proportional to the residual value. As default, the residuals are displayed together with the points of the fitted PCR curve. 
 }
 
 \usage{
@@ -31,10 +31,10 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## create l5 model and plot residuals
-## in a good position
+## create l5 model and plot 
+## standardized residuals
 m1 <- pcrfit(reps, 1, 2, l5)
-resplot(m1, ylim = c(-0.5, 0.5))
+resplot(m1)
 
 \dontrun{
 ## using replicates

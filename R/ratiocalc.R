@@ -1,7 +1,7 @@
 ratiocalc <- function(
 data, 
 group = NULL, 
-which.eff = c("sig", "sli", "exp", "mak"),
+which.eff = c("sig", "sli", "exp", "mak", "cm3"),
 type.eff = c("individual", "mean.single", "median.single",
               "mean.pair", "median.pair"), 
 which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
@@ -9,13 +9,16 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
 {      
     if (class(data)[2] != "pcrbatch")
         stop("data is not of class 'pcrbatch'!")
-
+    
+    NCOL <- ncol(data) - 1   
+        
+    ## test for equal length of input
     if (is.null(group))
-        stop("Please define 'group'!")    
-
-    if (length(group) != ncol(data) - 1)
+        stop("Please define 'group'!")   
+          
+    if (length(group) != NCOL)
         stop("Length of 'group' and 'data' do not match!")
-
+    
     if (!is.numeric(which.eff)) which.eff <- match.arg(which.eff)
 
     if (!is.numeric(which.cp)) which.cp <- match.arg(which.cp)
@@ -23,78 +26,86 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     
     ## from 1.3-4: added option of external efficiencies or threshold cycles,
     ## either single value (recycled) or a vector of values.
-    ## Check if all efficiencies are in [1, 2]
-    ## if all is o.k., add to 'pcrbatch' data
     if (is.numeric(which.eff)) {
-      if (length(which.eff) == 1) which.eff <- rep(which.eff, ncol(data) - 1)
+      if (length(which.eff) == 1) which.eff <- rep(which.eff, NCOL)
       else {
-        if (length(which.eff) != ncol(data) - 1) stop("Length of input efficiencies does not match number of runs!")
+        if (length(which.eff) != NCOL) stop("Length of input efficiencies does not match number of runs!")
       }
-      if (!all(which.eff >= 1 & which.eff <= 2)) stop("All efficiencies must be in [1, 2]. Consider adding 1 to each value, i.e. 'EFF <- EFF + 1'")          
       effDAT <- matrix(c("ext.eff", which.eff), nrow = 1)
       colnames(effDAT) <- colnames(data)
       data <- rbind(data, effDAT) 
       which.eff <- "ext"     
     }
-      
+    
     if (is.numeric(which.cp)) {
-      if (length(which.cp) != ncol(data) - 1 ) stop("Length of input threshold cycles does not match number of runs!")
+      if (length(which.cp) != NCOL) stop("Length of input threshold cycles does not match number of runs!")
       cpDAT <- matrix(c("sig.ext", which.cp), nrow = 1)
       colnames(cpDAT) <- colnames(data)
       data <- rbind(data, cpDAT) 
       which.cp <- "ext"      
     }      
     
-    ## from 1.3-4: added mak3 parameter
+    ANNO <- data[, 1]
+    DATA <- data[, -1]
+      
+    ## from 1.3-4: added mak3
+    ## from 1.3-7: added cm3
     if (which.eff == "mak") {
-      if (length(grep("mak3", data[, 1])) == 0) stop("'data' has no mak3 model included! Please use 'pcrbatch' with 'do.mak = TRUE'!")
-      WHICH <- which(data[, 1] == "mak3.D0")
-      data[, 1] <- sub("mak3.D0", "mak.eff", data[, 1])
+      GREP <- grep("mak\\w*.D0", ANNO)         
+      if (length(GREP) == 0) stop("data has no 'mak' model included! Please use 'pcrbatch' with methods = 'makX'!")
+      ANNO <- sub("mak\\w*.D0", "mak.eff", ANNO)
+    }    
+         
+    if (which.eff == "cm3") {
+      GREP <- grep("cm3.D0", ANNO)     
+      if (length(GREP) == 0) stop("data has no 'cm3' model included! Please use 'pcrbatch' with methods = 'cm3'!")
+      ANNO <- sub("cm3.D0", "cm3.eff", ANNO)
     }    
     
-    DATA <- data[, -1]
-
-    ## added removal of failed runs (either failed fits
+    ## from 1.3-5 : added removal of failed runs (either failed fits
     ## or SOD outlier) from DATA and 'group' by identification
-    ## of *...* or **...** in sample name in version 1.3-5
-    sampNAMES <- names(DATA)
-    hasTag <- grep("\\*[[:print:]]*\\*", sampNAMES)
+    ## of *...* or **...** in sample name
+    sampNAMES <- names(DATA)      
+    hasTag <- grep("\\*\\w*\\*", sampNAMES, perl = TRUE)   
     if (length(hasTag) > 0) {
        DATA <- DATA[, -hasTag]
-       group <- group[-hasTag]
+       group <- group[-hasTag]      
     }
-    
-    cpNAMES <- effNAMES <- NULL
-    PATTERN <- unique(group)
     
     ## test for presence of reference genes
     if (all(regexpr("rs", group, perl = TRUE) == -1)) refNo <- TRUE else refNo <- FALSE   
+    
+    ## get names pattern
+    PATTERN <- unique(group)    
     
     ## check for replicate data, if not present set type.eff = "individual"
     REPS <- lapply(PATTERN, function(x) which(x == group))
     NREPS <- sapply(REPS, function(x) length(x))           
     if (!all(NREPS > 1)) type.eff <- "individual"
     
-    ## initialize data as time-series
-    cpDAT <- effDAT <- ts()     
+    cpDAT <- effDAT <- NULL
+    cpNAMES <- effNAMES <- NULL   
     
+    ## select criteria
+    cpSEL <- which(ANNO == paste("sig.", which.cp, sep = ""))
+    effSEL <- which(ANNO == paste(which.eff, ".eff", sep = ""))
+      
     ## for all entries 'gs', 'gc', 'rs', 'rc' do...
-    for (i in 1:length(PATTERN)) {
-      WHICH <- which(group == PATTERN[i]) 
-      cpSEL <- which(data[, 1] == paste("sig.", which.cp, sep = ""))
-      effSEL <- which(data[, 1] == paste(which.eff, ".eff", sep = ""))
-      if (length(WHICH) != 1) tempCP <- as.numeric(t(DATA[cpSEL, WHICH])) else tempCP <- as.numeric(as.vector(DATA[cpSEL, WHICH]))     
-      if (length(WHICH) != 1) tempEff <- as.numeric(t(DATA[effSEL, WHICH])) else tempEff <- as.numeric(as.vector(DATA[effSEL, WHICH]))
-      if (is.numeric(which.eff)) tempEff <- rep(which.eff, length(WHICH))
-      cpDAT <- cbind(cpDAT, ts(tempCP))            
-      effDAT <- cbind(effDAT, ts(tempEff))
+    for (i in 1:length(PATTERN)) {    
+      WHICH <- which(group == PATTERN[i])     
+      tempCP <- as.numeric(DATA[cpSEL, WHICH, drop = FALSE])        
+      tempEff <- as.numeric(DATA[effSEL, WHICH, drop = FALSE])        
+      cpDAT <- qpcR:::cbind.na(cpDAT, tempCP)        
+      effDAT <- qpcR:::cbind.na(effDAT, tempEff)
       cpNAMES <- c(cpNAMES, paste("cp.", PATTERN[i], sep = ""))
       effNAMES <- c(effNAMES, paste("eff.", PATTERN[i], sep = ""))         
     }
-        
+      
+    ## remove first column
     cpDAT <- cpDAT[, -1]      
-    effDAT <- effDAT[, -1]         
+    effDAT <- effDAT[, -1]    
     
+    ## calculate averaged efficiencies/threshold cycles
     if (is.numeric(which.eff))
         type.eff <- "individual"
     if (type.eff == "mean.single")
@@ -112,39 +123,45 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
             effDAT[, 3:4] <- median(effDAT[, 3:4], na.rm = TRUE)
     }
     
+    ## make a one row matrix in case of no replicates
     cpDAT <- matrix(cpDAT, ncol = length(cpNAMES))
-    effDAT <- matrix(effDAT, ncol = length(effNAMES))
+    effDAT <- matrix(effDAT, ncol = length(effNAMES))    
     
     allDAT <- cbind(cpDAT, effDAT)     
-    colnames(allDAT) <- c(cpNAMES, effNAMES)     
-            
+    colnames(allDAT) <- c(cpNAMES, effNAMES)    
+    
+    ## define expressions
     if (refNo) {
-      EXPR <- expression(eff.gc^cp.gc/eff.gs^cp.gs)
-      TIES <- c(1, 2, 1, 2)  
-      
-      ## added mak3 option (1.3-4) => we only need D0 for ratio calculation
-      if (which.eff == "mak") {
+      EXPR <- expression(eff.gc^cp.gc/eff.gs^cp.gs)      
+      ## added makX/cm3 option (1.3-4/1.3-7) => we only need D0 for ratio calculation
+      if (which.eff %in% c("mak", "cm3")) {
         EXPR <- expression(eff.gs/eff.gc)
         TIES <- NULL
       }      
     }    
     else {
-      EXPR <- expression((eff.gc^cp.gc/eff.gs^cp.gs)/(eff.rc^cp.rc/eff.rs^cp.rs))
-      TIES <- c(1, 2, 1, 2, 1, 2, 1, 2)
-      
-      ## added mak3 option (1.3-4) => we only need D0 for ratio calculation
-      if (which.eff == "mak") {
+      EXPR <- expression((eff.gc^cp.gc/eff.gs^cp.gs)/(eff.rc^cp.rc/eff.rs^cp.rs))      
+      ## added makX/cm3 option (1.3-4/1.3-7) => we only need D0 for ratio calculation
+      if (which.eff %in% c("mak", "cm3")) {
         EXPR <- expression((eff.gs/eff.gc)/(eff.rs/eff.rc))
         TIES <- NULL
       }      
     }       
-            
-    CRIT <- c("perm > init", "perm == init", "perm < init")
+    
+    ## define 'TIES' that bind rs/gs and rc/gc samples together,
+    ## similar to "pairwise reallocation" in REST software
+    TIES <- numeric(ncol(allDAT))
+    isCON <- grep("\\w*c$", colnames(allDAT))
+    isSAMP <- grep("\\w*s$", colnames(allDAT))
+    TIES[isCON] <- 1
+    TIES[isSAMP] <- 2   
               
+    CRIT <- c("perm > init", "perm == init", "perm < init")
+        
     PROP <- try(propagate(EXPR, allDAT, do.sim = TRUE, do.perm = TRUE, ties = TIES, perm.crit = CRIT, 
                       verbose = TRUE, logx = TRUE, ...))
 
-    if (inherits(PROP, "try-error")) stop("'propagate' failed to calculate ratios! Try other 'which.eff', 'type.eff' or 'which.cp'.")
+    if (inherits(PROP, "try-error")) stop("'propagate' failed to calculate ratios! Try other 'which.eff', 'type.eff' or 'which.cp'!")
     PROP <- c(list(data = allDAT), PROP)     
     class(PROP) <- "ratiocalc"
     return(PROP)

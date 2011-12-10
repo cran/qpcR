@@ -86,6 +86,7 @@ ml2 <- modlist(testdat, model = l5)
 res2 <- KOD(ml2, method = "uni2", remove = TRUE)
 plot(res2, which = "single")
 
+\dontrun{
 ## multivariate outliers:
 ## a few runs are identified
 ml3 <- modlist(reps, model = l5)
@@ -95,6 +96,7 @@ res3 <- KOD(ml3, method = "multi1")
 ## several outliers identified
 rl3 <- replist(ml3, group = gl(7, 4))
 res4 <- KOD(rl3, method = "uni1")
+}
 }
 
 \keyword{models}

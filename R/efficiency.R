@@ -5,6 +5,8 @@ type = "cpD2",
 thresh = NULL, 
 shift = 0, 
 amount = NULL,
+baseline = FALSE,
+basefac = 1,
 ...) 
 {  
     if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ", "maxRatio"))
@@ -12,42 +14,62 @@ amount = NULL,
         stop("'amount' must be numeric!")
     if (!is.null(thresh) && !is.numeric(thresh))
         stop("'thresh' must be numeric!")       
-   
-    allCYCS <- object$DATA[, 1]  
-    if (is.numeric(type) && (type < min(allCYCS, na.rm = TRUE) || type > max(allCYCS, na.rm = TRUE))) stop("'type' must be within Cycles range!")
-
-    allFLUO <- object$DATA[, 2]  
-    if (is.numeric(thresh) && (thresh < min(allFLUO, na.rm = TRUE) || thresh > max(allFLUO, na.rm = TRUE))) stop("'thresh' must be within fluorescence range!")
-                
+    
+    if (is.numeric(type) && (type < min(object$DATA[, 1], na.rm = TRUE) || type > max(object$DATA[, 1], na.rm = TRUE))) stop("'type' must be within Cycles range!")
+    if (is.numeric(thresh) && (thresh < min(object$DATA[, 2], na.rm = TRUE) || thresh > max(object$DATA[, 2], na.rm = TRUE))) stop("'thresh' must be within fluorescence range!")
+    
+    ## from 1.3-7: baseline correction either by 'c' parameter of sigmoidal model (default),
+    ## average of first cycles or single value.
+    if (baseline != FALSE) {
+      if (is.numeric(baseline)) {
+        if (length(baseline) == 1) BASE <- baseline 
+        else if (length(baseline > 1)) {
+          amatch <- function(x, y) as.numeric(sapply(x, function(z) which(z == y)))
+          SEL <- amatch(baseline, object$DATA[, 1])
+          BASE <- mean(object$DATA[SEL, 2], na.rm = TRUE) * basefac      
+        }
+      } else if (baseline == TRUE) {
+        BASE <- coef(object)["c"] * basefac      
+        if (is.na(BASE)) stop("Need a model with a 'c' parameter!")
+      }
+      newDATA <- object$DATA     
+      newDATA[, 2] <- newDATA[, 2] - BASE
+      object <- update(object, data = newDATA, cyc = 1, fluo = 2)        
+    }
+        
     CYCS <- object$DATA[, 1]    
     EFFobj<- eff(object, ...)
     SEQ <- EFFobj$eff.x      
     D1seq <- object$MODEL$d1(SEQ, coef(object))
     D2seq <- object$MODEL$d2(SEQ, coef(object))   
-    EFFseq <- EFFobj$eff.y    
     
-    maxD1 <- which.max(D1seq) 
-    maxD2 <- which.max(D2seq)    
+    ## from 1.3-7: remove Inf's that mimicked maximum values
+    D1seq[!is.finite(D1seq)] <- NA
+    D2seq[!is.finite(D2seq)] <- NA    
+    EFFseq <- EFFobj$eff.y        
+       
+    maxD1 <- which.max(D1seq)     
+    maxD2 <- which.max(D2seq)      
     cycmaxD1 <- SEQ[maxD1]      
-    cycmaxD2 <- SEQ[maxD2]  
+    cycmaxD2 <- SEQ[maxD2]     
     
     if (!is.null(thresh)) type <- "cpD2"        
     
-    ### cpD2
+    ## cpD2
     if (type == "cpD2" || type == "CQ") {
         maxEFF <- EFFseq[maxD2 + (100 * shift)]
         CYC <- cycmaxD2 + shift 
         if (shift != 0) shiftCyc <- cycmaxD2 + shift
     }
                  
-    ### cpD1
+    ## cpD1
     if (type == "cpD1") {
         maxEFF <- EFFseq[maxD1 + (100 * shift)]
   	    CYC <- cycmaxD1 + shift
         if (shift != 0) shiftCyc <- cycmaxD1 + shift        
     }
 
-    ### maxE
+    ## maxE
     if (type == "maxE") {
         cycmaxEFF <- EFFobj$effmax.x   
         maxEFF <- EFFseq[(cycmaxEFF + shift - 1) * 100]        
@@ -55,7 +77,7 @@ amount = NULL,
         if (shift != 0) shiftCyc <- cycmaxEFF + shift             
     } else cycmaxEFF <- NA
                                 
-    ### numeric threshold cycle
+    ## numeric threshold cycle
     if (is.numeric(type)) {
         cycTYPE <- which(SEQ == round(type, 2))
         maxEFF <- EFFseq[cycTYPE]
@@ -63,7 +85,7 @@ amount = NULL,
         CYC <- type + shift
     }
 
-    ### expR
+    ## expR
     if (type == "expR") {
         expR <- maxD2 - (maxD1 - maxD2)
         cycEXP <- SEQ[expR]
@@ -72,7 +94,7 @@ amount = NULL,
         CYC <- cycEXP + shift
     } else cycEXP <- NA         
     
-    ### Cy0
+    ## Cy0
     if (type == "Cy0") {
         Cy0reg <- Cy0(object, plot = FALSE) 
         maxEFF <- EFFseq[(Cy0reg + shift - 1) * 100]
@@ -80,7 +102,7 @@ amount = NULL,
         CYC <- Cy0reg + shift          
     } else Cy0reg <- NA
     
-    ### numeric threshold fluorescence
+    ## numeric threshold fluorescence
     if (!is.null(thresh)) {
         cycF <- as.numeric(round(predict(object, newdata = data.frame(Fluo = thresh), "x"), 2))         
         maxEFF <- EFFseq[(cycF + shift - 1) * 100]
@@ -88,7 +110,7 @@ amount = NULL,
         CYC <- cycF + shift        
     } else cycF <- NA           
 
-    ### CQ (comparative quantitation)     
+    ## CQ (comparative quantitation)     
     if (type == "CQ") {
         fluo <- as.numeric(predict(object, newdata = data.frame(Cycles = CYC)))
         fluoCQ <- 0.2 * fluo
@@ -99,9 +121,9 @@ amount = NULL,
         fluo <- fluoCQ
     } else cycCQ <- NA
     
-    ### maxRatio method as in Shain et al. (2008)
+    ## maxRatio method as in Shain et al. (2008)
     if (type == "maxRatio") {
-      EFFobj <- eff(object, type = "spline", ...)
+      EFFobj <- eff(object, method = "spline", ...)
       SEQ <- EFFobj$eff.x
       EFFseq <- EFFobj$eff.y
       maxEFF <- EFFobj$effmax.y
@@ -167,7 +189,7 @@ amount = NULL,
         
         mtext(paste("Eff:", round(maxEFF, 3)), line = 1, 
             col = 4, adj = 0.35, cex = 0.9)
-        mtext(paste("resVar:", round(resVar(object), 8)), line = 2,
+        mtext(paste("resVar:", round(resVar(object), 5)), line = 2,
             col = 1, adj = 0.35, cex = 0.9)
         mtext(paste("AICc:", round(AICc(object), 2)), line = 2, 
             col = 1, adj = 0.65, cex = 0.9)

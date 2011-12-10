@@ -10,11 +10,16 @@
 \alias{b4}
 \alias{b3}   
 \alias{expGrowth}  
+\alias{linexp}
 \alias{mak2}
+\alias{mak2i}
 \alias{mak3}
-\alias{mak3n}
-\alias{chag}
+\alias{mak3i}
+\alias{lin2}
+\alias{cm3}
+\alias{spl3}
 
+\encoding{latin1}
 
 \title{The nonlinear/mechanistic models implemented in qpcR}
 
@@ -34,44 +39,53 @@ b5
 b4
 b3
 expGrowth 
+linexp
 mak2
+mak2i
 mak3
-mak3n
-chag
+mak3i
+lin2
+cm3
+spl3
 }
 
 \details{
 The following nonlinear sigmoidal models are implemented:\cr\cr
-\bold{l7:} \deqn{f(x) = c + k1 \cdot x + k2 \cdot x^2 + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
-\bold{l6:} \deqn{f(x) = c + k \cdot x + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
-\bold{l5:} \deqn{f(x) = c + \frac{d-c}{(1+exp(b(log(x)-log(e))))^f}}
-\bold{l4:} \deqn{f(x) = c + \frac{d-c}{1+exp(b(log(x)-log(e)))}}
-\bold{l3:} \deqn{f(x) = \frac{d}{1+exp(b(log(x)-log(e)))}} 
-\bold{b7:} \deqn{f(x) = c + k1 \cdot x + k2 \cdot x^2 + \frac{d-c}{(1+exp(b(x-e)))^f}}
-\bold{b6:} \deqn{f(x) = c + k \cdot x + \frac{d-c}{(1+exp(b(x-e)))^f}}
-\bold{b5:} \deqn{f(x) = c + \frac{d-c}{(1+exp(b(x-e)))^f}}
-\bold{b4:} \deqn{f(x) = c + \frac{d-c}{1+exp(b(x-e))}}
-\bold{b3:} \deqn{f(x) = \frac{d}{1+exp(b(x-e))}} 
+\bold{l7:} \deqn{f(x) = c + k1 \cdot x + k2 \cdot x^2 + \frac{d - c}{(1 + exp(b(log(x) - log(e))))^f}}
+\bold{l6:} \deqn{f(x) = c + k \cdot x + \frac{d - c}{(1 + exp(b(log(x) - log(e))))^f}}
+\bold{l5:} \deqn{f(x) = c + \frac{d - c}{(1 + exp(b(log(x) - log(e))))^f}}
+\bold{l4:} \deqn{f(x) = c + \frac{d - c}{1 + exp(b(log(x) - log(e)))}}
+\bold{l3:} \deqn{f(x) = \frac{d}{1 + exp(b(log(x) - log(e)))}} 
+\bold{b7:} \deqn{f(x) = c + k1 \cdot x + k2 \cdot x^2 + \frac{d - c}{(1 + exp(b(x - e)))^f}}
+\bold{b6:} \deqn{f(x) = c + k \cdot x + \frac{d - c}{(1 + exp(b(x - e)))^f}}
+\bold{b5:} \deqn{f(x) = c + \frac{d - c}{(1 + exp(b(x - e)))^f}}
+\bold{b4:} \deqn{f(x) = c + \frac{d - c}{1 + exp(b(x - e))}}
+\bold{b3:} \deqn{f(x) = \frac{d}{1 + exp(b(x - e))}} 
+
+The following nonlinear models for subsets of the curve are implemented:\cr\cr
 \bold{expGrowth}: \deqn{f(x) = a \cdot exp(b \cdot x) + c}\cr
+\bold{linexp}: \deqn{f(x) = a \cdot exp(b \cdot x) + (k \cdot x) + c}\cr
+\bold{lin2}: \deqn{f(x) = \eta \cdot log\left(exp\left(a1 \cdot \frac{x - \tau}{\eta}\right) + exp\left(a2 \cdot \frac{x - \tau}{\eta}\right)\right) + c}\cr
 
 The following mechanistic models are implemented:\cr\cr
-\bold{mak2}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + Fb}
-\bold{mak3 & mak3n}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + (slope \cdot n + Fb)} 
-\bold{chag}: \deqn{F_n = 1 - (1 - F_{n-1}) \cdot \left(\frac{1 - b \cdot  F_{n-1}}{1 + (a - 2) \cdot b \cdot F_{n-1}}\right)^\frac{1}{a - 1}}
+\bold{mak2 & mak2i}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + Fb}
+\bold{mak3 & mak3i}: \deqn{F_n = F_{n-1} + k \cdot log \left(1 + \left(\frac{F_{n-1}}{k}\right)\right) + (slope \cdot n + Fb)}
+\bold{cm3}: \deqn{F_n = F_{n-1} \cdot \left(1 + \left(\frac{max - F_{n-1}}{max}\right) - \left(\frac{F_{n-1}}{Kd + F_{n-1}}\right)\right) + Fb}
 
-\code{mak2} and \code{mak3} are two mechanistic models developed by Gregory Boggy (see references). \code{chag} was developed by Alexander Chagovetz and James Keener.
+Other models:\cr\cr
+\bold{spl3}:  \deqn{S:[a, b] \to Real, a = n_0 < n_1 < \ldots < n_{k-1} < n_k = b}
 
-The mechanistic models are a completely different approach in that the response value (Fluorescence) is not a function of the predictor value (Cycles), but a function of the preceeding response value, that is, \eqn{F_n = f(F_{n-1})}. These are also called 'recurrence relations' or 'iterative maps'.
-
-The implementation of these models in the 'qpcR'' package is the following:\cr
-1) In case of \code{mak2} or \code{mak3}, all cycles up from the second derivative maximum of a four-parameter log-logistic model (l4) are chopped off. This is because these two models do not fit to a complete sigmoidal curve. For \code{chag} and \code{mak3n}, the sigmoidal curve is also rescaled between [0, 1].\cr 
-2) A grid of sensible starting values is created for all parameters in the model.\cr
-3) For each combination of starting parameters, the model is fit by nonlinear least-squares (Levenberg-Marquardt by default).\cr
+\code{mak2} and \code{mak3} are two mechanistic models developed by Gregory Boggy (see references). The mechanistic models are a completely different approach in that the response value (Fluorescence) is not a function of the predictor value (Cycles), but a function of the preceeding response value, that is, \eqn{F_n = f(F_{n-1})}. These are also called 'recurrence relations' or 'iterative maps'. The implementation of these models in the 'qpcR'' package is the following:\cr
+1) In case of \code{mak2/mak2i} or \code{mak3/mak3i}, all cycles up from the second derivative maximum of a four-parameter log-logistic model (l4) are chopped off. This is because these two models do not fit to a complete sigmoidal curve. An \code{offset} criterion from the SDM can be defined in \code{\link{pcrfit}}, see there.\cr 
+2) For \code{mak2i/mak3i}, a grid of sensible starting values is created for all parameters in the model. For \code{mak2/mak3} the recurrence function is fitted directly (which is much faster, but may give convergence problems), so proceed to 7).\cr
+3) For each combination of starting parameters, the model is fit.\cr
 4) The acquired parameters are collected in a parameter matrix together with the residual sum-of-squares (RSS) of the fit.\cr
 5) The parameter combination is selected that delivered the lowest RSS.\cr
 6) These parameters are transferred to \code{\link{pcrfit}}, and the data is refitted.\cr
-7) Parameter \code{D0} can be used directly to calculate expression ratios, hence making the use of threshold cycles and efficiencies expendable.\cr
-Some parameters for this function can be set in \code{\link{parMAK}}, see also examples there and in \code{\link{pcrfit}}.\cr
+7) Parameter \code{D0} can be used directly to calculate expression ratios, hence making the use of threshold cycles and efficiencies expendable.\cr\cr
+\code{cm3} is a mechanistic model by Carr & Moore (see references). In contrast to the \code{mak} models, \code{cm3} models the complete curve, which might prove advantageous as no decision on curve subset selection has to be done. As in the \code{mak} models, \code{D0} is the essential parameter to use.\cr\cr
+\code{spl3} is a cubic spline function that treats each point as being exact. It is just implemented for comparison purposes.\cr\cr
+\code{lin2} is a bilinear model developed by P. Buchwald (see references). These are essentially two linear functions connected by a transition region. By default, cycles 1 ... (cpD2 + 3) are used. 
  
 The functions are defined as a list containing the following items:\cr
 
@@ -86,6 +100,10 @@ The functions are defined as a list containing the following items:\cr
 \code{$parnames}    the parameter names.\cr
 \code{$name}        the function name.\cr
 \code{$type}        the function type as a character string.\cr  
+}
+
+\note{
+For models \code{l6, l7, b6, b7} there are no explicit solutions to the inverse function. The calculation of \code{x} from \code{y} (Cycles from Fluorescence) is done using \code{\link{uniroot}} by minimizing \code{model$fct(x, parm)} - y in the interval [1, 100].
 }
 
 \author{
@@ -136,16 +154,20 @@ Comprehensive algorithm for quantitative real-time polymerase chain reaction.\cr
 Zhao S & Fernald RD.\cr
 \emph{J Comput Biol} (2005), \bold{12}:1047-64.
 
-\bold{mak2, mak3, mak3n}:\cr
+\bold{mak2, mak2i, mak3, mak3i}:\cr
 A Mechanistic Model of PCR for Accurate Quantification of Quantitative PCR Data.\cr
 Boggy GJ & Woolf PJ.\cr
-\emph{PLoS ONE} (2010), \bold{5(8)}: e12355.
+\emph{PLoS ONE} (2010), \bold{5}:e12355.
 
-\bold{chag}:\cr
-Kinetic models of qPCR as applied to the problem of low copy numbers.\cr
-Chagovetz AM & Keener JP.\cr
-Poster presented at the qPCR 2011 Symposium in Munich.\cr
-Can be downloaded at \url{http://www.dr-spiess.de/qpcR/other/Chago.pdf}.
+\bold{lin2}:\cr
+A general bilinear model to describe growth or decline time profiles.\cr
+Buchwald P.\cr
+\emph{Math Biosci} (2007), \bold{205}:108-36.
+
+\bold{cm3}:\cr
+Robust quantification of polymerase chain reactions using global fitting.\cr
+Carr AC & Moore SD.\cr
+\emph{PLoS One} (2012), \bold{7}:e37640.
 }
 
 \examples{

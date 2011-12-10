@@ -8,13 +8,13 @@ Calculates the efficiency curve from the fitted object by \eqn{E_n = \frac{F(n)}
 }
 
 \usage{
-eff(object, type = c("sigfit", "spline"), sequence = NULL, baseshift = NULL, 
+eff(object, method = c("sigfit", "spline"), sequence = NULL, baseshift = NULL, 
     smooth = FALSE, plot = FALSE)
 }
 
 \arguments{
   \item{object}{an object of class 'pcrfit'.}
-  \item{type}{the efficiency curve is either calculated from the sigmoidal fit (default) or a cubic spline interpolation.}
+  \item{method}{the efficiency curve is either calculated from the sigmoidal fit (default) or a cubic spline interpolation.}
   \item{sequence}{a 3-element vector (from, to, by) defining the sequence for the efficiency curve. Defaults to [min(Cycles), max(Cycles)] with 100 points per cycle.}
   \item{baseshift}{baseline shift value in case of \code{type = "spline"}. See documentation to \code{\link{maxRatio}}.}
   \item{smooth}{logical. If \code{TRUE} and \code{type = "spline"}, invokes a 5-point convolution filter (\code{\link{filter}}). See documentation to \code{\link{maxRatio}}.} 
@@ -54,7 +54,7 @@ eff(m1, sequence = c(5, 35, 0.1), plot = TRUE)
 ## using cubic splines
 ## it is preferred to use the
 ## smoothing option 
-eff(m1, type = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
+eff(m1, method = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
 }
 
 \keyword{models}

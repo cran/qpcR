@@ -62,7 +62,7 @@ cbind.na <- function (..., deparse.level = 1)
         nRow <- as.numeric(sapply(argl, function(x) NROW(x)))
         maxRow <- max(nRow, na.rm = TRUE)  
         argl <- lapply(argl, function(x)  if (is.null(nrow(x))) c(x, rep(NA, maxRow - length(x)))
-                                          else rbind(x, matrix(, maxRow - nrow(x), ncol(x))))
+                                          else rbind.na(x, matrix(, maxRow - nrow(x), ncol(x))))
         r <- do.call(cbind, c(argl[-1L], list(deparse.level = deparse.level)))
     }
     d2 <- dim(r)
@@ -116,8 +116,7 @@ rbind.na <- function (..., deparse.level = 1)
             return(rbind2(..1))
         else return(matrix(..., nrow = 1)) ##.Internal(rbind(deparse.level, ...)))
     }
-    print("JJJ")
-    
+        
     if (deparse.level) {
         symarg <- as.list(sys.call()[-1L])[1L:na]
         Nms <- function(i) {
@@ -633,7 +632,7 @@ multi1 <- function(object, cut, alpha, verbose = FALSE, ...) {
     if (inherits(EFF1, "try-error")) next
     
     ## first  derivative maximum of complete data
-    cpD1 <- EFF1$cpD1       
+    cpD1 <- EFF1$cpD1     
      
     ## reduce data within border
     UPPER <- floor(cpD1) + cut[2]
@@ -641,7 +640,7 @@ multi1 <- function(object, cut, alpha, verbose = FALSE, ...) {
     allDATA <- object[[i]]$DATA    
     cutDATA <- try(allDATA[LOWER:UPPER, ], silent = TRUE)
     if (inherits(cutDATA, "try-error")) next
-  
+      
     ## new symmetric sigmoidal for reduced data
     newOBJ <- try(pcrfit(cutDATA, 1, 2, model = l4, verbose = FALSE), silent = TRUE)
     if (inherits(newOBJ, "try-error")) next
@@ -851,148 +850,23 @@ fetchData <- function(object)
   if (class(object$call$data) == "name") DATA <- eval(object$call$data)
   else if (class(object$call$data) == "data.frame"  || class(object$call$data) == "matrix") DATA <- object$call$data
   else if (is.null(object$call$data)) DATA <- as.data.frame(sapply(all.vars(object$call$formula), function(a) get(a, envir = .GlobalEnv)))
-
+  
   ### get variables from formula
   VARS <- all.vars(object$call$formula)
   LHS <- VARS[1]
   RHS <- VARS[-1]
-  matchPRED <- which(!is.na(match(RHS, colnames(DATA))))
-  PREDname <- RHS[matchPRED]
-  PRED.pos <- which(colnames(DATA) == PREDname)
-  RESP.pos <- which(colnames(DATA) == LHS)
   
-  return(list(data = DATA, pred.pos = PRED.pos, resp.pos = RESP.pos, pred.name = PREDname))
-}
-
-####################################################################
-######## robust nonlinear least-squares => pcrfit ##################
-rnls <- function(
-formula,
-data,
-start,    
-weights = NULL,
-na.action = na.fail,
-psi = psi.huber,
-test.vec = c("resid", "coef", "w"),
-maxit = 20,
-acc = 1e-06,   
-trace = FALSE, 
-control = nls.control(),
-nls.method = "port", 
-...)
-{
-    mf <- match.call()    
-    formula <- as.formula(formula)
-    if (length(formula) != 3)
-        stop("'formula' should be a formula of the type 'y  ~ f(x, alpha)'")
-    test.vec <- match.arg(test.vec)
-    varNames <- all.vars(formula)
-    dataName <- substitute(data)
-    data <- as.data.frame(data)
-    if (length(pnames <- names(start)) != length(start))
-        stop("'start' must be fully named (list or numeric vector)")
-    if (!((is.list(start) && all(sapply(start, is.numeric))) ||
-        (is.vector(start) && is.numeric(start))) || any(is.na(match(pnames,
-        varNames))))
-        stop("'start' must be a list or numeric vector named with parameters in 'formula'")
-    if ("w" %in% varNames || "w" %in% pnames || "w" %in% names(data))
-        stop("Do not use 'w' as a variable name or as a parameter name")
-    if (!is.null(weights)) {
-        if (length(weights) != nrow(data))
-            stop("'length(weights)' must equal the number of observations")
-        if (any(weights < 0) || any(is.na(weights)))
-            stop("'weights' must be nonnegative and not contain NAs")
-    }
-    irls.delta <- function(old, new) sqrt(sum((old - new)^2,
-        na.rm = TRUE)/max(1e-20, sum(old^2, na.rm = TRUE)))
-    coef <- start
-    fit <- eval(formula[[3]], c(as.list(data), start))     
-    y <- eval(formula[[2]], as.list(data))
-    resid <- y - fit
-    w <- rep(1, nrow(data))
-    if (!is.null(weights))
-        w <- w * weights
-    oform <- formula
-    formula <- as.formula(substitute(~(LHS - RHS) * w, list(LHS = formula[[2]],
-        RHS = formula[[3]])))
-    converged <- FALSE
-    status <- "converged"
-    method.exit <- FALSE
-    for (iiter in 1:maxit) {
-        if (trace)
-            cat("robust iteration", iiter, "\n")
-        previous <- get(test.vec)
-        Scale <- median(abs(resid), na.rm = TRUE)/0.6745
-        if (Scale == 0) {
-            convi <- 0
-            method.exit <- TRUE
-            warning(status <- "could not compute scale of residuals")
-        }
-        else {
-            w <- psi(resid/Scale, ...)
-            if (!is.null(weights))
-                w <- w * weights
-            data$w <- sqrt(w)
-            out <- nls(formula, data = data, start = start, algorithm = nls.method,
-                trace = trace, na.action = na.action, control = control)
-            coef <- coefficients(out)
-            start <- coef
-            resid <- -residuals(out)/sqrt(w)
-            convi <- irls.delta(previous, get(test.vec))
-        }
-        converged <- convi <= acc
-        if (converged)
-            break
-    }
-    if (!converged && !method.exit)
-        warning(status <- paste("failed to converge in", maxit,
-            "steps"))
-    if (!is.null(weights)) {
-        tmp <- weights != 0
-        w[tmp] <- w[tmp]/weights[tmp]
-    }
-    
-    out <- list(m = out$m, call = match.call(), formula = oform,
-        new.formula = formula, Scale = Scale, w = w,
-        status = status, psi = psi, data = dataName, dataClasses = attr(attr(mf,
-            "terms"), "dataClasses"))
+  ### get predictor and response positions
+  PRED.pos <- match(RHS, colnames(DATA))  
+  PRED.name <- RHS[which(!is.na(PRED.pos))]
+  PRED.pos <- as.numeric(na.omit(PRED.pos))
+  RESP.pos <- match(LHS, colnames(DATA))  
             
-    out$m$fitted <- function() fit
-    out$m$lhs <- function() y
-    out$call$algorithm <- "port"
-    out$call$control <- control
-    out$call$trace <- FALSE
-    out$call$model <- TRUE
-    out$call$lower <- -Inf
-    out$call$upper <- Inf       
-    out$message <- paste("converged in", iiter, "iterations") 
-    out$control <- control       
-            
-    class(out) <- "nls"
-    return(out)
-}
-
-############################################################################
-######### parameters for mak2/mak3 mechanistic model ######################
-parMAK = function(
-SS.offset = 0, SS.method = "LM", SS.deriv = c("sigfit", "spline")
-)
-{
-  SS.deriv <- match.arg(SS.deriv)
-  LIST <- list(
-  ## number of cycles to add to SDM
-  SS.offset = SS.offset,  
-  ## fitting algorithm
-  SS.method = SS.method, 
-  ## method for SDM calculation
-  SS.deriv = SS.deriv
-  )  
-  assign("parMAKs", LIST, envir = .GlobalEnv)
+  return(list(data = DATA, pred.pos = PRED.pos, resp.pos = RESP.pos, pred.name = PRED.name))
 }
 
 #############################################################################
-######### create n-sequence (equidistant) with selected mean and s.d. #######
-######### => refmean ########################################################
+## create n-sequence (equidistant) with selected mean and s.d.  => refmean ##
 makeStat <- function(n, MEAN, SD) 
 {
   X <- 1:n
@@ -1001,8 +875,7 @@ makeStat <- function(n, MEAN, SD)
 }
 
 #############################################################################
-######### bubble plot #######################################################
-######### => pcropt1 ########################################################
+## bubble plot => pcropt
 bubbleplot <- function(x, y, z, scale = NULL, ...){
   RADIUS <- sqrt(z/pi)
   RANK <- rank(z)
@@ -1010,3 +883,78 @@ bubbleplot <- function(x, y, z, scale = NULL, ...){
   symbols(x, y, circles = RADIUS, inches = scale, bg = COL[RANK], ...)
 }
 
+###########################################################################
+## tmvrnorm (multivariate truncated normal distribution => propagate ######
+tmvrnorm <- function(
+n, 
+mean = rep(0, nrow(sigma)), 
+sigma = diag(length(mean)), 
+lower = rep(-Inf, length = length(mean)), 
+upper = rep(Inf, length = length(mean))
+)
+{
+  ## taken from tmvtnorm:::rtmvnorm.rejection
+  k <- length(mean)
+  Y <- matrix(NA, n, k)
+  D = diag(length(mean))
+  numSamples <- n
+  numAcceptedSamplesTotal <- 0
+  
+  while (numSamples > 0) {
+    nproposals <- ifelse(numSamples > 1e+06, numSamples, 
+                         ceiling(max(numSamples, 10)))
+    X <- mvrnorm(n, mu = mean, Sigma = sigma, empirical = TRUE)
+    X2 <- X %*% t(D)
+    ind <- logical(nproposals)    
+    for (i in 1:nproposals) {
+      ind[i] <- all(X2[i, ] >= lower & X2[i, ] <= upper)
+    }
+    numAcceptedSamples <- length(ind[ind == TRUE])
+    if (length(numAcceptedSamples) == 0 || numAcceptedSamples == 
+      0) 
+      next
+    numNeededSamples <- min(numAcceptedSamples, numSamples)
+    Y[(numAcceptedSamplesTotal + 1):(numAcceptedSamplesTotal + 
+      numNeededSamples), ] <- X[which(ind)[1:numNeededSamples], 
+                                ]
+    numAcceptedSamplesTotal <- numAcceptedSamplesTotal + 
+      numAcceptedSamples
+    numSamples <- numSamples - numAcceptedSamples
+  }
+  Y 
+}
+
+############################################################################
+## weighting function => pcrfit ############################################
+wfct <- function(
+expr, 
+x, 
+y, 
+model = model,
+start = start, 
+offset = offset, 
+verbose = TRUE) 
+{
+  ## calculate variances for response values if "error" is in expression
+  if (length(grep("error", expr)) > 0) {
+    ## test for replication
+    if (length(x) == length(unique(x))) stop("No replicates available to calculate error from!")
+    ## calcuate error (s.d)
+    error <- tapply(y, x, function(e) sd(e, na.rm = TRUE))    
+    ## convert to original repetitions     
+    error <- rep(error, length(x)/length(unique(x)))        
+  }
+  
+  ## calculate fitted or residual values if "fitted"/"resid" is in expression
+  if (length(grep("fitted", expr)) > 0 || length(grep("resid", expr)) > 0) {    
+    DATA <- data.frame(Cycles = x, Fluo = y)
+    ## unweighted fitting
+    MODEL <- pcrfit(DATA, 1, 2, model = model, start = start, offset = offset, verbose = verbose)
+    fitted <- fitted(MODEL)      
+    resid <- residuals(MODEL)      
+  }
+  
+  ## return evaluation: vector of weights 
+  OUT <- eval(parse(text = expr))  
+  return(OUT)
+}

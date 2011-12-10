@@ -48,8 +48,7 @@ getPar <- function(x, type = c("fit", "curve"), cp = "cpD2", eff = "sigfit", ...
   
   colnames(RES) <- NAMES
   rownames(RES) <- RN  
-                          
-  write.table(RES, file = "clipboard", sep = "\t", row.names = FALSE)
+                   
   cat("\n")
   return(RES)
 }

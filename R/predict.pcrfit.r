@@ -16,31 +16,49 @@ level = 0.95,
     else newDATA <- newdata
   } 
   
-  ### get predicted values
+  ## get model names
+  modNAME <- object$MODEL$name
+  
+  ## from 1.3-7: in case of 'spl3' model we need to supply 
+  ## y-values to spl3$fct
+  if (modNAME == "spl3") {
+    YVEC <- object$DATA[, 2]
+    if (which == "y") PRED <- object$MODEL$fct(newDATA[, 1], coef(object), YVEC)
+    else PRED <- object$MODEL$inv(newDATA[, 2], coef(object), YVEC)
+    return(PRED)
+  }
+  
+  ## get predicted values
   if (which == "y") PRED <- object$MODEL$fct(newDATA[, 1], coef(object))
   else PRED <- object$MODEL$inv(newDATA[, 2], coef(object))
-             
-  ### make list with gradients     
+  
+  ## from 1.3-7: return prediction directly when function is
+  ## not differentiable, i.e. mak/cm3/
+  if (modNAME %in% c("mak2", "mak2i", "mak3", "mak3i", "cm3")) return(PRED)
+  
+  ## make list with gradients  
   if (which == "y") DERIVS <- lapply(object$MODEL$parnames, function(x) D(object$MODEL$expr.grad, x))
   else DERIVS <- lapply(object$MODEL$parnames, function(x) D(object$MODEL$inv.grad, x))
-   
+  
+  if (inherits(DERIVS, "try-error")) return(PRED)
+                        
   GRAD <- NULL
   resMAT <- NULL
   
-  ### create t-statistic for confidence/prediction
+  ## create t-statistic for confidence/prediction
   if (!identical(interval, "none")) {
     TQUAN <- qt(1 - (1 - level)/2, df.residual(object))     
   }       
       
   for (i in 1:nrow(newDATA)) {     
-    ### create dataframe for gradient calculation
+    ## create dataframe for gradient calculation
     tempDATA <- data.frame(newDATA[i, , drop = FALSE], t(coef(object))) 
            
-    ### calculate gradients  
+    ## calculate gradients  
     dfEVAL <- as.numeric(lapply(DERIVS, function(x) eval(x, envir = tempDATA)))
     GRAD <- rbind(GRAD, as.numeric(dfEVAL))    
     
-    ### calculate variance
+    ## calculate variance
     VAR <- dfEVAL %*% vcov(object) %*% dfEVAL           
   
     if (interval == "confidence") {     
