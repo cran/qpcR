@@ -63,7 +63,7 @@ needFirst = TRUE,
     if (i > CRIT && usePars == TRUE) {
       cat("Formatting", FILE[i], "with saved parameters...\n")
       flush.console()
-      if (is.null(dirPars)) PATH <- .path.package("qpcR") else PATH <- dirPars
+      if (is.null(dirPars)) PATH <-path.package("qpcR") else PATH <- dirPars
       SW <- try(setwd(PATH), silent = TRUE)
       if (inherits(SW, "try-error")) stop("Path defined in 'dirPars' does not exist! Please create or use a different one...")
       LOAD <- try(load(file = "parList.rda", envir = .GlobalEnv), silent = TRUE)
@@ -286,7 +286,7 @@ needFirst = TRUE,
       parLIST <- list(sep = SEP, dec = DEC, delCol = DELCOL, delRow = DELROW,
                       format = FORMAT, names = NAMES, sampleDat = outSAMPLE, sampleLen = outSLEN,
                       refDat = outREF, refLen = outRLEN, check = FALSE)
-      if (is.null(dirPars)) PATH <- .path.package("qpcR") else PATH <- dirPars
+      if (is.null(dirPars)) PATH <- path.package("qpcR") else PATH <- dirPars
       SW <- try(setwd(PATH), silent = TRUE)
       if (inherits(SW, "try-error")) stop("Path defined in 'dirPars' does not exist! Please create or use a different one...")
       save(parLIST, file = "parList.rda")

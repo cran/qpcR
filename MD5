@@ -1,4 +1,4 @@
-b9573e2651efad132d55ed11924e46bb *DESCRIPTION
+cd01d24d5af26ea1509e78a62428d20e *DESCRIPTION
 f1a4cdea11b308351abd8b003da5e8c5 *NAMESPACE
 9b4ffa1785c2bad96d86eb1a50cb8c58 *NEWS
 131bf95c2acdee8811689d3f6801ba16 *R/AICc.R
@@ -37,7 +37,7 @@ fb8941d74d075c49dbbeedc5e84aa6bb *R/midpoint.R
 32371f355d7d09f65f223e76f6daf768 *R/pcrbatch.r
 2db29461920411bd03117bb533fdf12d *R/pcrboot.r
 e9a18c5a04f8c3cd50a498b2a089fc77 *R/pcrfit.r
-c37bd35b34462e47d3889d2a3b41a9b5 *R/pcrimport.R
+506bb25255749187c18e9a12c65e9a8b *R/pcrimport.R
 529099ccd5b4f29fe21fef1532e5e38d *R/pcrimport2.R
 e6786bb7eb836bb9bcb88a106bbef9f3 *R/pcropt1.R
 deb38435e4c6211aac37624ba29107f2 *R/pcropt2.r
@@ -131,7 +131,7 @@ b6d47f61c817c83944cc53671e250a84 *man/neill.test.rd
 49df70709e10de2ca5ca3f860b33cf55 *man/pcrbatch.Rd
 5e63aa4c27b6d48624fcbb3de6d32d8e *man/pcrboot.rd
 eb51f8f16f3f59936a549fe755d6a312 *man/pcrfit.Rd
-820d882b63589ba8a2f81b357b48550c *man/pcrimport.Rd
+67f4891db93b0596201afa05d53b30b2 *man/pcrimport.Rd
 4b071840e03499a71dc2eeeaa38ebf9d *man/pcrimport2.Rd
 bdf3b49abe228f07894235734e5f9bea *man/pcropt1.Rd
 ec527669a71aef07f745bfad1f73bf21 *man/pcropt2.rd

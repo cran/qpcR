@@ -79,7 +79,7 @@ A list with the transformed data as \code{data.frame} list items, suitable for d
 ## data in rows, and some unneeded columns and rows.
 ## This is the example data path, but could be any path
 ## with data such as c:/temp.
-PATH <- .path.package("qpcR")
+PATH <- path.package("qpcR")
 PATHall <- paste(PATH, "/add01/", sep = "")
 res <- pcrimport(PATHall)
 
@@ -114,7 +114,7 @@ plot(ml, which = "single")
 ## (in 'add02' directory) with 96 runs.
 ## Tab delimited, 40 cycles, reporter dye + reference dye,
 ## data in columns, and some unneeded columns and rows.
-PATH <- .path.package("qpcR")
+PATH <- path.package("qpcR")
 PATHall <- paste(PATH, "/add02/", sep = "")
 res <- pcrimport(PATHall)
 
