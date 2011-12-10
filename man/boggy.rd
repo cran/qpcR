@@ -27,8 +27,8 @@ Additional File S1 to the paper.
 
 \references{
 A Mechanistic Model of PCR for Accurate Quantification of Quantitative PCR Data.\cr
-Boggy GJ and Woolf PJ.\cr
-\emph{PLOS One}, 2010, \bold{5}: e12355.
+Boggy GJ & Woolf PJ.\cr
+\emph{PLOS One} (2010), \bold{5}: e12355.
 }
 
 \examples{

@@ -44,7 +44,7 @@ do.all = FALSE,
 		retMAT[i, 3] <- round(AICc(modLIST[[i]]), 2)
 		retMAT[i, 4] <- round(resVar(modLIST[[i]]), 5)   		
     if (i < length(modLIST)) retMAT[i + 1 , 5] <- as.matrix(anova(modLIST[[i]], modLIST[[i + 1]]))[2, 6]
-    if (i < length(modLIST)) retMAT[i + 1, 6] <- LR(modLIST[[i]], modLIST[[i + 1]])$p.value  
+    if (i < length(modLIST)) retMAT[i + 1, 6] <- llratio(modLIST[[i]], modLIST[[i + 1]])$p.value  
     retMAT[i, 7] <- fitchisq(modLIST[[i]], ...)$chi2.red            
   }           
 	

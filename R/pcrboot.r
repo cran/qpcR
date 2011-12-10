@@ -75,7 +75,7 @@ verbose = TRUE,
   
   ## combine data
   effDAT <- t(sapply(effLIST, function(z) unlist(z)))    
-  statLIST <- list(coef = COEF, rse = RSE, rss = RSS, gof = GOF, eff = effDAT) 
+  statLIST <- list(coef = COEF, rmse = RSE, rss = RSS, gof = GOF, eff = effDAT) 
   confLIST <- lapply(statLIST, function(x) t(apply(as.data.frame(x), 2, function(y) quantile(y, c((1 - conf)/2, 1 - (1 - conf)/2), na.rm = TRUE)))) 
     
   if (plot) {

@@ -15,12 +15,12 @@ batchstat <- function(..., group = NULL,  do = c("cbind", "stat"), statfun = mea
   }
 
   if (do == "stat") {
-    if (is.null(group)) stop("Please define 'group'ing vector!")
+    if (is.null(group)) stop("Please define 'group' vector!")
     group <- as.factor(group)
     DATAout <- list()
 
     for (i in 1:length(DATA)) {
-      anno <- DATA[[i]][ ,1, drop = FALSE]
+      anno <- DATA[[i]][ , 1, drop = FALSE]
       DATAtemp <- DATA[[i]][, -1, drop = FALSE]
       STAT <- apply(DATAtemp, 1, function(x) tapply(as.numeric(x), group, function(y) statfun(y, na.rm = TRUE)))
       STAT <- t(STAT)

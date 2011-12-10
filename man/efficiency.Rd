@@ -5,12 +5,8 @@
 \title{Calculation of qPCR efficiency and other important qPCR parameters}
 
 \description{
-This function calculates the PCR efficiency of a model of class 'pcrfit' or on a 'modlist', including several other 
- important values for qPCR quantification like the first and second derivatives and the 
- corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the 
- calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit.
-Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC),
- the residual variance and the R-square value.   
+This function calculates the PCR efficiency of a model of class 'pcrfit', including several other 
+ important values for qPCR quantification like the first and second derivatives and the corresponding maxima thereof (i.e. threshold cycles). These values can subsequently be used for the calculation of PCR kinetics, fold induction etc. All values are included in a graphical output of the fit. Additionally, several measures of goodness-of-fit are calculated, i.e. the Akaike Information Criterion (AIC), the residual variance and the \eqn{R^2} value.   
 }
 
 \usage{
@@ -19,7 +15,7 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
 }
 
 \arguments{
-  \item{object}{an object of class 'pcrfit' or 'modlist'.}
+  \item{object}{an object of class 'pcrfit'.}
   \item{plot}{logical. If TRUE, a graph is displayed. If FALSE, values are printed out.}
   \item{type}{the method of efficiency estimation. See 'Details'.}
   \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
@@ -29,8 +25,7 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
 }
 
 \details{
-The efficiency is always (with the exception of \code{type = "maxRatio"} calculated from the efficiency curve (in blue), which is calculated according to \eqn{E = \frac{F(n)}{F(n-1)}} from the 
-fitted curve, but taken from different points at the curve, as to be defined in \code{type}: 
+The efficiency is always (with the exception of \code{type = "maxRatio"}) calculated from the efficiency curve (in blue), which is calculated according to \eqn{E_n = \frac{F_n}{F_{n-1}}} from the fitted curve, but taken from different points at the curve, as to be defined in \code{type}: 
 
 "cpD2"  taken from the maximum of the second derivative curve,\cr
 "cpD1"  taken from the maximum of the first derivative curve,\cr
@@ -41,16 +36,9 @@ fitted curve, but taken from different points at the curve, as to be defined in 
 a numeric value taken from the threshold cycle output of the PCR software, i.e. 15.24  as defined in \code{type} or\cr
 a numeric value taken from the fluorescence threshold output of the PCR software as defined in \code{thresh}.
 
-The initial fluorescence F(0) for relative or absolute quantification is either calculated by setting x = 0 in the sigmoidal model of \code{object} giving \code{init1} or 
- by calculating an exponential model down (\code{init2}) with \eqn{F(0) = \frac{F(n)}{E(n)^{Cyc}}}, with F(n) = raw fluorescence at the cycle number defined by \code{type}, 
- E(n) = PCR efficiency at the cycle number defined by \code{type} and Cyc = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F(0)}} is given.
-The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. 
-First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
+The initial fluorescence \eqn{F_0} for relative or absolute quantification is either calculated by setting \eqn{x = 0} in the sigmoidal model of \code{object} giving \code{init1} or by calculating an exponential model down (\code{init2}) with \eqn{F_0 = \frac{F_n}{E^n}}, with \eqn{F_n} = raw fluorescence, \eqn{E} = PCR efficiency and \eqn{n} = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F_0}} is given. The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
 
-If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic spline interpolated raw fluorescence values and therefore NOT
- from the sigmoidal fit. This is a different paradigm and will usually result in fairly the same threshold cycles as with \code{type = "cpD2"},
- but the efficiencies are generally lower. See documentation to \code{\link{maxRatio}}. This method is usually not applied for calculating
- efficiencies that are to be used for relative quantification, but one might try...  
+If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic spline interpolated raw fluorescence values and therefore NOT from the sigmoidal fit. This is a different paradigm and will usually result in fairly the same threshold cycles as with \code{type = "cpD2"}, but the efficiencies are generally lower. See documentation to \code{\link{maxRatio}}. This method is usually not applied for calculating efficiencies that are to be used for relative quantification, but one might try...  
 }
 
 \value{
@@ -59,8 +47,8 @@ If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic
   \item{resVar}{the residual variance.}
   \item{AICc}{the bias-corrected Akaike Information Criterion.}
   \item{AIC}{the Akaike Information Criterion.}
-  \item{Rsq}{the R-square value.}
-  \item{Rsq.ad}{the adjusted R-square value.}
+  \item{Rsq}{the \eqn{R^2} value.}
+  \item{Rsq.ad}{the adjusted \eqn{R_{adj}^2} value.}
   \item{cpD1}{the first derivative maximum (point of inflection in 'l4' or 'b4' models, 
   can be used for defining the threshold cycle).}
   \item{cpD2}{the second derivative maximum (turning point of cpD1, more often used for defining 
@@ -84,16 +72,17 @@ Andrej-Nikolai Spiess
 }
 
 \references{
-Weihong Liu and David A. Saint (2002) Validation of a quantitative method for real time PCR kinetics, 
-\emph{BBRC}, \bold{294}, 347 - 353.
+Validation of a quantitative method for real time PCR kinetics.\cr
+Liu W & Saint DA.\cr  
+\emph{BBRC} (2002), \bold{294}: 347-353.\cr
+
 A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
-Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.  
+Guescini M, Sisti D, Rocchi MB, Stocchi L & Stocchi V.\cr
+\emph{BMC Bioinformatics} (2008), \bold{9}: 326.  
 }
 
 \note{
-Three parameter models ('b3' or 'l3') do not work very well in calculating the PCR efficiency. 
-It is advisable not to take too many cycles of the plateau phase prior to fitting the model as this has a strong 
- effect on the validity of the efficiency estimates. 
+Three parameter models ('b3' or 'l3') do not work very well in calculating the PCR efficiency. It is advisable not to take too many cycles of the plateau phase prior to fitting the model as this has a strong effect on the validity of the efficiency estimates. 
 }
 
 \examples{

@@ -6,7 +6,9 @@ combs = c("same", "across", "all"),
 type.eff = "mean.single",
 which.cp = "cpD2",
 which.eff = "sli",
+refmean = TRUE,
 dataout = "clip", 
+verbose = TRUE,
 ...)
 {
   if (class(data)[2] != "pcrbatch")
@@ -20,7 +22,17 @@ dataout = "clip",
 
   if (length(group) != ncol(data) - 1)
       stop("Length of 'group' and 'data' do not match!")
+  
   combs <- match.arg(combs)
+  
+  ## from 1.3-6, pass data to 'refmean' for averaging of 
+  ## multiple reference genes, and then use modified 'group' label
+  ## in attributes
+  if (refmean) {
+    data <- refmean(data = data, group = group, which.eff = which.eff, 
+                    which.cp = which.cp,  verbose = verbose)
+    group <- attr(data, "group")
+  }  
    
   ANNO <- data[, 1]
   DATA <- data[, -1]  
@@ -58,7 +70,8 @@ dataout = "clip",
   Snum <- t(apply(Snum, 1, function(x) x[x != ""]))
   Gnum <- t(apply(Gnum, 1, function(x) x[x != ""]))
   Rnum <- t(apply(Rnum, 1, function(x) x[x != ""]))      
-      
+  
+  ## select combinations as set under 'combs'
   if (hasRef) {     
     if (combs == "across") {
       SELECT <- which(Cnum[, 1] == Cnum[, 2] & Snum[, 1] == Snum[, 2])
@@ -103,7 +116,7 @@ dataout = "clip",
                
     finalNAME <-  as.vector(unlist(COMBS[i, ]))
     finalNAME <- paste(finalNAME, collapse = ":")      
-    cat("Calculating ", finalNAME, " (", counter, " of ", ncomb, ")...\n", sep = "")
+    if (verbose) cat("Calculating ", finalNAME, " (", counter, " of ", ncomb, ")...\n", sep = "")
     flush.console()
     class(finalDATA) <- c("data.frame", "pcrbatch")
     if (hasRef) finalGROUP <- c(rep("rc", ncol(RCdat)), rep("gc", ncol(GCdat)), rep("rs", ncol(RSdat)), rep("gs", ncol(GSdat)))
@@ -123,14 +136,16 @@ dataout = "clip",
     counter <- counter + 1 
   }  
   
+  ## create method names for values
   names(outLIST) <- nameLIST
   outFRAME <- sapply(outLIST, function(x) as.matrix(x, ncol = 1))
   rowNAMES <- c(paste(rownames(outLIST[[1]]), "Sim", sep = "."), 
                 paste(rownames(outLIST[[1]]), "Perm", sep = "."), 
                 paste(rownames(outLIST[[1]]), "Prop", sep = ".")) 
   rownames(outFRAME) <- rowNAMES 
-  outFRAME <- outFRAME[complete.cases(outFRAME), ]   
+  outFRAME <- outFRAME[complete.cases(outFRAME), , drop = FALSE]   
   
+  ## plot results
   if (plot && length(outLIST) < 50) {
     DIM <- ceiling(sqrt(length(outLIST)))
     par(mfrow = c(DIM, DIM + 1)) 
@@ -149,7 +164,7 @@ dataout = "clip",
     par(mar = c(0.5, 0.5, 0.5, 0.5))
     plot(1, 1, type = "n", axes = FALSE)
     legend(x = 0.7, y = 1.4, legend = c("Monte-Carlo\nSimulation", "Permutation", "Error\nPropagation"), 
-           bty = "n", cex = 1.3, fill  = c("darkblue", "darkred", "darkgreen"), y.intersp = 2)
+           bty = "n", cex = 1, fill  = c("darkblue", "darkred", "darkgreen"), y.intersp = 1)
   } 
   
   outFRAME2 <- cbind(VALS = rownames(outFRAME), outFRAME)

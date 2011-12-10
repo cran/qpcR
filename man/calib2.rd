@@ -4,13 +4,7 @@
 \title{Calculation of qPCR efficiency by dilution curve bootstrapping}
 
 \description{
-This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the 
- logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}.
-A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve.  
-The threshold cycles are calculated either by some arbitrary fluorescence value (i.e. as given by the qPCR software)
- or calculated from the second derivative maximum of the dilution curves. 
-If values to be predicted are given, they are calculated from the curve and also displayed within.
-\code{calib2} uses a bootstrap approach if replicates for the dilutions are supplied. See 'Details'.
+This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}. A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve. The threshold cycles are calculated either by some arbitrary fluorescence value (i.e. as given by the qPCR software) or calculated from the second derivative maximum of the dilution curves. If values to be predicted are given, they are calculated from the curve and also displayed within. \code{calib2} uses a bootstrap approach if replicates for the dilutions are supplied. See 'Details'.
 } 
 
 \usage{
@@ -30,21 +24,18 @@ calib2(refcurve, predcurve = NULL, thresh = "cpD2", dil = NULL,
 }
 
 \details{
-\code{calib2} calculates confidence intervals for efficiency, AICc, adjusted R-square and the prediction curve concentrations.
-If single replicates per dilution are supplied by the user, confidence intervals for the prediction curves are calculated based on
- asymptotic normality. If multiple replicates are supplied, the regression curves are calculated by randomly sampling one of the replicates from
- each dilution group. The confidence intervals are then calculated from the bootstraped results.
+\code{calib2} calculates confidence intervals for efficiency, AICc, adjusted \eqn{R^2_{adj}} and the prediction curve concentrations. If single replicates per dilution are supplied by the user, confidence intervals for the prediction curves are calculated based on asymptotic normality. If multiple replicates are supplied, the regression curves are calculated by randomly sampling one of the replicates from each dilution group. The confidence intervals are then calculated from the bootstraped results.
 }
 
 \value{
 A list with the following components:
  \item{eff}{the efficiency.}
  \item{AICc}{the second-order corrected AIC.}  
- \item{Rsq.ad}{the adjusted R-square.}
+ \item{Rsq.ad}{the adjusted \eqn{R^2_{adj}}.}
  \item{predconc}{the (log) concentration of the predicted curves.}    
  \item{conf.boot}{a list containing the confidence intervals for the efficiency, the AICc, Rsq.ad and the predicted concentrations.} 
 
-A plot is also supplied for efficiency, AICc, Rsq.ad and predicted concentrations including confidence intervals in red.
+A plot is also supplied for \code{eff}iciency, \code{AICc}, \code{Rsq.ad} and predicted concentrations including confidence intervals in red.
 }
 
 \author{

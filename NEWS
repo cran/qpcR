@@ -1,3 +1,50 @@
+qpcR 1.3 - 6 (21-02-2012)
+
+Gigantomaniac update!
+
+New functions:
+    *After many requests, a function for multiple reference gene normalization has been added (although I'm not really a fan of this approach): refmean. This function averages the expression of several reference genes for the same sample according to the method described by Vandesompele et al. (2002). The implementation in this package is based on ARITHMETIC averaging of the threshold cycles prior to ratio calculation, as opposed to the published method which conducts GEOMETRIC averaging of relative expression values (quantities). Both methods result in the same, due to logarithmic identity of the arithmetic and geometric mean: (prod(Exi))^(1/n) = (1/n) * logE(prod(E^xi)) = (1/n) * sum(xi). See here and the extensive documentation and 'Examples' in the manual that compare this implementation with results from the 'geNorm' software. Essentially, reference genes for the same sample such as "r1c1, r1c1, r2c1, r2c1" are replaced by a vector of same length and equidistant values which have the overall grand mean and standard deviation obtained from the reference set. This is done by internal function qpcR:::makeStat, which calculates a shifted and scaled Z-transformation. This resulting averaged vector is then used in ratiocalc to calculate ratios, hence a complete error propagation treatment is included in the reference gene averaging and ratio calculation (as advocated in Nordgard et al., 2006).
+    *Added LRE, a function to analyze qPCR data by the "linear regression of efficiency" method from Rutledge et al. (2008). This is an iterative method similar to sliwin, but while sliwin regresses cycle number versus log(fluorescence), LRE regresses fluorescence versus efficiency. Hence, the former is based on assuming constant efficiency, while the latter assumes cycle-dependent efficiency.
+    *Added the Hannan-Quinn Information Criterion as function HQIC. This function penalizes n more than BIC: -2 * logLik(model) + 2 * k * log(log(n)). This is just for comparison purposes...
+    *Added 5 new datasets in the package and on the 'Datasets' page: vermeulen1 & vermeulen2 => High-throughput data (1280 runs of 64 genes) and the corresponding dilution data for calibration curves, taken from Vermeulen et al. (2009). lievens1, lievens2, lievens3 => 5-fold dilution and inhibition experiments with 18 replicates each from Lievens et al. (2012). 
+
+Changes and bug-fixes in functions:
+    *modlist and pcrbatch have a new "exclude" parameter in which the user can define by some character vector which samples to automatically delete prior to fitting (i.e. by empty names or a regular expression).
+    *pcrbatch now has a new parameter "method", in which the user can define which methods to use and concatenate as results. Example: method = c("sigfit", "sliwin", "mak3") will do consecutive fitting of a sigmoidal model, window-of-linearity and a mechanistic model. See new 'Examples' there.
+    *sliwin has an added "verbose" parameter.
+    *plot.pcrfit has a new plot type: "image". This is a "heatmap"-like display which is suitable for visualizing high-throughput qPCR data (> 200 runs). See 'Screenshots' page. The qPCR raw fluorescence values are "flattened" and the values displayed by a color map ("heat.colors"). The user is encouraged to try this function and email me for further modifications/improvements.
+    *LR has been renamed to llratio to not confuse it with the new LRE function as described above.
+    *The internal parameters in sliwin have been changed a bit, which results in better borders of the fit.
+    *pcrimport and pcrimport2 have now by default set "check.names = FALSE", so that after import "r1c1, r1c1" is not transformed into "r1c1, r1c1.1" which made ratiocalc fail.
+    *Modified the resplot function so that it displays a sum-of-residuals for replicate data.
+    *pcrGOF now automatically calculates a (reduced) chi2 value by fitchisq in case of replicates and has its internal PRESS function made fail-safe by 'tryCatch'.
+    *pcropt1 has been modified so that the result matrix is displayed as a rank-colored bubble plut, by use of the new internal function qpcR:::bubbleplot.
+    *pcrsim now takes a fitted object of class "pcrfit" as input.
+    *The takeoff function for calculating the "take-off point" according to Tichopad et al. (2003) has been revamped.
+    *In pcrfit, the check for negative eigenvalues of the Hessian matrix has been removed because internal nls function does enough checking.
+    *BIC is now included in evidence to calculate the evidence ratio.
+    *replist has a new parameter "doFit". If it is set to "FALSE", the replicate data is just aggregated WITHOUT refitting. This can be useful for plotting only the replicate raw data.
+    *The manual has been completely overworked for consistent syntax. 
+
+qpcR 1.3 - 5 (11-10-2011)
+
+Tyrannosauric update!
+
+    * Added another mechanistic model: chag. This was developed by Alexander Chagovetz and presented as a poster at the qPCR 2011 meeting in Europe. The poster can be downloaded here. Similar to mak2/mak3, PCR data is modelled by a mechanistic recurrence relation, derived from solving partial differential equations describing PCR mechanistics such as annealing, elongation, reagent depletion, etc. As all other functions, it can be called by pcrfit(yourdata, 1, 2, chag) or likewise. In contrast to mak2/mak3, chag models the complete sigmoidal curve. Information about this model can be found with ?chag. It is still experimental...
+    * A normalized version of mak3 has been added: mak3n. Normalizing the qPCR data within [0, 1] results in the starting parameters for the fitting process being in a reasonably constant range. Hence, less iterations are needed for the convergence of the fit parameters (~ 150 ms/curve).
+    * All mak models can now be tweaked with function parMAK(). See help there.
+    * Dataset 'htPCR' has been added, courtesy of Roman Bruno. This is a qPCR dataset with 8858 (!) runs, coming from a Fluidigm system. It is ideal for testing high-throughput algorithms and methods for automatic fail-checking of qPCR data.
+    * replist has been upgraded so it automatically removes failed replicate fits instead of stopping.
+    * made cbind.na et al. invisible, as they will be transferred to another package. They can still be called with qpcR:::cbind.na().
+    * PRESS, pcrboot and pcrimport have been updated (minor bugs).
+    * Datasets 'sisti1' and 'sisti2' have been removed (they were partially redundant with the 'guescini' datasets).
+    * Function outlier (identification of the first significant cycle in the exponential phase) has been renamed to takeoff in order to not confuse it with sigmoidal or kinetic outliers.
+    * sliwin has been revamped. It can now do an iterative baseline optimization similar to the one described in Ruijter et al. (2009). The baseline is iterated in a user-defined range (100 steps) and for each baseline value, the best sliding window is found. The criterion for this has also been updated: either maximum R2 or the baseline delivering the least variation in the slope of all sliding windows. The sliding window size can also be iterated. Is much slower if baseline optimization is selected, but efficiency and F0 values are, according to Ruijter et al. (2009), estimated more realistically.
+    * KOD is now the main function for sigmoidal and kinetic outlier detection. While the former is useful for identifying if single PCR reactions failed to amplify (lack of sigmoidal structure), the latter is used in context of replicate runs for the identification of reactions that deviate significantly from the remaining replicates. The included methods are: uni1 => kinetic outlier according to Bar et al. (2003), based on efficiency; uni2 => sigmoidal structure detection by comparing first and second derivative maxima; multi1 => kinetic outlier method #1 according to Tichopad et al. (2010), using first and second derivative maxima; multi2 => method #2 according to Tichopad et al. (2010), using the slope at FDM and Fmax as parameters; multi3 => kinetic outlier method as in Sisti et al. (2010) using Fmax, slope at FDM and fluorescence at FDM as parameters. Please read the 'Details' section in ?KOD.
+    * SOD (sigmoidal outlier detection) has been removed and included in modlist. See below.
+    * modlist and replist have been significantly upgraded. A labeling vector can be supplied to modlist, which is automatically updated (that is, labels are removed), when remove = TRUE and certain PCR runs are sigmoidal outliers. This way, labels for defining control genes and genes-of-interest are automatically updated prior to using ratiocalc or ratiobatch. Sigmoidal outlier detection (SOD) is now included in modlist and switched on by default, so that failed runs are automatically tagged. If remove = "fit", they are removed from the final model list (and an optional label vector updated). Parameters can now be supplied to outlier detection (parKOD), smoothing (smoothPAR) and fitting (optPAR). Likewise, replist has now kinetic outlier detection (KOD) included, to either detect / tag kinetic outliers or remove them. The default is being switched off. A new names = "first" option has been added in order to name replicate models by the first run in the replicate set. 
+
+
 qpcR 1.3 - 4 (07-03-2011) 
 
 Monstrous update!

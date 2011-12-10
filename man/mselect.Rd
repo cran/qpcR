@@ -31,24 +31,17 @@ mselect(object, fctList = NULL, sig.level = 0.05, verbose = TRUE,
 \item{fctList}{a list of functions to be analyzed, i.e. for a non-nested regime. Should also contain the original model.}
 \item{sig.level}{the significance level for the nested F-test.}
 \item{verbose}{logical. If \code{TRUE}, the result matrix is displayed in the console.}
-\item{crit}{the criterium for model selection. Either 'ftest'/'ratio' for nested models or 'weights'/'fitprob' for nested and non-nested models.}
+\item{crit}{the criterium for model selection. Either \code{"ftest"/"ratio"} for nested models or \code{"weights"/"fitprob"} for nested and non-nested models.}
 \item{do.all}{if \code{TRUE}, all available sigmoidal models are tested and the best one is selected based on AICc weights.}
 \item{...}{other parameters to be passed to \code{\link{fitchisq}}.} 
 }
 
 \details{
-Criteria 5) and 6) cannot be used for comparison unless the models are nested. 
-Criterion 8), Akaike weights, can be used for nested and non-nested regimes, which also accounts for the reduced chi-square.
-For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better.
-The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{LR}}), corrected Akaike weights
- (\code{\link{akaike.weights}}) or reduced chi-square (\code{\link{fitchisq}}) and returned as a new model.
-When using 'ftest'/'ratio' the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5/b6/b7; l3/l4/l5/l6/l7.
-If supplying nested models, please do this with ascending number of parameters.  
+Criteria 5) and 6) cannot be used for comparison unless the models are nested. Criterion 8), Akaike weights, can be used for nested and non-nested regimes, which also accounts for the reduced \eqn{\chi_\nu^2}. For criterion 1) the larger the better. For criteria 2), 3) and 4): the smaller the better. The best model is chosen either from the nested F-test (\code{\link{anova}}), likelihood ratio (\code{\link{llratio}}), corrected Akaike weights (\code{\link{akaike.weights}}) or reduced \eqn{\chi_\nu^2} (\code{\link{fitchisq}}) and returned as a new model. When using \code{"ftest"/"ratio"} the corresponding nested functions are analyzed automatically, i.e. b3/b4/b5/b6/b7; l3/l4/l5/l6/l7. If supplying nested models, please do this with ascending number of parameters.  
 }
 
 \value{
-A model of the best fit selected by one of the criteria above.
-The new model has an additional list item 'retMat' with a result matrix of the criterion tests.
+A model of the best fit selected by one of the criteria above. The new model has an additional list item 'retMat' with a result matrix of the criterion tests.
 }
 
 \author{
@@ -56,7 +49,7 @@ Andrej-Nikolai Spiess
 }
 
 \seealso{
-\code{\link{LR}}, \code{\link{akaike.weights}} and \code{\link{fitchisq}}.   
+\code{\link{llratio}}, \code{\link{akaike.weights}} and \code{\link{fitchisq}}.   
 }  
 
 \examples{

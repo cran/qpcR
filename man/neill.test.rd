@@ -39,16 +39,13 @@ Andrej-Nikolai Spiess, taken in part from function \code{neill.test} of the 'drc
 }
 
 \references{
-## Original publication:
-\cr
-Neill JW.\cr
 Testing for lack-of-fit in nonlinear regression.\cr
-\emph{Ann Statist} (1988), \bold{16}, 733-740.\cr
-## Using dendrogram splitting for grouping:
-\cr
-Ritz C, Martinussen T.\cr
+Neill JW.\cr
+\emph{Ann Statist} (1988), \bold{16}: 733-740.\cr
+
 Lack-of-fit tests for assessing mean structures for continuous dose-response data.\cr
-\emph{Environ Ecol Stat} (2011), \bold{18}, 349-366.  
+Ritz C & Martinussen T.\cr
+\emph{Environ Ecol Stat} (2011), \bold{18}: 349-366.  
 }
 
 \examples{

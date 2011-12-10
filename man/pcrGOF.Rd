@@ -9,26 +9,16 @@ Works for objects of class \code{pcrfit}, \code{lm}, \code{glm}, \code{nls}, \co
 }
 
 \usage{
-pcrGOF(object, PRESS = FALSE, ...)
+pcrGOF(object, PRESS = FALSE)
 }
 
 \arguments{
 \item{object}{a fitted object.}
-\item{PRESS}{logical. If \code{TRUE}, the more calculation intensive P-square is also returned.}
-\item{...}{other parameters to be passed to \code{\link{fitchisq}}.}  
+\item{PRESS}{logical. If \code{TRUE}, the more calculation intensive \eqn{P^2} is also returned.}
 }
 
 \value{
-A list with the following components:
-  \item{Rsq}{the R-squared value.}
-  \item{Rsq.ad}{the adjusted R-squared value.} 
-  \item{AIC}{the Akaike Information Criterion.} 
-  \item{AICc}{the bias-corrected Akaike Information Criterion.} 
-  \item{BIC}{the Bayesian Information Criteron.}  
-  \item{resVar}{the residual variance.}
-  \item{RMSE}{the root-mean-squared-error.}   
-  \item{p.neill}{the p-value from Neill's Lack-of-fit test without replicates. See \code{\link{neill.test}}.}  
-  \item{P.square}{the PRESS P-square, if \code{PRESS = TRUE}.}
+A list with all implemented Information criteria (\code{AIC, AICc, BIC, HQIC}), residual variance, root-mean-squared-error, the p-value from \code{\link{neill.test}} (if no replicates), the reduced \eqn{\chi_{\nu}^2} from \code{\link{fitchisq}} (if replicates) and the \code{\link{PRESS}} \eqn{P^2} value (if \code{PRESS = TRUE}).  
 }
 
 \author{
@@ -37,9 +27,16 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-## all measures, inclusing PRESS
+## single fit without replicates
+## including PRESS statistic
 m1 <- pcrfit(reps, 1, 2, l5)
-pcrGOF(m1, PRESS = TRUE)   
+pcrGOF(m1, PRESS = TRUE)
+
+## fit containing replicates:
+## calculation of reduced 
+## chi-square included!
+m2 <- pcrfit(reps, 1, 2:5, l5)
+pcrGOF(m2)
 }
 
 \keyword{models}

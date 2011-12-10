@@ -21,8 +21,7 @@ batsch5
 }
 
 \format{
-Data frames with the PCR cycles and 15 qPCR runs with 3 replicates of five 4-fold dilutions.
-The replicates are defined by FX.Y (X = dilution number, Y = replicate number).  
+Data frames with the PCR cycles and 15 qPCR runs with 3 replicates of five 4-fold dilutions. The replicates are defined by FX.Y (X = dilution number, Y = replicate number).  
 }
 
 \details{
@@ -40,7 +39,8 @@ Additional File 5 to the paper.
 
 \references{
 Simultaneous fitting of real-time PCR data with efficiency of amplification modeled as Gaussian function of target fluorescence.\cr
-Batsch A et al., \emph{BMC Bioinformatics}, 2008, \bold{9}: 95.
+Batsch A, Noetel A, Fork C, Urban A, Lazic D, Lucas T, Pietsch J, Lazar A, Schoemig E & Gruendemann D.\cr 
+\emph{BMC Bioinformatics} (2008), \bold{9}: 95.\cr
 }
 
 \examples{

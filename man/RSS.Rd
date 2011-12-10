@@ -4,8 +4,7 @@
 \title{Residual sum-of-squares of a fitted model}
 
 \description{
-Calculates the residual sum-of-squares for objects of class \code{nls}, \code{lm}, \code{glm}, \code{drc}
- or any other models from which \code{\link{residuals}} can be extacted. 
+Calculates the residual sum-of-squares for objects of class \code{nls}, \code{lm}, \code{glm}, \code{drc} or any other models from which \code{\link{residuals}} can be extacted. From version 1.3-6, this function uses weights, if \code{object} has an item \code{$weights}.
 }
 
 \usage{
@@ -16,8 +15,12 @@ RSS(object)
   \item{object}{a fitted model.}  
 }
 
+\details{
+\deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2}
+}
+
 \value{
-The residual sum-of-squares from the fit: \deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2}
+The (weighted) residual sum-of-squares from the fit.
 }
 
 \author{

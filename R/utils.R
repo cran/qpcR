@@ -1,116 +1,97 @@
 ######################################################################
 ## cbind modification without replication ############################
-cbind.na <- function (..., deparse.level = 1)
+cbind.na <- function (..., deparse.level = 1) 
 {
-    na <- nargs() - (!missing(deparse.level))
+    na <- nargs() - (!missing(deparse.level))    
     deparse.level <- as.integer(deparse.level)
     stopifnot(0 <= deparse.level, deparse.level <= 2)
-    argl <- list(...)
-      
+    argl <- list(...)   
     while (na > 0 && is.null(argl[[na]])) {
         argl <- argl[-na]
         na <- na - 1
     }
-    
-    ### determine max length/nrow    
-    numROW <- sapply(argl, function(x) NROW(x))
-    classROW <- sapply(argl, function(x) class(rownames(x)))
-    ROWS <- max(numROW, na.rm = TRUE)     
-    
-    ### determine max rownames, if exist
-    whichMAX <- which(numROW == ROWS)
-    whichCHAR <- which(classROW == "character") 
-    if (length(whichCHAR) == 0) WHICH <- whichMAX[1] else WHICH <- intersect(whichMAX, whichCHAR)[1]
-    NAMES <- rownames(argl[[WHICH]])      
-    
-    ### added NA fill to max length/nrow
-    for (i in 1:length(argl)) {      
-      if (is.null(dim(argl[[i]]))) argl[[i]] <- c(argl[[i]], rep(NA, ROWS - length(argl[[i]])))
-      else {
-        MAT <- matrix(nrow = ROWS - NROW(argl[[i]]), ncol = NCOL(argl[[i]]))    
-        colnames(MAT) <- colnames(argl[[i]])  
-        argl[[i]] <- rbind(argl[[i]], MAT) 
-        rownames(argl[[i]]) <- NAMES
-      }
-    } 
-    
-    if (na == 0)
+    if (na == 0) 
         return(NULL)
-    if (na == 1) {
-        if (isS4(..1))
+    if (na == 1) {         
+        if (isS4(..1)) 
             return(cbind2(..1))
-        else return(.Internal(cbind(deparse.level, ...)))
-    }
-    if (deparse.level) {
-        symarg <- as.list(sys.call()[-1L])[1L:na]       
+        else return(matrix(...))  ##.Internal(cbind(deparse.level, ...)))
+    }    
+    
+    if (deparse.level) {       
+        symarg <- as.list(sys.call()[-1L])[1L:na]
         Nms <- function(i) {
             if (is.null(r <- names(symarg[i])) || r == "") {
-                if (is.symbol(r <- symarg[[i]]) || deparse.level ==
-                  2)
+                if (is.symbol(r <- symarg[[i]]) || deparse.level == 
+                  2) 
                   deparse(r)
             }
             else r
         }
-    }
-    if (na == 2) {
-        ### changed to second argl item
+    }   
+    ## deactivated, otherwise no fill in with two arguments
+    if (na == 0) {
         r <- argl[[2]]
-        #r <- ..2
         fix.na <- FALSE
     }
     else {
         nrs <- unname(lapply(argl, nrow))
         iV <- sapply(nrs, is.null)
         fix.na <- identical(nrs[(na - 1):na], list(NULL, NULL))
-        if (fix.na) {
-            nr <- max(if (all(iV)) sapply(argl, length) else unlist(nrs[!iV]))
-            argl[[na]] <- cbind(rep(argl[[na]], length.out = nr),
-                deparse.level = 0)
-        }
+        ## deactivated, otherwise data will be recycled
+        #if (fix.na) {
+        #    nr <- max(if (all(iV)) sapply(argl, length) else unlist(nrs[!iV]))
+        #    argl[[na]] <- cbind(rep(argl[[na]], length.out = nr), 
+        #        deparse.level = 0)
+        #}       
         if (deparse.level) {
-            if (fix.na)
+            if (fix.na) 
                 fix.na <- !is.null(Nna <- Nms(na))
-            if (!is.null(nmi <- names(argl)))
+            if (!is.null(nmi <- names(argl))) 
                 iV <- iV & (nmi == "")
-            ii <- if (fix.na)
+            ii <- if (fix.na) 
                 2:(na - 1)
-            else 2:na            
+            else 2:na
             if (any(iV[ii])) {
-                for (i in ii[iV[ii]]) if (!is.null(nmi <- Nms(i)))
+                for (i in ii[iV[ii]]) if (!is.null(nmi <- Nms(i))) 
                   names(argl)[i] <- nmi
             }
         }
-        r <- do.call(cbind.na, c(argl[-1L], list(deparse.level = deparse.level)))
-    }    
+           
+        ## filling with NA's to maximum occuring nrows
+        nRow <- as.numeric(sapply(argl, function(x) NROW(x)))
+        maxRow <- max(nRow, na.rm = TRUE)  
+        argl <- lapply(argl, function(x)  if (is.null(nrow(x))) c(x, rep(NA, maxRow - length(x)))
+                                          else rbind(x, matrix(, maxRow - nrow(x), ncol(x))))
+        r <- do.call(cbind, c(argl[-1L], list(deparse.level = deparse.level)))
+    }
     d2 <- dim(r)
-    ### changed to first argl item
     r <- cbind2(argl[[1]], r)
-    #r <- cbind2(..1, r)
-    if (deparse.level == 0)
+    if (deparse.level == 0) 
         return(r)
     ism1 <- !is.null(d1 <- dim(..1)) && length(d1) == 2L
     ism2 <- !is.null(d2) && length(d2) == 2L && !fix.na
-    if (ism1 && ism2)
+    if (ism1 && ism2) 
         return(r)
     Ncol <- function(x) {
         d <- dim(x)
-        if (length(d) == 2L)
+        if (length(d) == 2L) 
             d[2L]
         else as.integer(length(x) > 0L)
     }
     nn1 <- !is.null(N1 <- if ((l1 <- Ncol(..1)) && !ism1) Nms(1))
     nn2 <- !is.null(N2 <- if (na == 2 && Ncol(..2) && !ism2) Nms(2))
     if (nn1 || nn2 || fix.na) {
-        if (is.null(colnames(r)))
+        if (is.null(colnames(r))) 
             colnames(r) <- rep.int("", ncol(r))
-        setN <- function(i, nams) colnames(r)[i] <<- if (is.null(nams))
+        setN <- function(i, nams) colnames(r)[i] <<- if (is.null(nams)) 
             ""
         else nams
-        if (nn1)
+        if (nn1) 
             setN(1, N1)
-        if (nn2)
+        if (nn2) 
             setN(1 + l1, N2)
-        if (fix.na)
+        if (fix.na) 
             setN(ncol(r), Nna)
     }
     r
@@ -118,118 +99,122 @@ cbind.na <- function (..., deparse.level = 1)
 
 ##############################################################
 ## rbind modification without replication ####################
-rbind.na <- function (..., deparse.level = 1)
+rbind.na <- function (..., deparse.level = 1) 
 {
     na <- nargs() - (!missing(deparse.level))
     deparse.level <- as.integer(deparse.level)
     stopifnot(0 <= deparse.level, deparse.level <= 2)
     argl <- list(...)
-
     while (na > 0 && is.null(argl[[na]])) {
         argl <- argl[-na]
         na <- na - 1
-    }
-      
-    ### determine max width/ncol
-    numCOL <- sapply(argl, function(x) if(NCOL(x) == 1) NROW(x) else NCOL(x))    
-    classCOL <- sapply(argl, function(x) class(colnames(x)))
-    COLS <- max(numCOL, na.rm = TRUE)   
-        
-    ### determine max colnames, if exist
-    whichMAX <- which(numCOL == COLS)
-    whichCHAR <- which(classCOL == "character") 
-    if (length(whichCHAR) == 0) WHICH <- whichMAX[1] else WHICH <- intersect(whichMAX, whichCHAR)[1]
-    NAMES <- colnames(argl[[WHICH]])
-           
-    ### added NA fill to max length/col
-    for (i in 1:length(argl)) {      
-      if (is.null(dim(argl[[i]]))) argl[[i]] <- c(argl[[i]], rep(NA, COLS - length(argl[[i]])))
-      else {
-        MAT <- matrix(ncol = COLS - NCOL(argl[[i]]), nrow = NROW(argl[[i]]))    
-        rownames(MAT) <- rownames(argl[[i]])  
-        argl[[i]] <- cbind(argl[[i]], MAT) 
-        colnames(argl[[i]]) <- NAMES    
-      }
     }    
-
-    if (na == 0)
+    if (na == 0) 
         return(NULL)
     if (na == 1) {
-        if (isS4(..1))
+        if (isS4(..1)) 
             return(rbind2(..1))
-        else return(.Internal(rbind(deparse.level, ...)))
+        else return(matrix(..., nrow = 1)) ##.Internal(rbind(deparse.level, ...)))
     }
+    print("JJJ")
+    
     if (deparse.level) {
         symarg <- as.list(sys.call()[-1L])[1L:na]
         Nms <- function(i) {
             if (is.null(r <- names(symarg[i])) || r == "") {
-                if (is.symbol(r <- symarg[[i]]) || deparse.level ==
-                  2)
+                if (is.symbol(r <- symarg[[i]]) || deparse.level == 
+                  2) 
                   deparse(r)
             }
             else r
         }
     }
-    if (na == 2) {
-        ### changed to second argl item
+    
+    ## deactivated, otherwise no fill in with two arguments
+    if (na == 0) {
         r <- argl[[2]]
-        #r <- ..2
         fix.na <- FALSE
     }
     else {
         nrs <- unname(lapply(argl, ncol))
         iV <- sapply(nrs, is.null)
         fix.na <- identical(nrs[(na - 1):na], list(NULL, NULL))
-        if (fix.na) {
-            nr <- max(if (all(iV)) sapply(argl, length) else unlist(nrs[!iV]))
-            argl[[na]] <- rbind(rep(argl[[na]], length.out = nr),
-                deparse.level = 0)
-        }
+        ## deactivated, otherwise data will be recycled
+        #if (fix.na) {
+        #    nr <- max(if (all(iV)) sapply(argl, length) else unlist(nrs[!iV]))
+        #    argl[[na]] <- rbind(rep(argl[[na]], length.out = nr), 
+        #        deparse.level = 0)
+        #}
         if (deparse.level) {
-            if (fix.na)
+            if (fix.na) 
                 fix.na <- !is.null(Nna <- Nms(na))
-            if (!is.null(nmi <- names(argl)))
+            if (!is.null(nmi <- names(argl))) 
                 iV <- iV & (nmi == "")
-            ii <- if (fix.na)
+            ii <- if (fix.na) 
                 2:(na - 1)
             else 2:na
             if (any(iV[ii])) {
-                for (i in ii[iV[ii]]) if (!is.null(nmi <- Nms(i)))
+                for (i in ii[iV[ii]]) if (!is.null(nmi <- Nms(i))) 
                   names(argl)[i] <- nmi
             }
         }
-        r <- do.call(rbind.na, c(argl[-1L], list(deparse.level = deparse.level)))
+        
+        ## filling with NA's to maximum occuring ncols
+        nCol <- as.numeric(sapply(argl, function(x) if (is.null(ncol(x))) length(x)
+                                                    else ncol(x)))
+        maxCol <- max(nCol, na.rm = TRUE)  
+        argl <- lapply(argl, function(x)  if (is.null(ncol(x))) c(x, rep(NA, maxCol - length(x)))
+                                          else cbind(x, matrix(, nrow(x), maxCol - ncol(x))))  
+        
+        ## create a common name vector from the
+        ## column names of all 'argl' items
+        namesVEC <- rep(NA, maxCol)  
+        for (i in 1:length(argl)) {
+          CN <- colnames(argl[[i]])          
+          m <- !(CN %in% namesVEC)
+          namesVEC[m] <- CN[m]          
+        }  
+        
+        ## make all column names from common 'namesVEC'
+        for (j in 1:length(argl)) {    
+          if (!is.null(ncol(argl[[j]]))) colnames(argl[[j]]) <- namesVEC
+        }
+        
+        r <- do.call(rbind, c(argl[-1L], list(deparse.level = deparse.level)))        
     }
     
     d2 <- dim(r)
-    ### changed to first argl item      
+    
+    ## make all column names from common 'namesVEC'
+    colnames(r) <- colnames(argl[[1]])
+    
     r <- rbind2(argl[[1]], r)
-    #r <- rbind2(..1, r)
-    if (deparse.level == 0)
+        
+    if (deparse.level == 0) 
         return(r)
     ism1 <- !is.null(d1 <- dim(..1)) && length(d1) == 2L
     ism2 <- !is.null(d2) && length(d2) == 2L && !fix.na
-    if (ism1 && ism2)
+    if (ism1 && ism2) 
         return(r)
     Nrow <- function(x) {
         d <- dim(x)
-        if (length(d) == 2L)
+        if (length(d) == 2L) 
             d[1L]
         else as.integer(length(x) > 0L)
     }
     nn1 <- !is.null(N1 <- if ((l1 <- Nrow(..1)) && !ism1) Nms(1))
     nn2 <- !is.null(N2 <- if (na == 2 && Nrow(..2) && !ism2) Nms(2))
     if (nn1 || nn2 || fix.na) {
-        if (is.null(rownames(r)))
+        if (is.null(rownames(r))) 
             rownames(r) <- rep.int("", nrow(r))
-        setN <- function(i, nams) rownames(r)[i] <<- if (is.null(nams))
+        setN <- function(i, nams) rownames(r)[i] <<- if (is.null(nams)) 
             ""
         else nams
-        if (nn1)
+        if (nn1) 
             setN(1, N1)
-        if (nn2)
+        if (nn2) 
             setN(1 + l1, N2)
-        if (fix.na)
+        if (fix.na) 
             setN(nrow(r), Nna)
     }
     r
@@ -400,10 +385,8 @@ data.frame.na <- function (..., row.names = NULL, check.rows = FALSE, check.name
     attr(value, "class") <- "data.frame"
     value
 }
-
 ############################################################
 ## rescale function => all that use 'norm' #################
-
 rescale <- function (x, tomin, tomax) 
 {
     if (missing(x) | missing(tomin) | missing(tomax)) {
@@ -425,7 +408,6 @@ rescale <- function (x, tomin, tomax)
 
 ##############################################################
 ## vector delete #############################################
-
 delete <- function(x, pos, fill = FALSE) {
   xout <- x[-pos]
   if (fill) xout <- c(xout, rep(NA, length(pos)))
@@ -434,7 +416,6 @@ delete <- function(x, pos, fill = FALSE) {
 
 ###############################################################
 ## different mean measures ####################################
-
 gmean <- function(x) prod(x, na.rm = TRUE)^(1/length(x[!is.na(x)]))
 hmean <- function(x) length(x[!is.na(x)])/sum(1/x, na.rm = TRUE) 
 cmean <- function(x, E) -log(mean(E^-x, na.rm = TRUE))/log(E)
@@ -467,36 +448,6 @@ counter <- function(i) {
   if (i %% 10 == 0) cat(i) else cat(".")
   if (i %% 50 == 0) cat("\n")
   flush.console()
-}
-
-############################################################
-## utility function to create mixed dataset ################
-allSets <- function()
-{
-  htPCRs <- htPCR[, 1:97]
-  
-  DATA <- c("reps", 
-            "reps2", 
-            "reps3", 
-            "rutledge",
-            "boggy",
-            paste("batsch", 1:5, sep = ""),
-            paste("guescini", 1:2, sep = ""),
-            paste("sisti", 1:2, sep = ""),
-            "htPCRs"
-            )
-  
-  datLIST <- vector("list", length = length(DATA))
-   
-  for (i in 1:length(datLIST)) {
-    tempDAT <- get(DATA[i])
-    if (i > 1) tempDAT <- tempDAT[, -1]
-    datLIST[[i]] <- tempDAT
-  }
-  
-  outDAT <- do.call(qpcR:::cbind.na, datLIST)[1:45, ]
-  return(outDAT)
-            
 }
 
 ############################################################
@@ -607,9 +558,10 @@ uni1 <- function(object, eff, train, alpha, verbose = FALSE, ...) {
     ## if it is a non-fitted run, skip
     if (object[[i]]$isFitted == FALSE) next
         
-    EFF1 <- try(switch(eff, sliwin = sliwin(object[[i]], plot = FALSE, ...)$eff,
+    EFF1 <- try(switch(eff, sliwin = sliwin(object[[i]], plot = FALSE, verbose = FALSE, ...)$eff,
                             sigfit = efficiency(object[[i]], plot = FALSE, ...)$eff,
                             expfit = expfit(object[[i]], plot = FALSE, ...)$eff), silent = TRUE)   
+    
     if (inherits(EFF1, "try-error")) next
     PAR[i, ] <- EFF1
   }
@@ -913,7 +865,7 @@ fetchData <- function(object)
 }
 
 ####################################################################
-######## robust nonlinear least-squares => pcrfit
+######## robust nonlinear least-squares => pcrfit ##################
 rnls <- function(
 formula,
 data,
@@ -1038,4 +990,23 @@ SS.offset = 0, SS.method = "LM", SS.deriv = c("sigfit", "spline")
   assign("parMAKs", LIST, envir = .GlobalEnv)
 }
 
+#############################################################################
+######### create n-sequence (equidistant) with selected mean and s.d. #######
+######### => refmean ########################################################
+makeStat <- function(n, MEAN, SD) 
+{
+  X <- 1:n
+  Z <- (((X - mean(X, na.rm = TRUE))/sd(X, na.rm = TRUE))) * SD
+  MEAN + Z  
+}
+
+#############################################################################
+######### bubble plot #######################################################
+######### => pcropt1 ########################################################
+bubbleplot <- function(x, y, z, scale = NULL, ...){
+  RADIUS <- sqrt(z/pi)
+  RANK <- rank(z)
+  COL <- rev(heat.colors(length(z)))
+  symbols(x, y, circles = RADIUS, inches = scale, bg = COL[RANK], ...)
+}
 

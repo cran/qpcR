@@ -1,10 +1,10 @@
-evidence <- function(x, y, type = c("AICc", "AIC"))
+evidence <- function(x, y, type = c("AIC", "AICc", "BIC"))
 {
   type <- match.arg(type)
 
   if (!is.numeric(x) && !is.numeric(y)) {
-    x1 <- switch(type, AIC = AIC(x), AICc = AICc(x))
-    y1 <- switch(type, AIC = AIC(y), AICc = AICc(y))
+    x1 <- switch(type, AIC = AIC(x), AICc = AICc(x), BIC = BIC(x))
+    y1 <- switch(type, AIC = AIC(y), AICc = AICc(y), BIC = BIC(y))
   } else {
     if (is.numeric(x) && is.numeric(y)) {
       x1 <- x

@@ -4,15 +4,15 @@
 \title{Create nonlinear models from a dataframe and coerce them into a list}
 
 \description{
-Essential function to create a list of nonlinear models from the columns (runs) of a qPCR dataframe. This function houses different methods for curve transformation prior to fitting, such as normalization in [0, 1], smoothing, background subtraction etc. Runs that failed to fit or that have been identified as kinetic outliers (by default lack of sigmoidal structure) can be removed automatically as well as their entries in an optionally supplied label vector. 
+Essential function to create a list of nonlinear models from the columns (runs) of a qPCR dataframe. This function houses different methods for curve transformation prior to fitting, such as normalization in [0, 1], smoothing, background subtraction etc. Runs that failed to fit or that have been identified as kinetic outliers (by default: lack of sigmoidal structure) can be removed automatically as well as their entries in an optionally supplied label vector. 
 }
 
 \usage{
 modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2", 
         checkPAR = parKOD(), remove = c("none", "fit", "KOD"), 
-        labels = NULL, norm = FALSE, 
-        backsub = NULL, smooth = c("none", "smooth", "lowess", "supsmu", 
-        "spline"), smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
+        exclude = NULL, labels = NULL, norm = FALSE, backsub = NULL, 
+        smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
+        smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
         optPAR = list(sig.level = 0.05, crit = "ftest"), verbose = TRUE, ...)
 }
 
@@ -21,9 +21,10 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
   \item{cyc}{the column containing the cycle data. Defaults to first column.}
   \item{fluo}{the column(s) (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
   \item{model}{the model to be used for all runs.} 
-  \item{check}{the method for kinetic outlier detection. Default is check for sigmoidal structure, see \code{\link{KOD}}. To turn off, use\code{NULL}.}
+  \item{check}{the method for kinetic outlier detection. Default is check for sigmoidal structure, see \code{\link{KOD}}. To turn off, use \code{NULL}.}
   \item{checkPAR}{parameters to be supplied to the \code{check} method, see \code{\link{KOD}}.}
-  \item{remove}{which runs to remove. Either \code{"none""}, those which failed to \code{"fit""} or from the \code{"KOD"} outlier method.}
+  \item{remove}{which runs to remove. Either \code{"none"}, those which failed to \code{"fit"} or from the \code{"KOD"} outlier method.}
+  \item{exclude}{either \code{""} for samples with missing column names or a regular expression defining columns (samples) to be excluded from \code{modlist}. See 'Details'.} 
   \item{labels}{a vector containing labels, i.e. for defining replicate groups prior to \code{\link{ratiobatch}}.}
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
   \item{backsub}{background subtraction. An optional numeric sequence defining the cycle numbers for background averaging and subtraction, such as \code{1:8}.}
@@ -42,7 +43,7 @@ A list with each item containing the model from each column. A \code{names} item
 
 \details{
 The following smoothing methods are available for the fluorescence values:\cr
-\code{\link{smooth}}, \code{\link{lowess}}, \code{\link{supsmu}} and \code{\link{spline}}. See documentation there. The author of this package favorizes \code{"supsmu"} with \code{span = 0.1}. In case of unsuccessful model fitting and if \code{remove = "none"} (default), the original data is included in the output, albeit with no fitting information. This is useful since using \code{plot.pcrfit} on the 'modlist' shows the non-fitted runs. If \code{remove = "fit"}, the non-fitted runs are automatically removed and will thus not be displayed. If \code{remove = "KOD"}, by default all runs without sigmoidal structure are removed likewise. If a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. This way, an initial labeling vector for all samples can be supplied, bad runs and their labels automatically removed and these transfered to downstream analysis (i.e. to \code{\link{ratiobatch}}) without giving errors.
+\code{\link{smooth}}, \code{\link{lowess}}, \code{\link{supsmu}} and \code{\link{spline}}. See documentation there. The author of this package favorizes \code{"supsmu"} with \code{span = 0.1}. In case of unsuccessful model fitting and if \code{remove = "none"} (default), the original data is included in the output, albeit with no fitting information. This is useful since using \code{plot.pcrfit} on the 'modlist' shows the non-fitted runs. If \code{remove = "fit"}, the non-fitted runs are automatically removed and will thus not be displayed. If \code{remove = "KOD"}, by default all runs without sigmoidal structure are removed likewise. If a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. This way, an initial labeling vector for all samples can be supplied, bad runs and their labels automatically removed and these transfered to downstream analysis (i.e. to \code{\link{ratiobatch}}) without giving errors. \code{exclude} offers an option to exclude samples from the modlist by some regular expression or by using \code{""} for samples with empty column names. See 'Examples'. 
 }
 
 \seealso{
@@ -86,6 +87,11 @@ GROUP_mod
 ## get D0 values
 ml6 <- modlist(reps, model = mak3)
 sapply(ml6, function(x) coef(x)[1])
+
+## exclude first sample in each 
+## replicate group of dataset 'reps'
+ml7 <- modlist(reps, exclude = ".1")
+plot(ml7, which = "single")
 }
 }
 

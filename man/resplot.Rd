@@ -1,26 +1,29 @@
 \name{resplot}
 \alias{resplot}
 
-\title{A residuals bar-plot with colour-coded bars}
+\title{An (overlayed) residuals barplot}
 
 \description{
- A plotting function which displays a barplot of the residuals of any object from which \code{\link{residuals}}
- can be extracted. The bars are colour-coded with heat colours proportional to the residual value.
- As default, the residuals are displayed together with the points of the amplification curve.
+A plotting function which displays a barplot of the residuals. The bars are colour-coded with heat colours proportional to the residual value. As default, the residuals are displayed together with the points of the fitted PCR curve. 
 }
 
 \usage{
-resplot(object, overlay = TRUE, ...)
+resplot(object, overlay = TRUE, ylim = NULL, ...)
 }
 
 \arguments{
- \item{object}{either residuals (numeric) or any fitted object, i.e. of class \code{nls}, \code{lm}, \code{drc} etc.} 
- \item{overlay}{logical. If \code{TRUE}, the residuals are plotted on top of the amplification curve, else alone.}
+ \item{object}{an object of class 'pcrfit.} 
+ \item{overlay}{logical. If \code{TRUE}, the residuals are plotted on top of the fitted curve, else alone.}
+ \item{ylim}{graphical ylim values for tweaking the scale and position of the barplot overlay.}
  \item{...}{any other parameters to be passed to \code{\link{barplot}}.} 	
 }
 
 \value{
 A plot as described above.
+}
+
+\details{
+If replicate data is present in the fitted curve, the residuals from all replicates \eqn{i, j} are summed up from the absolute values: \eqn{Y_i = \sum{|\hat{\varepsilon}_{i, j}|}}.
 }
 
 \author{
@@ -29,8 +32,15 @@ Andrej-Nikolai Spiess
 
 \examples{
 ## create l5 model and plot residuals
+## in a good position
 m1 <- pcrfit(reps, 1, 2, l5)
-resplot(m1)
+resplot(m1, ylim = c(-0.5, 0.5))
+
+\dontrun{
+## using replicates
+m2 <- pcrfit(reps, 1, 2:5, l5)
+resplot(m2)
+}
 }
 
 \keyword{models}

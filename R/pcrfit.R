@@ -16,58 +16,68 @@ verbose = TRUE,
   options(warn = -1)   
 
   ## version 1.3-4: create (stacked) data, depending on replicates
-  if (length(fluo) == 1) DATA <- data[, c(cyc, fluo)]
-  else {
-    DATA <- data.frame(Cycles = rep(data[, cyc], length(fluo)), Fluo = matrix(as.matrix(data[, fluo]), ncol = 1))
-    ssDATA <- rowMeans(data[, fluo], na.rm = TRUE)
-  }
+  if (length(fluo) == 1) {
+    CYC <- data[, cyc]
+    FLUO <- data[, fluo]
+  } else {
+    CYC <- rep(data[, cyc], length(fluo))
+    FLUO <- stack(data[, fluo])[, 1]
+    ssDATA <- rowMeans(data[, fluo], na.rm = TRUE)    
+  }   
   
-  ## filter out incomplete pairs
-  DATA <- DATA[complete.cases(DATA), ]
-  Cycles <- DATA[, 1]
-  Fluo <- DATA[, 2] 
+  ## define weights for nls and rnls 
+  if (is.null(weights)) WEIGHTS <- rep(1, length(FLUO)) 
+  else if (is.function(weights)) {  
+    WFCT <- weights
+    WEIGHTS <- WFCT(CYC, FLUO)      
+  } else WEIGHTS <- weights   
+  if (length(WEIGHTS) != length(FLUO)) stop("'weights' and 'fluo' have unequal length!")  
+  
+  ## eliminate NAs
+  allDAT <- cbind(CYC, FLUO, WEIGHTS)
+  tempDAT <- na.omit(allDAT)
+  CYC <- tempDAT[, 1]
+  FLUO <- tempDAT[, 2]
+  WEIGHTS <- tempDAT[, 3]
 
   ## version 1.3-4: get selfStart values
   if (is.null(start)) {
     if (length(fluo) == 1) {
-      ssVal <- model$ssFct(Cycles, Fluo)
+      ssVal <- model$ssFct(CYC, FLUO)
     } else {
       ssVal <- model$ssFct(data[, cyc], ssDATA)
     }
   } else ssVal <- start
   
   ## get attribute 'subset' transferred from ssFct
-  ## (as is the case in mak2/mak3 model, when only curve
+  ## (as is the case in mak2/mak3/mak3n model, when only curve
   ## up till second derivative max is taken)
   ## or mak3n/chag model with rescaling within [0, 1]
   SCALE <- attr(ssVal, "scale")
-  if (!is.null(SCALE)) Fluo <- qpcR:::rescale(Fluo, SCALE[1], SCALE[2])
+  if (!is.null(SCALE)) FLUO <- qpcR:::rescale(FLUO, SCALE[1], SCALE[2])
   
   SUB <- attr(ssVal, "subset")
-  if (!is.null(SUB)) {
-    Cycles <- Cycles[SUB]
-    Fluo <- Fluo[SUB]
-    weights <- weights[SUB]
+  if (!is.null(SUB)) {  
+    m <-which(CYC %in% SUB)
+    CYC <- CYC[m]    
+    FLUO <- FLUO[m]
+    WEIGHTS <- WEIGHTS[m]
   }
-       
+    
   ## initialize parameter matrix
   ssValMat <- NULL
-  ssValMat <- rbind(ssValMat, c("start", ssVal))
-  
-  ## define weights for nls and rnls
-  if (is.null(weights)) weights <- rep(1, length(Fluo)) else weights <- abs(weights)
-  if (length(weights) != length(Fluo)) stop("'weights' and 'fluo' have unequal length!")
+  ssValMat <- rbind(ssValMat, c("start", ssVal)) 
     
   ## objective function for 'optim', returns residual sum-of-squares
   FCT <- function(x) {     
-    SSR <- sum(sqrt(weights) * (Fluo - model$fct(Cycles, x))^2)
+    SSR <- sum(sqrt(WEIGHTS) * (FLUO - model$fct(CYC, x))^2)
     SSR       
   }    
   
   ## objective function for 'nls.lm', returns residuals
   FCT2 <- function(x) {     
-    RESID <- Fluo - model$fct(Cycles, x)       
-    RESID <- sqrt(weights) * RESID 
+    RESID <- FLUO - model$fct(CYC, x)       
+    RESID <- sqrt(WEIGHTS) * RESID 
     RESID       
   }        
   
@@ -97,15 +107,7 @@ verbose = TRUE,
       ## attach parameter values to matrix
       ssValMat <- rbind(ssValMat, c(i, OPTIM$par))     
       ssVal <- OPTIM$par       
-       
-      ## check for negative eigenvalues of the hessian matrix
-      if (!is.null(OPTIM$hessian)) EIGEN <- eigen(OPTIM$hessian)$values else EIGEN <- 0 
-             
-      if (any(EIGEN < 0)) {
-        if (verbose) cat("Negative hessian eigenvalues! Trying next method...\n")
-        next
-      }  
-      
+          
       ## break out of loop if any method converged
       if (verbose) cat("Using method '", i, "' converged.\n", sep = "")      
       break      
@@ -113,20 +115,22 @@ verbose = TRUE,
   }              
   
   names(ssVal) <- model$parnames    
-    
-  ## define all methods
+        
+  ## define all 'nls'' methods
   if (nls.method == "all") nls.method <- c("port", "default", "plinear") 
-  ## added 1.3-4 only use 'plinear' for models of type mak2/mak3
-  if (model$name %in% c("mak2", "mak3")) nls.method <- "plinear"
+  ## added 1.3-4 only use 'plinear' for models of type mak2/mak3/mak3n/chag
+  if (model$name %in% c("mak2", "mak3", "chag")) nls.method <- "plinear"
   
-  DATA <- as.data.frame(cbind(Cycles, Fluo))    
+  ## coerce to dataframe
+  DATA <- as.data.frame(cbind(Cycles = CYC, Fluo = FLUO))    
     
+  ## try all methods successively
   for (j in nls.method) {
     if (!robust) NLS <- try(nls(as.formula(model$expr), data = DATA, start = as.list(ssVal), model = TRUE, 
-                          algorithm = j, control = nls.control(maxiter = 1000, warnOnly = TRUE), weights = weights, ...), silent = TRUE)
+                          algorithm = j, control = nls.control(maxiter = 1000, warnOnly = TRUE), weights = WEIGHTS, ...), silent = TRUE)
     else NLS <- try(qpcR:::rnls(as.formula(model$expr), data = DATA, start = as.list(ssVal), nls.method = j, 
-                    control = nls.control(maxiter = 1000, warnOnly = TRUE), weights = weights, ...), silent = TRUE)     
-    
+                    control = nls.control(maxiter = 1000, warnOnly = TRUE), weights = WEIGHTS, ...), silent = TRUE)     
+        
     ## if no convergence is reached, try next method...
     if (inherits(NLS, "try-error")) {
       if (verbose) cat("Method '", j, "' did not converge. Trying next method...\n", sep = "")
@@ -138,7 +142,7 @@ verbose = TRUE,
     if (verbose) cat("Using method '", j, "' converged.\n", sep = "")
     break
   }  
-   
+     
   ## attach parameter values to matrix
   ssValMat <- rbind(ssValMat, c(class(NLS), coef(NLS)))      
                 

@@ -1,22 +1,30 @@
 sliwin <- function(
 object, 
 wsize = 6, 
-fix = c("top", "cpD2"), 
+basecyc = 1:6,
+base = 0,
+border = NULL,
 type = c("rsq", "slope"),
-border = c(0, 8), 
-base = 0, 
 plot = TRUE, 
+verbose = TRUE, 
 ...) 
 {
   if (class(object)[1] != "pcrfit") stop("object must be of class 'pcrfit'!")   
-  fix <- match.arg(fix)
   type <- match.arg(type)
   PARS <- list(...)$pars
   OPT <- list(...)$opt
-       
-  ## get takeoff point or second derivative max
-  if (fix == "top") FIX <- takeoff(object)$top
-  else FIX <- round(efficiency(object, plot = FALSE)$cpD2)
+  
+  ## define border to search in
+  RES <- efficiency(object, plot = FALSE)
+  cpD1 <- RES$cpD1
+  cpD2 <- RES$cpD2
+  LOWER <- takeoff(object)$top
+  UPPER <- cpD1 + (cpD1 - cpD2)
+ 
+  if (length(border) == 2) {
+    LOWER <- LOWER + border[1]
+    UPPER <- UPPER + border[2]    
+  } else if (length(border == 1)) LOWER <- UPPER <- border
    
   ## get data
   X <- object$DATA[, 1]
@@ -26,20 +34,11 @@ plot = TRUE,
   YMIN <- min(log10(Y), na.rm = TRUE)
   YMAX <- max(log10(Y), na.rm = TRUE) 
   
-  ## define border to search in
-  if (length(border) == 2) {
-    LOWER <- FIX + border[1]
-    UPPER <- FIX + border[2]    
-  } else {
-    LOWER <- UPPER <- border   
-  }
-  
   ## baseline sequence
-  TOP <- takeoff(object)$top
-  MIN <- min(Y[1:TOP], na.rm = TRUE)
-  MAX <- max(Y[1:TOP], na.rm = TRUE)    
-  MEAN <- mean(Y[1:TOP], na.rm = TRUE)
-  SD <- sd(Y[1:TOP], na.rm = TRUE)
+  MIN <- min(Y[basecyc], na.rm = TRUE)
+  MAX <- max(Y[basecyc], na.rm = TRUE)    
+  MEAN <- mean(Y[basecyc], na.rm = TRUE)
+  SD <- sd(Y[basecyc], na.rm = TRUE)
   
   if (is.null(OPT)) {
     if (base > 0) BASE <- seq(MIN, MEAN + base * SD, length.out = 100)
@@ -57,7 +56,7 @@ plot = TRUE,
   
   ## iterate over all wsize/base and sliding window combinations
   for (i in 1:nrow(GRID)) {
-    qpcR:::counter(i)     
+    if (verbose) qpcR:::counter(i)     
     
     ## subtract baseline value
     modY <- Y - GRID[i, 3]        
@@ -117,14 +116,16 @@ plot = TRUE,
   
   ## run 'sliwin' with optimal parameters
   optPAR <- resMAT[SEL, ]    
-    
+      
   ## one more go with optimized parameters  
   if (is.null(PARS)) {    
     res <- sliwin(object, wsize = as.numeric(optPAR[2]), border = as.numeric(optPAR[1]), 
-                  base = as.numeric(optPAR[3]), plot = plot, pars = resMAT, opt = 1)
+                  base = as.numeric(optPAR[3]), plot = plot, pars = resMAT, verbose = verbose, opt = 1)
     return(res)
   }
 
+  if (verbose) cat("\n") 
+  
   ## return parameters
   if (!is.null(PARS)) resMAT <- PARS
   return(list(eff = as.numeric(optPAR[5]), rsq = as.numeric(optPAR[6]), init = as.numeric(optPAR[7]),

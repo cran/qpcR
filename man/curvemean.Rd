@@ -44,16 +44,7 @@ Geometric mean ("gmean"):
 Harmonic mean ("hmean"):
 \deqn{\bar x = \frac{n}{\sum_{i=1}^n\frac{1}{x_i}}}
 
-Why is \code{mean = "cmean1"} the default? This is because all classical versions of the 'mean' do not work in the context of real-time PCR.
-Consider the following example: We have a qPCR experiment with three biological replicates, yielding threshold cycles 25, 26, and 27. 
-This means (with an efficiency = 2) that the second sample has half (1/2^1) and the third sample 1/fourth (1/2^2) amount of initial copy
- numbers. If we plainly average (arithmetic mean) the threshold cycles, we obtain 26. But if we do this for the initial copy numbers, we obtain, for example,
-  (100 + 50 + 25)/3 = 58.33. But ct = 26 corresponds to 50 copies, so the arithmetic mean of the threshold cycles significantly underestimates the initial copy numbers.
- The same accounts for the geometric and harmonic mean, as they all do not consider the exponential nature of the amplification.
- In contrast to this, the 'expression mean' does: cmean1 = -log(sum(2^-25 + 2^-26 + 2^-27)/3)/log(2) =  25.77761. And this values represents
- the averaged copy numbers because (calculated as ratios) 100/58.33 gives the same as 2^25.77761/2^25. Therefore, the expression mean calculates a
-  cycle number which corresponds to the initial copy numbers of the replicates.
- If \code{mean = "cmean2"} is applied, the efficiency is calculated as the arithmetic mean of the efficiencies from all curves.
+Why is \code{mean = "cmean1"} the default? This is because all classical versions of the 'mean' do not work in the context of real-time PCR. Consider the following example: We have a qPCR experiment with three biological replicates, yielding threshold cycles 25, 26, and 27. This means (with an efficiency = 2) that the second sample has half (1/2^1) and the third sample 1/fourth (1/2^2) amount of initial copy numbers. If we plainly average (arithmetic mean) the threshold cycles, we obtain 26. But if we do this for the initial copy numbers, we obtain, for example, (100 + 50 + 25)/3 = 58.33. But ct = 26 corresponds to 50 copies, so the arithmetic mean of the threshold cycles significantly underestimates the initial copy numbers. The same accounts for the geometric and harmonic mean, as they all do not consider the exponential nature of the amplification. In contrast to this, the 'expression mean' does: cmean1 = -log(sum(2^-25 + 2^-26 + 2^-27)/3)/log(2) =  25.77761. And this values represents the averaged copy numbers because (calculated as ratios) 100/58.33 gives the same as 2^25.77761/2^25. Therefore, the expression mean calculates a cycle number which corresponds to the initial copy numbers of the replicates. If \code{mean = "cmean2"} is applied, the efficiency is calculated as the arithmetic mean of the efficiencies from all curves.
 }
 
 
@@ -66,8 +57,9 @@ Andrej-Nikolai Spiess
 }
 
 \references{
-Accurate normalization of real-time quantitative RT-PCR data by geometric averaging of multiple internal control genes.
-Vandesompele et al., \emph{Genome Biology}, 2002, \bold{3}: research0034.1-0034.11.
+Accurate normalization of real-time quantitative RT-PCR data by geometric averaging of multiple internal control genes.\cr
+Vandesompele J, De Preter K, Pattyn F, Poppe B, Van Roy N, De Paepe A & Speleman F.\cr
+\emph{Genome Biology} (2002), \bold{3}: research0034.1-0034.11.\cr
 }
 
 \examples{

@@ -5,8 +5,7 @@
 
 \description{
 An exponential model is fit to a window of defined size on the qPCR raw data.
-The window is identified either by the 'studentized outlier' method as described in Tichopad et al. (2003),
- the 'midpoint' method (Peirson et al., 2003) or by subtracting the difference of cpD1 and cpD2 from cpD2 ('ERBCP', unpublished).
+The window is identified either by the 'studentized outlier' method as described in Tichopad \emph{et al}. (2003), the 'midpoint' method (Peirson \emph{et al}., 2003) or by subtracting the difference of cpD1 and cpD2 from cpD2 ('ERBCP', unpublished).
 }
 
 \usage{
@@ -18,10 +17,10 @@ expfit(object, method = c("outlier", "midpoint", "ERBCP"), pval = 0.05,
 \arguments{
   \item{object}{an object of class 'pcrfit'.}
   \item{method}{one of the three possible methods to be used for defining the position of the fitting window.}
-  \item{pval}{for method "outlier", the p-value for the outlier test.}
-  \item{n.outl}{for method "outlier", the number of successive outlier cycles.}
-  \item{n.ground}{for method "midpoint", the number of cycles in the noisy ground phase to calculate the standard deviation from.}
-  \item{corfact}{for method "ERBCP", the correction factor for finding the exponential region. See 'Details'.}
+  \item{pval}{for \code{method = "outlier"}, the p-value for the outlier test.}
+  \item{n.outl}{for \code{method = "outlier"}, the number of successive outlier cycles.}
+  \item{n.ground}{for \code{method = "midpoint"}, the number of cycles in the noisy ground phase to calculate the standard deviation from.}
+  \item{corfact}{for \code{method = "ERBCP"}, the correction factor for finding the exponential region. See 'Details'.}
   \item{fix}{for methods "midpoint" and "ERBCP", the orientation of the fitting window based on the identified point. See 'Details'.} 
   \item{nfit}{the size of the fitting window.}
   \item{plot}{logical. If \code{TRUE}, a graphical display of the curve and the fitted region is shown.}
@@ -29,7 +28,7 @@ expfit(object, method = c("outlier", "midpoint", "ERBCP"), pval = 0.05,
 }
 
 \details{
-The exponential growth function \eqn{f(x) = b \cdot exp(k \cdot x) + e} is fit to the data. Calls \code{\link{takeoff}} for the calculation of the studentized residuals and 'outlier' cycle, and \code{midpoint} for calculation of the exponential phase 'midpoint'. For method 'ERBCP' (Exponential Region By Crossing Points), the exponential region is calculated by \eqn{expR = cpD2 - \code{corfact} \cdot (cpD1-cpD2)}. The efficiency is calculated a) from the exponential fit with \eqn{Eff = exp(k)} and b) for each cycle within the exponential region from the raw fluorescence values by \eqn{Eff = \frac{F(n)}{F(n-1)}}. The inital template fluorescence (F0) is derived from \eqn{b \cdot exp(k)}.
+The exponential growth function \eqn{f(x) = b \cdot exp(k \cdot x) + e} is fit to the data. Calls \code{\link{takeoff}} for the calculation of the studentized residuals and 'outlier' cycle, and \code{midpoint} for calculation of the exponential phase 'midpoint'. For method 'ERBCP' (Exponential Region By Crossing Points), the exponential region is calculated by \eqn{expR = cpD2 - \code{corfact} \cdot (cpD1-cpD2)}. The efficiency is calculated a) from the exponential fit with \eqn{E = exp(k)} and b) for each cycle within the exponential region from the raw fluorescence values by \eqn{E_n = \frac{F_n}{F_{n-1}}}. The inital template fluorescence \eqn{F_0} is derived from \eqn{F_0 = b \cdot exp(k)}.
 }
 
 \value{
@@ -50,10 +49,13 @@ Andrej-Nikolai Spiess
 }
 
 \references{
-Standardized determination of real-time PCR efficiency from a single reaction set-up.
-Tichopad et al., \emph{Nucleic Acids Research}, 2003, \bold{e122}.\cr
-Experimental validation of novel and conventional approaches to quantitative real-time PCR data analysis.
-Peirson et al., \emph{Nucleic Acids Research}, 2003, \bold{e73}.
+Standardized determination of real-time PCR efficiency from a single reaction set-up.\cr
+Tichopad A, Dilger M, Schwarz G & Pfaffl MW.\cr
+\emph{Nucleic Acids Research} (2003), \bold{31}:e122.
+
+Comprehensive algorithm for quantitative real-time polymerase chain reaction.\cr
+Zhao S & Fernald RD.\cr
+\emph{J Comput Biol} (2005), \bold{12}:1047-64.
 }
 
 \examples{

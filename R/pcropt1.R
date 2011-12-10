@@ -1,60 +1,60 @@
-pcropt1 <- function (object, fact = 3, opt = FALSE, plot = TRUE, ...) 
+pcropt1 <- function (object, fact = 3, opt = FALSE, plot = TRUE, bubble = NULL, ...) 
 {
-  
-  window.l <- NULL
-  window.u <- NULL    
-  aic <- NULL
-  aicc <- NULL
-  resvar <- NULL
-  eff <- NULL
-  init.exp <- NULL
-  init.sig <- NULL  
   
   START <- try(efficiency(object, plot = FALSE))
   if (inherits(START, "try-error")) stop("Could not initialize optimization. Please try different 'fact'!")
   
+  ## calculate bordr values to iterate in
   cpD1 <- round(START$cpD1)
   cpD2 <- round(START$cpD2)
-  lower <- cpD1 - fact * (cpD1 - cpD2)
-  upper <- cpD1 + fact * (cpD1 - cpD2)    
-  lowerseq <- 1:lower
-  upperseq <- nrow(object$DATA):upper    
+  LOWER <- round(cpD1 - fact * (cpD1 - cpD2))
+  UPPER <- round(cpD1 + fact * (cpD1 - cpD2))    
+  seqLOWER <- 1:LOWER
+  seqUPPER <- nrow(object$DATA):UPPER   
+  
+  ## counter for initializing result matrix
+  counter <- 1
     
-  for (i in lowerseq) {
-    for (j in upperseq) {
-      newData <- object$DATA[i:j, 1:2]
-     
-      newCurve <- try(pcrfit(newData, 1, 2, model = object$MODEL, verbose = FALSE, ...), silent = TRUE)
-      if (inherits(newCurve, "try-error")) break      
+  for (i in seqLOWER) {
+    qpcR:::counter(i)
+    for (j in seqUPPER) {      
+      ## data subset
+      newDAT <- object$DATA[i:j, ]   
+      ## new model from subset
+      newMOD <- try(pcrfit(newDAT, 1, 2, model = object$MODEL, verbose = FALSE), silent = TRUE)
+      if (inherits(newMOD, "try-error")) next    
+      ## optional model selection
+      if (opt) newMOD <- mselect(newMOD, verbose = FALSE, ...)       
+      ## efficiency parameters
+      EFF <- try(efficiency(newMOD, plot = plot, ...), silent = TRUE)   
+      if (inherits(EFF, "try-error")) next
+      ## goodness-of-fit
+      GOF <- pcrGOF(newMOD)
+      ## initialize result matrix at first iteration
+      vecGOF <- unlist(GOF)
+      vecEFF <- unlist(EFF)[c("eff", "init1", "init2")]
+      RES <- c(i, j, vecGOF, vecEFF)
+      if (counter == 1) resMAT <- matrix(nrow = length(seqLOWER) * length(seqUPPER), ncol = length(RES))
       
-      if (opt) newCurve <- mselect(newCurve, verbose = FALSE, ...)       
-            
-      ITER <- try(efficiency(newCurve), silent = TRUE)   
-      if (inherits(ITER, "try-error")) break
-      
-      window.l <- c(window.l, i)
-      window.u <- c(window.u, j)        
-      aic <- c(aic, ITER$AIC)
-      aicc <- c(aicc, ITER$AICc)
-      resvar <- c(resvar, ITER$resVar)
-      eff <- c(eff, ITER$eff)
-      init.sig <- c(init.sig, ITER$init1)
-      init.exp <- c(init.exp, ITER$init2)      
+      ## store results in matrix and increase counter
+      resMAT[counter, ] <- RES 
+      counter <- counter + 1
       }
     }
-    
-    resMat <- cbind(as.numeric(window.l), as.numeric(window.u),  
-                    as.numeric(aic), as.numeric(aicc), as.numeric(resvar), 
-                    as.numeric(eff), as.numeric(init.exp), as.numeric(init.sig))
-                    
-    if (plot) {
-      par(mfrow = c(2, 2))
-      boxplot(resMat[, 4], main = "AICc")
-      boxplot(resMat[, 6], main = "Eff")                 
-      boxplot(resMat[, 7], main = "init.exp")       
-      boxplot(resMat[, 8], main = "init.sig")      
-    }         
-    
-    colnames(resMat) <- c("lower", "upper", "AIC", "AICc", "resVar", "Eff", "init.exp", "init.sig")      
-    return(as.data.frame(resMat))
+  
+    cat("\n")
+  
+    ## make coulumn names
+    colnames(resMAT) <- c("lower", "upper", names(vecGOF), names(vecEFF))
+  
+    ## make bubble plot from the parameter selected in 'bubble'
+    if (!is.null(bubble)) {
+      Z <- try(resMAT[, bubble], silent = TRUE)
+      if (!inherits(Z, "try-error")) {
+        bubbleplot(resMAT[, 1], resMAT[, 2], rank(Z), scale = 0.1, las = 1,
+                   xlab = "Lower cycle number", ylab = "Upper cycle number")        
+      } else print("Parameter could not be extracted from result matrix! Omitting bubbleplot...")
+    }
+            
+    return(resMAT)
 }

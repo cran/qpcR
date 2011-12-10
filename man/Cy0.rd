@@ -4,9 +4,7 @@
 \title{Cy0 alternative to threshold cycles as in Guescini et al. (2008)}
 
 \description{
-An alternative to the classical crossing point/threshold cycle estimation as described in Guescini et al.
-A tangent is fit to the first derivative maximum (point of inflection) of the modeled curve and the intersect 
- with the x-axis is calculated.   
+An alternative to the classical crossing point/threshold cycle estimation as described in Guescini \emph{et al} (2002). A tangent is fit to the first derivative maximum (point of inflection) of the modeled curve and the intersection with the x-axis is calculated.   
 }
 
 \usage{
@@ -21,8 +19,8 @@ Cy0(object, plot = FALSE, add = FALSE, ...)
  }
 
 \details{
-The function calculates the first derivative maximum (cpD1) of the curve and the slope and fluorescence at that point.
- Cy0 is then calculated by \eqn{Cy0 = cpD1 - (Fluo/slope)}.
+The function calculates the first derivative maximum (cpD1) of the curve and the slope and fluorescence \eqn{F_{cpD2}} at that point.
+ Cy0 is then calculated by \eqn{Cy0 = cpD1 - \frac{F_{cpD2}}{slope}}.
 }
 
 \value{
@@ -35,7 +33,8 @@ Andrej-Nikolai Spiess
 
 \references{
 A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
-Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
+Guescini M, Sisti D, Rocchi MB, Stocchi L & Stocchi V.\cr
+\emph{BMC Bioinformatics} (2008), \bold{9}: 326.\cr
 }
           
 \examples{

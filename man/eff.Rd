@@ -4,9 +4,7 @@
 \title{The amplification efficiency curve of a fitted object}
 
 \description{
-Calculates the efficiency curve from the fitted object by \eqn{E = \frac{F(n)}{F(n-1)}},
- with E = efficiency, F = raw fluorescence, n = Cycle number. Alternatively, a cubic spline interpolation 
-  can be used on the raw data as in Shain et al. (2008). 
+Calculates the efficiency curve from the fitted object by \eqn{E_n = \frac{F(n)}{F(n-1)}}, with \eqn{E} = efficiency, \eqn{F} = raw fluorescence, \eqn{n} = Cycle number. Alternatively, a cubic spline interpolation can be used on the raw data as in Shain \emph{et al}. (2008). 
 }
 
 \usage{
@@ -32,8 +30,7 @@ A list with the following components:
 }
 
 \details{
-For more information about the curve smoothing, baseline shifting and cubic spline interpolation for the method as in Shain et al. (2008),
- see 'Details' in \code{\link{maxRatio}}.
+For more information about the curve smoothing, baseline shifting and cubic spline interpolation for the method as in Shain \emph{et al}. (2008), see 'Details' in \code{\link{maxRatio}}.
 }
 
 \author{
@@ -42,13 +39,13 @@ Andrej-Nikolai Spiess
 
 \references{
 A new method for robust quantitative and qualitative analysis of real-time PCR.\cr
-Shain & Clemens, \emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
+Shain EB & Clemens JM.\cr
+\emph{Nucleic Acids Research} (2008), \bold{36}, e91.
 }  
 
 \examples{
-m1 <- pcrfit(reps, 1, 7, l5)
-
 ## with default 100 points per cycle
+m1 <- pcrfit(reps, 1, 7, l5)
 eff(m1, plot = TRUE) 
 
 ## not all data and only 10 points per cycle

@@ -110,7 +110,7 @@ needFirst = TRUE,
     DEC <- switch(DEC, "1" = ".", "2" = ",", dec)
 
     ### read in data
-    if (!isWS) DATA <- try(read.delim(FILE[i], header = FALSE, skip = 0, sep = SEP, dec = DEC, colClasses = NA,
+    if (!isWS) DATA <- try(read.delim(FILE[i], header = FALSE, skip = 0, sep = SEP, dec = DEC, colClasses = NA, check.names = FALSE,
                                       quote = "", stringsAsFactors = FALSE, comment.char = "", na.strings = "NA", ...), silent = TRUE)
     if (inherits(DATA, "try-error")) {
        cat("There was an error in importing from", FILE[i], ". Trying next file...\n")

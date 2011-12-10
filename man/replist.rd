@@ -12,7 +12,7 @@ Starting from a 'modlist' containing qPCR models from single data, \code{replist
 \usage{
 replist(object, group = NULL, check = "none",
         checkPAR = parKOD(), remove = c("none", "KOD"), 
-        names = c("group", "first"), opt = FALSE, 
+        names = c("group", "first"), doFit = TRUE, opt = FALSE, 
         optPAR = list(sig.level = 0.05, crit = "ftest"), 
         verbose = TRUE, ...)
 }
@@ -24,6 +24,7 @@ replist(object, group = NULL, check = "none",
  \item{checkPAR}{parameters to be supplied to the \code{check} method, see \code{\link{KOD}}.}
  \item{remove}{which runs to remove. Either \code{none} or those that failed from the method defined in \code{check}.}
  \item{names}{how to name the grouped fit. Either 'group_1, ...' or the first name of the replicates.}
+ \item{doFit}{logical. If set to \code{FALSE}, the replicate data is only aggregated without doing a refitting. See 'Details'.}
  \item{opt}{logical. Should model selection be applied to the final model?}
  \item{optPAR}{parameters to be supplied to \code{\link{mselect}}.}
  \item{verbose}{if \code{TRUE}, the analysis is printed to the console.}
@@ -31,7 +32,8 @@ replist(object, group = NULL, check = "none",
 }
 
 \details{
-As being defined by \code{group}, the 'modlist' is split into groups of runs and these amalgamated into a nonlinear model. Runs which have failed to be fitted by \code{\link{modlist}} are automatically removed and \code{group} is updated (that is, the correpsonding entries also removed) prior to fitting the replicate model by \code{\link{pcrfit}}. Model selection can be applied to the final replicate model by setting \code{opt = TRUE} and changing the parameters in \code{optPAR}. If \code{check} is set to any of the methods in \code{"KOD"}, kinetic outliers are identified and optionally removed, if \code{remove} is set to \code{"KOD"}.
+As being defined by \code{group}, the 'modlist' is split into groups of runs and these amalgamated into a nonlinear model. Runs which have failed to be fitted by \code{\link{modlist}} are automatically removed and \code{group} is updated (that is, the correpsonding entries also removed) prior to fitting the replicate model by \code{\link{pcrfit}}. Model selection can be applied to the final replicate model by setting \code{opt = TRUE} and changing the parameters in \code{optPAR}. If \code{check} is set to any of the methods in \code{"KOD"}, kinetic outliers are identified and optionally removed, if \code{remove} is set to \code{"KOD"}.\cr
+If \code{doFit = FALSE}, the replicate data is only aggregated and no refitting is done. This is useful when plotting replicate data by some grouping vector. See 'Examples'.
 }
 
 \value{
@@ -66,26 +68,32 @@ rl3 <- replist(ml3, group = gl(7, 4), check = "uni1",
 plot(rl3, which = "single")
 
 \dontrun{
+## just aggregation and no
+## refitting
+ml4 <- modlist(reps, model = l4)
+rl4 <- replist(ml4, group = gl(7, 4), doFit = FALSE)
+plot(rl4, which = "single")
+
 ## Scenario 1:
 ## automatic removal of runs that failed to
 ## fit during 'modlist' by using
 ## 'testdat' set
-ml4 <- modlist(testdat, model = l5)
-rl4 <- replist(ml4, gl(6, 4))
-plot(rl4, which = "single")
+ml5 <- modlist(testdat, model = l5)
+rl5 <- replist(ml5, gl(6, 4))
+plot(rl5, which = "single")
 
 ## Scenario 2:
 ## automatic removal of runs that failed to
 ## fit during 'replist':
 ## samples F3.1-F3.4 is set to 1.
 dat1 <- reps
-ml5 <- modlist(dat1)
-ml5[[9]]$DATA[, 2] <- 1
-ml5[[10]]$DATA[, 2] <- 1
-ml5[[11]]$DATA[, 2] <- 1
-ml5[[12]]$DATA[, 2] <- 1
-rl5 <- replist(ml5, gl(7, 4))
-plot(rl5, which = "single")
+ml6 <- modlist(dat1)
+ml6[[9]]$DATA[, 2] <- 1
+ml6[[10]]$DATA[, 2] <- 1
+ml6[[11]]$DATA[, 2] <- 1
+ml6[[12]]$DATA[, 2] <- 1
+rl6 <- replist(ml6, gl(7, 4))
+plot(rl6, which = "single")
 }
 }
 

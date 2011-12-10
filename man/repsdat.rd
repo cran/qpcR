@@ -24,7 +24,7 @@ reps3
 }
 
 \details{
-The real-time PCR was conducted with primers for the S27a housekeeping gene in a Lightcycler 1.0 instrument (Roche Diagnostics) for \code{reps} and \code{reps2} or in a MXPro3000P instrument (Stratagene) for \code{reps3}. \code{reps3} was ROX-normalized.
+The real-time PCR was conducted with primers for the S27a housekeeping gene in a Lightcycler 1.0 instrument (Roche Diagnostics) for \code{reps} or in a MXPro3000P instrument (Stratagene) for \code{reps2, reps3}. \code{reps3} was ROX-normalized.
 }
 
 \source{

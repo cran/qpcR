@@ -34,7 +34,7 @@ pcrimport(file = NA, sep = NA, dec = NA, delCol = NA, delRow = NA,
 }
 
 \details{
-This function has been designed to offer maximal flexibility in importing qPCR data from all kinds of systems. This is accomplished by asking the user for many formatting options in single steps, with the final goal of obtaining a dataset that is transformed in a way suitable for \code{\link{pcrfit}}, as in all datasets in this package (i.e. 'reps'). At the end, it must be a dataframe with the first column containing the cycle numbers ("Cycles") and all subsequent columns with sensible sample names, such as "S1_1". In detail, the following steps are queried:\cr
+This function has been designed to offer maximal flexibility in importing qPCR data from all kinds of systems. This is accomplished by asking the user for many formatting options in single steps, with the final goal of obtaining a dataset that is transformed in a way suitable for \code{\link{pcrfit}}, as in all datasets in this package (i.e. 'reps'): it must be a dataframe with the first column containing the cycle numbers ("Cycles") and all subsequent columns with sensible sample names, such as "S1_1". In detail, the following steps are queried:\cr
 
 1) Location of the file. Either a directory containing the file(s), the (Windows) clipboard or a dataframe in the workspace.\cr
 2) How are the fields separated, i.e. by tabs?\cr
@@ -56,7 +56,7 @@ One major advantage of this function is that the formatting parameters are store
 The function will query (if \code{needFirst = TRUE}) all parameters that are defined as \code{NA}. For example, using
 \code{res <- pcrimport(file = "c:/temp", sep = "\t", dec = ".", delCol = c(1, 3), delRow = 1:2, ...)} will result in these parameters not being queried.\cr
 
-If reference dye data was supplied, the function checks if the data is of same dimensions than the reporter dye data. The output is then the normalized fuorescence data \eqn{F_{reporter}/F_{reference}}.\cr
+If reference dye data was supplied, the function checks if the data is of same dimensions than the reporter dye data. The output is then the normalized fuorescence data \eqn{\frac{F_{rep}}{F_{ref}}}.\cr
 
 The 'Examples' feature internal datasets, but this function is best understood by the tutorial under \url{http://www.dr-spiess.de/qpcR/tutorials.html}.
 }

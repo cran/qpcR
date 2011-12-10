@@ -17,16 +17,14 @@ After fitting the appropriate model, either the raw fluorescence values can be p
 \arguments{
   \item{object}{an object of class 'pcrfit'.}  
   \item{newdata}{a dataframe containing the values to estimate from, using the same variable naming as in the fitted model.}
-  \item{which}{either "y" (default) for prediction of the raw fluorescence or "x" for prediction of the cycle number.}
+  \item{which}{either \code{"y"} (default) for prediction of the raw fluorescence or \code{"x"} for prediction of the cycle number.}
   \item{interval}{if not \code{"none"}, confidence or prediction intervals are calculated.}      
   \item{level}{the confidence level.}	
   \item{...}{some methods for this generic require additional arguments. None are used in this method.}
  }
 
 \details{
-y-values (fluorescence) are estimated from \code{object$MODEL$expr}, x-values (cycles) are estimated from \code{object$MODEL$inv}.
-Confidence levels are calculated from the gradient of these and the variance-covariance matrix of \code{object} by \emph{grad(f)} \%*\% \code{vcov(object)} \%*\% \emph{grad(f)}
- and are based on asymptotic normality (t-distribution).
+y-values (Fluorescence) are estimated from \code{object$MODEL$expr}, x-values (Cycles) are estimated from \code{object$MODEL$inv}. Confidence intervals are calculated from the gradient of the function and the variance-covariance matrix of \code{object} by \eqn{\nabla f(x) \cdot cov(y) \cdot \nabla f(x)} and are based on asymptotic normality (t-distribution).
 }
 
 \value{

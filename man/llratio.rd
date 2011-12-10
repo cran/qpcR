@@ -1,5 +1,5 @@
-\name{LR}
-\alias{LR}
+\name{llratio}
+\alias{llratio}
 
 \encoding{latin1}
 
@@ -10,7 +10,7 @@ Calculates the likelihood ratio and p-value from a chi-square distribution for t
 }
 
 \usage{
-LR(objX, objY)
+llratio(objX, objY)
 }
 
 \arguments{
@@ -20,7 +20,7 @@ LR(objX, objY)
 
 \details{
 The likelihood ratio statistic is \deqn{LR = \frac{f(X, \hat{\phi}, \hat{\psi})}{f(X, \phi, \hat{\psi_0})}}
-The usual test statistic is \deqn{\Lambda = 2*(l(\hat{\phi}, \hat{\psi}) - l(\phi, \hat{\psi_0}))}
+The usual test statistic is \deqn{\Lambda = 2 \cdot (l(\hat{\phi}, \hat{\psi}) - l(\phi, \hat{\psi_0}))}
 Following the large sample theory, if \eqn{H_0} is true, then \deqn{\Lambda \sim \chi_p^2}  
 
 }
@@ -29,7 +29,7 @@ Following the large sample theory, if \eqn{H_0} is true, then \deqn{\Lambda \sim
 A list containing the following items:
 \item{ratio}{the likelihood ratio statistic.}
 \item{df}{the change in parameters.}
-\item{p.value}{the p-value from a chi-square distribution. See Details.}
+\item{p.value}{the p-value from a \eqn{\chi^2} distribution. See Details.}
 }
 
 \author{
@@ -45,7 +45,7 @@ Andrej-Nikolai Spiess
 ## compare l5 and l4 model
 m1 <- pcrfit(reps, 1, 2, l5)
 m2 <- pcrfit(reps, 1, 2, l4)
-LR(m1, m2)
+llratio(m1, m2)
 }
 
 \keyword{models}

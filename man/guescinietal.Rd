@@ -30,7 +30,8 @@ Supplemental data 1 to the paper.
 
 \references{
 A new real-time PCR method to overcome significant quantitative inaccuracy due to slight amplification inhibition.\cr
-Guescini M et al, \emph{BMC Bioinformatics}, 2008, \bold{9}: 326.
+Guescini M, Sisti D, Rocchi MB, Stocchi L & Stocchi V.\cr
+\emph{BMC Bioinformatics} (2008), \bold{9}: 326.\cr
 }
 
 \examples{

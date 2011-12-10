@@ -1,4 +1,4 @@
-LR <- function(objX, objY)
+llratio <- function(objX, objY)
 {
       if(inherits(objX, "logLik")) LLx <- objX else LLx <- logLik(objX)
       if(inherits(objY, "logLik")) LLy <- objY else LLy <- logLik(objY)

@@ -5,6 +5,7 @@ check = "none",
 checkPAR = parKOD(),
 remove = c("none", "KOD"),
 names = c("group", "first"),
+doFit = TRUE, 
 opt = FALSE, 
 optPAR = list(sig.level = 0.05, crit = "ftest"),
 verbose = TRUE, 
@@ -35,8 +36,7 @@ verbose = TRUE,
     
   ## iterate over all subsets
   for (i in 1:length(splitLIST)) {
-    CYCS <- NULL
-    FLUO <- NULL  
+    DATA <- NULL
     
     modTEMP <- object[splitLIST[[i]]]
     class(modTEMP) <- c("modlist", "pcrfit")
@@ -50,9 +50,7 @@ verbose = TRUE,
   
     ## aggregate data
     for (j in 1:length(modTEMP)) {
-      CYCS <- c(CYCS, modTEMP[[j]]$DATA[, 1])     
-      FLUO <- c(FLUO, modTEMP[[j]]$DATA[, 2])     
-      DATA <- cbind(Cycles = CYCS, Fluo = FLUO)    
+      DATA <- rbind(DATA, modTEMP[[j]]$DATA)         
     }  
       
     ## use model from first item
@@ -61,13 +59,23 @@ verbose = TRUE,
     nameTEMP <- sapply(modTEMP, function(x) x$names)
       
     ## fit replicates
-    if (verbose) cat("Making model for replicates:", nameTEMP, "=>" , nameMODEL, "\n", sep= " ")
-    flush.console()
-    fitOBJ <- try(pcrfit(DATA, 1, 2, model = MODEL, verbose = FALSE), silent = TRUE)
-      
+    if (doFit) {
+      if (verbose) cat("Making model for replicates:", nameTEMP, "=>" , nameMODEL, "\n", sep = " ")
+      flush.console()
+      fitOBJ <- try(pcrfit(DATA, 1, 2, model = MODEL, verbose = FALSE), silent = TRUE)
+    } else {
+      if (verbose) cat("Aggregating without fit:", nameTEMP, "\n", sep = " ")
+      flush.console()
+      fitOBJ <- list()
+      fitOBJ$DATA <- DATA
+      fitOBJ$isFitted <- FALSE
+      fitOBJ$isOutlier <- FALSE
+    }  
+    
     ## return empty list, if fitting failed
-    if (inherits(fitOBJ, "try-error")) {
-      fitOBJ <- list()     
+    if (inherits(fitOBJ, "try-error") && doFit) {
+      fitOBJ <- list()   
+      fitOBJ$DATA <- DATA
       if (verbose) cat(" => Fitting failed. Tagging replicates...\n", sep = "")  
       flush.console()
       ## from 1.3-5: tag failed replicate fits

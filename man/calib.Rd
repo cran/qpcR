@@ -5,21 +5,15 @@
 
 \description{
 This function calculates the PCR efficiency from a classical qPCR dilution experiment. The threshold cycles are plotted against the 
- logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}.
-A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve.  
-The threshold cycles are calculated either by some arbitrary fluorescence value (i.e. as given by the qPCR software)
- or calculated from the second derivative maximum of the first (highest concentration) curve. 
-If values to be predicted are given, they are calculated from the curve and also displayed within.
-An iterative search of the optimal threshold border can be conducted, thereby going through all slopes and intercepts and 
- selecting the combination that minimizes the AIC of the acquired linear regression curves. See 'Details' for more information
- on this (maybe controversial) procedure.   
+ logarithmized concentration (or dilution) values, a linear regression line is fit and the efficiency calculated by \eqn{E = 10^{\frac{-1}{slope}}}. A graph is displayed with the raw values plotted with the threshold cycle and the linear regression curve.  
+The threshold cycles are calculated either by some arbitrary fluorescence value (i.e. as given by the qPCR software) or calculated from the second derivative maximum of the first (highest concentration) curve. If values to be predicted are given, they are calculated from the curve and also displayed within. An iterative search of the optimal threshold border can be conducted, thereby going through all slopes and intercepts and selecting the combination that minimizes the AIC of the acquired linear regression curves. See 'Details' for more information on this (maybe controversial) procedure.   
 } 
 
 \usage{
 calib(refcurve, predcurve = NULL, thresh = "cpD2", term = NULL, 
       dil = NULL, plot = TRUE, plot.map = TRUE,
       conf = 0.95, opt = c("none", "inter", "slope"),       
-      opt.step = c(50, 50), stop.crit = c("midpoint", "outlier"), 
+      opt.step = c(50, 50), stop.crit = c("outlier", "midpoint"), 
       quan = 0.5, slope = NULL, count = 1)
 }
 
@@ -34,17 +28,14 @@ calib(refcurve, predcurve = NULL, thresh = "cpD2", term = NULL,
  \item{conf}{the confidence interval. Defaults to 95\%, can be omitted with \code{NULL}.}
  \item{opt}{type of optimization. See 'Details'.}
  \item{opt.step}{a two-element vector. Number of iterations for the intercept as first item, number of slope iterations as second.}
- \item{stop.crit}{the stopping criterium for the iterations. Default is the 'midpoint' of the highest dilution curve.}
+ \item{stop.crit}{the stopping criterium for the iterations. Default is the first outlier cycle of the highest dilution curve.}
  \item{quan}{the top quantile of iterations to be shown in the heatmap.}
  \item{slope}{a slope to be defined for the threshold line. Mostly used internally by the iteration process.}
  \item{count}{internal counter for recursive purposes. Not to be altered.}  
 }
 
 \details{                    
-The iterative function conducts a search through all combinations of slope and intercept. For each iteration, either R-square or AIC
- of the resulting calibration curves are collected, and finally the combination is selected that minimized the AIC.
-The function goes through all combinations as to avoid local maxima that are likely to happen in this approach.
-The different settings for \code{opt} are:
+The iterative function conducts a search through all combinations of slope and intercept. For each iteration, either \eqn{R^2} or AIC of the resulting calibration curves are collected, and finally the combination is selected that minimized the AIC. The function goes through all combinations as to avoid local maxima that are likely to happen in this approach. The different settings for \code{opt} are:
 
 "none"  only second derivative maximum or single threshold value.\cr
 "inter" iterate along the y-axis intercept.\cr
@@ -68,8 +59,8 @@ The paradigm is such that the iterations will start at the second derivative of 
   \item{eff}{the efficiency as calculated from the calibration curve.}
   \item{aic}{the AIC value of the linear fit.}
   \item{aicc}{the corrected AIC value of the linear fit.}   
-  \item{rsq}{The R-square of the linear fit.} 
-  \item{rsq.ad}{The adjusted R-square of the linear fit.}   
+  \item{rsq}{The \eqn{R^2} of the linear fit.} 
+  \item{rsq.ad}{The adjusted \eqn{R^2_{adj}} of the linear fit.}   
   \item{aicMat}{a matrix with the calibration curve AIC of each iteration.}  
   
 ATTENTION: If iterations were used, the values reflect the analysis of the best fit! 

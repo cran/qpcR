@@ -2,24 +2,29 @@ takeoff <- function(object, pval = 0.05, nsig = 3)
 {
       require(MASS, quietly = TRUE)
       
+      ## extract x, y values
       CYC <- object$DATA[, 1]
       FLUO <- object$DATA[, 2]
-      res <- vector()
-
-      for (i in 5:length(CYC)) {
-            mod <- lm(FLUO[1:i] ~ CYC[1:i], na.action = na.exclude)
-            st <- studres(mod)              
-            st1 <- tail(st, 1)
-            pst1 <- 2 * (1 - pt(st1, df = mod$df.residual))              
-            res <- c(res, pst1)
-      }
-      resl <- sapply(res, function(x) x < pval)       
-      resl[is.na(resl)] <- FALSE
-           
-      which.top <- sapply(1:length(resl), function(x) all(resl[x:(x + nsig)]))
-      min.top <- min(which(which.top == TRUE), na.rm = TRUE)
-      top <- as.numeric(names(resl[min.top]))                    
+      RES <- vector()
       
-      fluo.top <- as.numeric(predict(object, newdata = data.frame(Cycles = top)))
-      return(list(top = top, f.top = fluo.top))
+      ## calculate studententized residuals over moving window
+      for (i in 5:length(CYC)) {
+            MOD <- lm(FLUO[1:i] ~ CYC[1:i], na.action = na.exclude)
+            ST <- rstudent(MOD)   
+            ST1 <- tail(ST, 1)            
+            PST1 <- 1 - pt(ST1, df = MOD$df.residual)           
+            RES <- c(RES, PST1)            
+      }
+      
+      ## calculate p-value events
+      SIG <- sapply(RES, function(x) x < pval) 
+      SIG[is.na(SIG)] <- FALSE
+      
+      ## which nsig cycles are TRUE? (outliers)
+      selTOP <- sapply(1:length(SIG), function(x) all(SIG[x:(x + nsig - 1)]))
+      minTOP <- min(which(selTOP == TRUE), na.rm = TRUE)
+      TOP <- as.numeric(names(SIG[minTOP]))                    
+      
+      fluoTOP <- as.numeric(predict(object, newdata = data.frame(Cycles = TOP)))
+      return(list(top = TOP, f.top = fluoTOP))
 }

@@ -38,7 +38,7 @@ where \eqn{\epsilon_{t}^{\ast}} are i.i.d. from distribution \eqn{\hat{F}}, wher
 One can then characterize the EDF and calculate confidence intervals for each parameter: \deqn{\theta \in [EDF^{-1}(\alpha/2), EDF^{-1}(1-\alpha/2)]}      
 The jackknife alternative is to perform the bootstrap on the data-predictor vector, i.e. eliminating a certain number of datapoints.\cr 
 If the residuals are correlated or have non-constant variance the latter is recommended. This may be the case in qPCR data,
- as the variance in the low fluorecence region (ground phase) is usually much higher than in the rest of the curve. 
+ as the variance in the low fluorescence region (ground phase) is usually much higher than in the rest of the curve. 
 }
 
 \value{
@@ -46,9 +46,7 @@ A list containing the following items:
   \item{ITER}{a list containing each of the results from the iterations.}   
   \item{CONF}{a list containing the confidence intervals for each item in \code{ITER}.}
   
-Each item contains subitems for the coefficients (\code{coef}), root-mean-squared error (\code{rse}),
- residual sum-of-squares (\code{rss}), goodness-of-fit measures (\code{gof}) and the efficiency analysis (\code{eff}).
-If \code{plot = TRUE}, all data is plotted as boxplots including confidence intervals.     
+Each item contains subitems for the coefficients (\code{coef}), root-mean-squared error (\code{rmse}), residual sum-of-squares (\code{rss}), goodness-of-fit measures (\code{gof}) and the efficiency analysis (\code{eff}). If \code{plot = TRUE}, all data is plotted as boxplots including confidence intervals.     
 }
 
 \author{
@@ -56,17 +54,17 @@ Andrej-Nikolai Spiess
 }
 
 \references{
-Bates DM and Watts DG (1988).\cr
 Nonlinear regression analysis and its applications.\cr
-Wiley, Chichester, UK.
+Bates DM & Watts DG.\cr
+Wiley, Chichester, UK, 1988.\cr
 
-Seber GAF and Wild CJ (1989).\cr
 Nonlinear regression.\cr
-Wiley, New York.
+Seber GAF & Wild CJ.\cr
+Wiley, New York, 1989.\cr
 
-Roy T (1994).\cr
 Boostrap accuracy for non-linear regression models.\cr
-\emph{J Chemometics}, \bold{8}: 37-44.
+Roy T.\cr
+\emph{J Chemometics} (1994), \bold{8}: 37-44.
 }
           
 \examples{

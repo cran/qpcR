@@ -22,7 +22,7 @@ Calling the function writes a list named \code{parMAKs} with the three parameter
 }
 
 \value{
-A list with three items is written to the global environment.
+A list with the three items is written to the global environment.
 }
 
 \author{
@@ -30,6 +30,7 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
+\dontrun{
 ## fitting a mak2 model (no slope parameter)
 m1 <- pcrfit(reps, 1, 2, mak2)
 plot(m1)
@@ -43,6 +44,7 @@ BIC(m2)
 ## using a spline fit
 parMAK(SS.deriv = "spline")
 m3 <- pcrfit(reps, 1, 2, mak3)
+}
 }
 
 \keyword{models}

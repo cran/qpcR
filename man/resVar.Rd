@@ -17,8 +17,12 @@ resVar(object)
  }
 
 \value{
-The residual variance of the fit:
-\deqn{\frac{RSS}{n - p}}
+The residual variance of the fit.
+}
+
+\details{
+\deqn{resVar = \frac{\sum_{i=1}^n(y_i - \hat{y}_i)^2}{n - p}}
+where \eqn{n} is the number of response values and \eqn{p} the number of parameters in the model.
 }
 
 \author{

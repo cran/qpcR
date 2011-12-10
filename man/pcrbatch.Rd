@@ -6,28 +6,32 @@
 \title{Batch calculation of qPCR efficiency and other qPCR parameters}
 
 \description{
-This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}} and \code{\link{expfit}} or the coefficients from a \code{mak3} model on a dataframe containing many qPCR runs. The input can also be a list obtained from \code{\link{modlist}}, which simplifies things in many cases. The output is a dataframe with the estimated parameters and model descriptions. Very easy to use on datasheets containing many qPCR runs, i.e. as can be imported from Excel. The result is automatically copied to the clipboard.
+This function batch calculates the results obtained from \code{\link{efficiency}}, \code{\link{sliwin}}, \code{\link{expfit}}, \code{\link{LRE}} or the coefficients from any of the \code{mak} models on a dataframe containing many qPCR runs. The input can also be a list obtained from \code{\link{modlist}}, which simplifies things in many cases. The output is a dataframe with the estimated parameters and model descriptions. Very easy to use on datasheets containing many qPCR runs, i.e. as can be imported from Excel. The result is automatically copied to the clipboard.
 }
 
 \usage{
-pcrbatch(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
-         checkPAR = parKOD(), remove = c("none", "fit", "KOD"), 
-         type = "cpD2", labels = NULL, norm = FALSE, backsub = NULL,
+pcrbatch(x, cyc = 1, fluo = NULL, 
+         methods = c("sigfit", "sliwin", "expfit", "LRE"),
+         model = l4, check = "uni2", checkPAR = parKOD(), 
+         remove = c("none", "fit", "KOD"), exclude = NULL, 
+         type = "cpD2", labels = NULL, norm = FALSE, backsub = NULL, 
          smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
          smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
          optPAR = list(sig.level = 0.05, crit = "ftest"), 
-         do.mak = FALSE, group = NULL, names = c("group", "first"),
-         plot = TRUE, verbose = TRUE, ...)
+         group = NULL, names = c("group", "first"), plot = TRUE, 
+         verbose = TRUE, ...)
 }
 
 \arguments{
   \item{x}{a dataframe containing the qPCR raw data from the different runs or a list obtained from \code{\link{modlist}}.}
   \item{cyc}{the column containing the cycle data. Defaults to first column.}
   \item{fluo}{the column(s) (runs) to be analyzed. If \code{NULL}, all runs will be considered.}
+  \item{methods}{a character vector defining the methods to use. See 'Details'.}
   \item{model}{the model to be used for all runs.} 
   \item{check}{the method for outlier detection in \code{\link{KOD}}. Default is check for sigmoidal structure.}
   \item{checkPAR}{parameters to be supplied to the \code{check} method.}
   \item{remove}{which runs to remove. Either \code{none}, those which failed to \code{fit} or from the outlier methods.}
+  \item{exclude}{either \code{""} for samples with missing column names or a regular expression defining columns (samples) to be excluded from \code{pcrbatch}. See 'Details' and 'Examples' in \code{\link{modlist}}.}
   \item{type}{the point on the amplification curve from which the efficiency is estimated. See \code{\link{efficiency}}.}  
   \item{labels}{a vector containing labels, i.e. for defining replicate groups prior to \code{\link{ratiobatch}}.}  
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
@@ -37,16 +41,15 @@ pcrbatch(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
   \item{factor}{a multiplication factor for the fluorescence response values (barely useful, but who knows...).}
   \item{opt}{logical. Should model selection be applied to each model?}
   \item{optPAR}{parameters to be supplied to \code{\link{mselect}}.}
-  \item{do.mak}{logical. If \code{TRUE}, a \code{\link{mak3}} model is fit and the coefficients attached. Time intensive, hence omitted in default.}
-   \item{group}{a vector containing the grouping for possible replicates.}
-   \item{names}{how to name the grouped fit. Either 'group_1, ...' or the first name of the replicates.}   
+  \item{group}{a vector containing the grouping for possible replicates.}
+  \item{names}{how to name the grouped fit. Either 'group_1, ...' or the first name of the replicates.}   
   \item{plot}{logical. If \code{TRUE}, the single runs are plotted from the internal 'modlist' for diagnostics.}
   \item{verbose}{logical. If \code{TRUE}, fitting and tagging results will be displayed in the console.}  
   \item{...}{other parameters to be passed to downstream methods.} 
 }
 
 \details{
-The qPCR raw data should be arranged with the cycle numbers in the first column with the name "Cycles". All subsequent columns must be plain raw data with sensible column descriptions. If replicates are defined by \code{group}, the output will contain a numbering of groups (i.e. "group_1" for the first replicate group). The model selection process is optional, but we advocate using this for obtaining better parameter estimates. Normalization has been described to improve certain qPCR analyses, but this has still to be independently evaluated. Background subtraction is done by averaging the \code{backsub} cycles of the run and subtracting this from all data points. In case of unsuccessful model fitting or lack of sigmoidal structure, the names are tagged by *NAME* or **NAME**, respectively, and the column has no values (if \code{remove = FALSE}). However, if \code{remove = TRUE}, the  failed runs are excluded from the output. Likewise to \code{\link{modlist}}, if a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. 
+The \code{methods} vector is used for defining the different methods from which \code{pcrbatch} will concatenate the results. The \code{mak} models are omitted by default, because fitting is time-expensive. If they should be included, just add \code{"mak3"} to \code{methods}. See 'Examples'. The qPCR raw data should be arranged with the cycle numbers in the first column with the name "Cycles". All subsequent columns must be plain raw data with sensible column descriptions. If replicates are defined by \code{group}, the output will contain a numbering of groups (i.e. "group_1" for the first replicate group). The model selection process is optional, but we advocate using this for obtaining better parameter estimates. Normalization has been described to improve certain qPCR analyses, but this has still to be independently evaluated. Background subtraction is done by averaging the \code{backsub} cycles of the run and subtracting this from all data points. In case of unsuccessful model fitting or lack of sigmoidal structure, the names are tagged by *NAME* or **NAME**, respectively (if \code{remove = FALSE}). However, if \code{remove = TRUE}, the  failed runs are excluded from the output. Likewise to \code{\link{modlist}}, if a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. 
 }
 
 \value{
@@ -80,16 +83,13 @@ res3 <- pcrbatch(reps, fluo = 2:5, group = c(1,1,2,3),
                  opt = TRUE, optPAR = list(crit = "weights"))
 
 \dontrun{
-## fitting a 'mak3' mechanistic model
-res4 <- pcrbatch(reps, do.mak = TRUE)
+## fitting a sigmoidal and 'mak3' mechanistic model
+res4 <- pcrbatch(reps, methods = c("sigfit", "mak3"))
 View(res4)
 
 ## converting a 'modlist' to 'pcrbatch'
 ml1 <- modlist(reps, 1, 2:5, b3)
 res5 <- pcrbatch(ml1)
-
-## complete dataset
-res6 <- pcrbatch(reps)
 }    
 }
 

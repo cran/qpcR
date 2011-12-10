@@ -6,6 +6,7 @@ model = l4,
 check = "uni2",
 checkPAR = parKOD(),
 remove = c("none", "fit", "KOD"),
+exclude = NULL,
 labels = NULL, 
 norm = FALSE,
 backsub = NULL,
@@ -43,12 +44,23 @@ verbose = TRUE,
     LABNAME <- "lab"
   }
     
-  modLIST <- vector("list", length = length(fluo))   
-   
   CYCLES <- x[, cyc]
-  allFLUO <- x[, fluo, drop = FALSE]
-  NAMES <- colnames(allFLUO)    
+  allFLUO <- x[, fluo, drop = FALSE]  
+  NAMES <- colnames(x)[fluo]
   
+  ## from 1.3-6: exclude columns with no (default) or specific column names
+  if (!is.null(exclude)) {
+    if (exclude == "") SEL <- which(NAMES == "") 
+    else SEL <- grep(exclude, NAMES)  
+    if (length(SEL) > 0) {
+      allFLUO <- allFLUO[, -SEL]
+      NAMES <- NAMES[-SEL]
+    }
+  }
+  
+  ## pre-allocate model list
+  modLIST <- vector("list", length = ncol(allFLUO))
+    
   for (i in 1:ncol(allFLUO)) {
     FLUO  <- allFLUO[, i]      
     NAME <- NAMES[i]
@@ -153,7 +165,7 @@ verbose = TRUE,
       if (verbose) cat(" => Removing from fit:", NAMES[SEL], "... \n", sep = " ")
       flush.console()
       modLIST <- modLIST[-SEL]      
-      if (verbose) cat(" => Updating", LABNAME, "and Writing", paste(LABNAME, "_mod", sep = ""), "to global environment...\n\n", sep = " ")
+      if (verbose) cat(" => Updating", LABNAME, "and writing", paste(LABNAME, "_mod", sep = ""), "to global environment...\n\n", sep = " ")
       flush.console()    
       LABELS <- LABELS[-SEL]    
       assign(paste(LABNAME, "_mod", sep = ""), LABELS, envir = .GlobalEnv)        

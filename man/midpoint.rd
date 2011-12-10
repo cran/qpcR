@@ -1,10 +1,10 @@
 \name{midpoint}
 \alias{midpoint}
 
-\title{Calculation of the 'midpoint' region according to Peirson et al. (2003)}
+\title{Calculation of the 'midpoint' region}
 
 \description{
-Calculates the exponential region midpoint using the algorithm described under 'References'.
+Calculates the exponential region midpoint using the algorithm described in Peirson \emph{et al}. (2003).
 }
 
 \usage{
@@ -18,7 +18,7 @@ midpoint(object, noise.cyc = 1:5)
 
 \details{
 The 'midpoint' region is calculated by \deqn{F_{noise} \cdot \sqrt{\frac{F_{max}}{F_{noise}}}}
- with \eqn{Fnoise} = the standard deviation of the background cycles and \eqn{Fmax} = the maximal fluorescence.
+ with \eqn{F_{noise}} = the standard deviation of the background cycles and \eqn{F_{max}} = the maximal fluorescence.
 }
 
 \value{
@@ -32,8 +32,9 @@ Andrej-Nikolai Spiess
 }
 
 \references{
-Experimental validation of novel and conventional approaches to quantitative real-time PCR data analysis.
-Peirson et al., \emph{Nucleic Acids Research}, 2003, \bold{e73}.  
+Experimental validation of novel and conventional approaches to quantitative real-time PCR data analysis.\cr
+Peirson SN, Butler JN & Foster RG.\cr
+\emph{Nucleic Acids Research} (2003), \bold{31}: e73.  
 }
 
 \examples{

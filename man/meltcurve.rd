@@ -6,13 +6,7 @@
 
 \description{
 This function conducts a melting curve analysis from the melting curve data of a real-time qPCR instrument.
-The data has to be preformatted in a way that for each column of temperature values there exists a corresponding fluorescence value column.
-See \code{edit(dyemelt)} for a proper format. The output is a graph displaying the raw fluorescence curve (black), the first derivative curve (red)
- and the identified melting peaks. The original data together with the results (\emph{dF.dT} values, \eqn{T_m} values) are returned as a list. An
- automatic optimization procedure is also implemented which iterates over \code{span.smooth} and \code{span.peaks} values and finds the optimal parameter
- combination that delivers minimum residual sum-of-squares of the identified \eqn{T_m} values to known \eqn{T_m} values. For all peaks, the areas can
- be calculated and only those included which have areas higher than a given cutoff (\code{cut.Area}). If no peak was identified meeting the cutoff values,
- the melting curves are flagged with a 'bad' attribute. See 'Details'. 
+The data has to be preformatted in a way that for each column of temperature values there exists a corresponding fluorescence value column. See \code{edit(dyemelt)} for a proper format. The output is a graph displaying the raw fluorescence curve (black), the first derivative curve (red) and the identified melting peaks. The original data together with the results (\eqn{-\frac{\partial F}{\partial T}} values, \eqn{T_m} values) are returned as a list. An automatic optimization procedure is also implemented which iterates over \code{span.smooth} and \code{span.peaks} values and finds the optimal parameter combination that delivers minimum residual sum-of-squares of the identified \eqn{T_m} values to known \eqn{T_m} values. For all peaks, the areas can be calculated and only those included which have areas higher than a given cutoff (\code{cut.Area}). If no peak was identified meeting the cutoff values, the melting curves are flagged with a 'bad' attribute. See 'Details'. 
 }
 
 \usage{
@@ -53,7 +47,7 @@ Then, the function \code{qpcR:::TmFind} conducts the following steps:\cr
 2c) Friedman's supersmoother (\code{\link{supsmu}}) is applied to the first derivative values.\cr
 2d) Melting peaks (\eqn{T_m}) values are identified by \code{qpcR:::peaks}.\cr
 2e) Raw melt data, first derivative data, best parameters, residual sum-of-squares and identified \eqn{T_m} values are returned.\cr 
-Peak areas are then calculated by \code{qpcR:::peakArea} by:\cr
+Peak areas are then calculated by \code{qpcR:::peakArea}:\cr
 3a) A linear regression curve is fit from the leftmost temperature value (\eqn{T_m} - \code{Tm.border}[1]) to the rightmost temperature value (\eqn{T_m} + \code{Tm.border}[2]) by \code{\link{lm}}.\cr
 3b) A baseline curve is calculated from the regression coefficients by \code{\link{predict.lm}}.\cr
 3c) The baseline data is subtracted from the first derivative melt data (baselining).\cr
@@ -63,21 +57,16 @@ Peak areas are then calculated by \code{qpcR:::peakArea} by:\cr
 Finally,\cr
 5) A matrix of xyy-plots is displayed using \code{qpcR:::xyy.plot}.\cr
 
-\code{is.deriv} must be set to \code{TRUE} if the exported data was already transformed to df/dT by the PCR system (i.e. Stratagene MX3000P).\cr
+\code{is.deriv} must be set to \code{TRUE} if the exported data was already transformed to \eqn{-\frac{\partial F}{\partial T}} by the PCR system (i.e. Stratagene MX3000P).\cr
 
-If values are given to \code{Tm.opt} (see 'Examples'), then \code{meltcurve} is iterated over all combinations of \code{span.smooth = seq(0, 0.2, by = 0.01)}
- and \code{span.peaks = seq(11, 201, by = 10)}. For each iteration, \eqn{T_m} values are calculated and compared to those given by measuring the residual
- sum-of-squares between the given values \code{Tm.opt} and the \code{TMs} obtained during the iteration:
- \deqn{RSS = \sum_{i=1}^n{(TM_i - Tm.opt_i)^2}} 
+If values are given to \code{Tm.opt} (see 'Examples'), then \code{meltcurve} is iterated over all combinations of \code{span.smooth = seq(0, 0.2, by = 0.01)} and \code{span.peaks = seq(11, 201, by = 10)}. For each iteration, \eqn{T_m} values are calculated and compared to those given by measuring the residual sum-of-squares between the given values \code{Tm.opt} and the \eqn{Tm} values obtained during the iteration:
+ \deqn{RSS = \sum_{i=1}^n{(Tm_i - Tm.opt_i)^2}} 
 
-The returned list items containing the resulting data frame each has an attribute \code{"quality"} which is set to "bad" if none of the peaks met
- the \code{cut.Area} criterion (or "good" otherwise).
+The returned list items containing the resulting data frame each has an attribute \code{"quality"} which is set to "bad" if none of the peaks met the \code{cut.Area} criterion (or "good" otherwise).
 }
 
 \value{
-A list with as many items as melting curves, named as in \code{data}, each containing a data.frame with the temperature (\emph{Temp}), 
- fluorescence values (\emph{Fluo}), first derivative (\emph{dF.dT}) values, (optimized) parameters of \emph{span.smooth}/\emph{span.peaks}, residual sum-of-squares (if \code{Tm.opt != NULL}),
- identified melting points (\emph{Tm}), calculated peak areas (\emph{Area}) and peak baseline values (\emph{baseline}).  
+A list with as many items as melting curves, named as in \code{data}, each containing a data.frame with the temperature (\emph{Temp}), fluorescence values (\emph{Fluo}), first derivative (\emph{dF.dT}) values, (optimized) parameters of \emph{span.smooth}/\emph{span.peaks}, residual sum-of-squares (if \code{Tm.opt != NULL}), identified melting points (\emph{Tm}), calculated peak areas (\emph{Area}) and peak baseline values (\emph{baseline}).  
 }
 
 \note{

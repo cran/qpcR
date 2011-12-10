@@ -4,8 +4,8 @@
 \title{Comparison of all sigmodal models within the exponential region}
 
 \description{
-The exponential region of the qPCR data is identified by the studentized outlier method, as in \link{expfit}.
-The root-mean-squared-error of all available sigmoidal models within this region is then calculated.
+The exponential region of the qPCR data is identified by the studentized outlier method, as in \code{\link{expfit}}.
+The root-mean-squared-error (RMSE) of all available sigmoidal models within this region is then calculated.
 The result of the fits are plotted and models returned in order of ascending RMSE.
 }
 

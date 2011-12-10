@@ -1,31 +1,28 @@
 \name{evidence}
 \alias{evidence}
 
-\title{Evidence ratio for model comparison with AIC or AICc}
+\title{Evidence ratio for model comparisons with AIC, AICc or BIC}
 
 \description{
-The evidence ratio \deqn{\frac{1}{exp(-0.5 * (AIC2 - AIC1))}} is calculated for either two fitted models or two numerical values.
-Models can be compared that are not nested and where the f-test on residual-sum-of-squares is not applicable.
+The evidence ratio \deqn{\frac{1}{exp(-0.5 \cdot (IC2 - IC1))}} is calculated for one of the information criteria \eqn{IC = AIC, AICc, BIC} either from two fitted models or two numerical values. Models can be compared that are not nested and where the f-test on residual-sum-of-squares is not applicable.
 }
 
 \usage{
-evidence(x, y, type = c("AICc", "AIC"))
+evidence(x, y, type = c("AIC", "AICc", "BIC"))
 }
 
 \arguments{
   \item{x}{a fitted object or numerical value.}
   \item{y}{a fitted object or numerical value.}
-  \item{type}{Bias-corrected (\code{\link{AICc}}, default) or original (\code{\link{AIC}}) versions of the Akaike Information Criterion.} 
+  \item{type}{any of the three Information Criteria \code{AIC, AICc or BIC}.} 
 }
 
 \details{
-Small differences in AIC values can mean substantial more 'likelihood' of one model over the other.
-For example, a model with AIC = -130 is nearly 150 times more likely than a model with AIC = -120.   
+Small differences in values can mean substantial more 'likelihood' of one model over the other. For example, a model with AIC = -130 is nearly 150 times more likely than a model with AIC = -120.   
 }
 
 \value{
-A value of the first model \code{x} being more likely than the second model \code{y}.
-If large, first model is better. If small, second model is better.
+A value of the first model \code{x} being more likely than the second model \code{y}. If large, first model is better. If small, second model is better.
 }
 
 \author{

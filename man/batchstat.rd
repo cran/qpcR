@@ -6,8 +6,7 @@
 \title{Concatenating or calculating statistics on a 'pcrbatch'}
 
 \description{
-This function will either concatenate data from several \code{pcrbatch}es or calculate some user-defined statistic on the runs within a \code{pcrbatch}.
-If the latter is chosen, a grouping vector must be supplied for defining the runs to be subjected to statistical analysis.
+This function will either concatenate data from several \code{pcrbatch}es or calculate some user-defined statistic on the runs within a \code{pcrbatch}. If the latter is chosen, a grouping vector must be supplied for defining the runs to be subjected to statistical analysis.
 }
 
 \usage{
@@ -26,8 +25,7 @@ batchstat(..., group = NULL,  do = c("cbind", "stat"), statfun = mean)
 }
 
 \value{
-Either a concatenated dataframe (\code{do = "cbind"}), or a list containing a dataframe(s) with the statistical output for each
- factor level defined in \code{group}, if \code{do = "stat"}. 
+Either a concatenated dataframe (\code{do = "cbind"}), or a list containing a dataframe(s) with the statistical output for each factor level defined in \code{group}, if \code{do = "stat"}. 
 } 
 
 \author{
@@ -35,6 +33,7 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
+\dontrun{
 ## create 3 'pcrbatch'es
 ## and concatenate
 dat1 <- pcrbatch(reps, fluo = 2:5, model = l4, plot = FALSE)
@@ -56,6 +55,7 @@ batchstat(dat4, do = "stat", group = GROUP, statfun = sd)
 ## All batches must have same length!
 batchstat(dat1, dat2, dat3, do = "stat", 
           group = c(1, 1, 2, 2)) 
+}
 }
 
 \keyword{models}

@@ -4,8 +4,7 @@
 \title{The maxRatio method as in Shain et al. (2008)}
 
 \description{
-The maximum ratio (MR) is determined along the cubic spline interpolated curve of F(x)/F(x-1) and the corresponding
-cycle numbers FCN and its adjusted version FCNA are then calculated for MR.
+The maximum ratio (MR) is determined along the cubic spline interpolated curve of \eqn{\frac{F_n}{F_{n-1}}} and the corresponding cycle numbers FCN and its adjusted version FCNA are then calculated for MR.
 }
 
 \usage{
@@ -23,12 +22,8 @@ maxRatio(x, type = c("spline", "sigfit"), baseshift = NULL,
 }
 
 \details{                   
-In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for
- many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{y_i = y_i + baseshift} (baseline shifting).
- Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{y_n}{y_{n-1}}-1)}.
- \emph{FCN} is then calculated as the cycle number at \emph{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2(MR)}.
- Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated.
- This must be resolved by tweaking the \code{baseshift} value.  
+In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{F_n = F_n + baseshift} (baseline shifting).
+ Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{F_n}{F_{n-1}}-1)}. \eqn{FCN} is then calculated as the cycle number at \eqn{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2(MR)}. Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated. This must be resolved by tweaking the \code{baseshift} value.  
 }
 
 \value{
@@ -51,16 +46,17 @@ This function has been approved by the original author (Eric Shain).
 \references{
 A new method for robust quantitative and qualitative analysis of real-time PCR.\cr
 Shain EB & Clemens JM.\cr
-\emph{Nucleic Acids Research}, 2008, \bold{36}, e91.
+\emph{Nucleic Acids Research} (2008), \bold{36}: e91.
 }
 
 \examples{
 ## on single curve
+## using baseline shifting
 m1 <- pcrfit(reps, 1, 2, l5)
 maxRatio(m1, baseshift = 0.3)     
 
 ## on a 'modlist'
-## using 'baseline shifting' and 
+## using 'baseline shifting' 
 \dontrun{
 ml1 <- modlist(reps, model = l5) 
 maxRatio(ml1, baseshift = 0.5)

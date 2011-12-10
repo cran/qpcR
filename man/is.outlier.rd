@@ -30,8 +30,8 @@ Andrej-Nikolai Spiess
 \examples{
 ## analyze in respect to amplification
 ## efficiency outliers
-ml1 <- modlist(reps, check = "uni2")
-res1 <- KOD(ml1)
+ml1 <- modlist(reps)
+res1 <- KOD(ml1, check = "uni2")
 
 ## which runs are outliers?
 outl <- is.outlier(res1)
@@ -40,7 +40,7 @@ which(outl)
 
 ## test for sigmoidal outliers
 ## with the 'testdat' dataset
-ml2 <- modlist(testdat, check = "uni2")
+ml2 <- modlist(testdat, model = l5, check = "uni2")
 is.outlier(ml2)    
 }
 

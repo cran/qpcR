@@ -3,11 +3,10 @@
 
 \encoding{latin1}
 
-\title{Function for qPCR model fitting}
+\title{Workhorse function for qPCR model fitting}
 
 \description{
-This is the main workhorse function of the qpcR package that fits one of the available models to qPCR data using nonlinear least-squares fitting from \code{\link{nls}}, 
- with sensible starting parameters obtained from either \code{\link{nls.lm}} (default) or \code{\link{optim}}.
+This is the main workhorse function of the qpcR package that fits one of the available models to qPCR data using nonlinear least-squares fitting from \code{\link{nls}}, with sensible starting parameters obtained from either \code{\link{nls.lm}} (default) or \code{\link{optim}}.
 }
 
 \usage{
@@ -21,7 +20,7 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
   \item{data}{the name of the dataframe containing the qPCR runs.}
   \item{cyc}{the column containing the cycle data. Defaults to 1.}
   \item{fluo}{the column(s) containing the raw fluorescence data of the run(s). If more than one column is given, the model will be built with the replicates. See 'Details' and 'Examples'.}
-  \item{model}{the model to be used for the analysis. Defaults to l4.} 
+  \item{model}{the model to be used for the analysis. Defaults to 'l4'.} 
   \item{do.optim}{if \code{FALSE}, refinement of starting values by any of the optimization methods (see 'Details') will be skipped.}
   \item{opt.method}{all or one of the available optimization methods. See 'Details'.}
   \item{nls.method}{all or one of the available methods in \code{\link{nls}}. See 'Details'.}
@@ -33,26 +32,17 @@ pcrfit(data, cyc = 1, fluo, model = l4, do.optim = TRUE,
 }
 
 \details{
-The fitting procedure works as follows (hopefully ensuring maximum safeness against convergence errors):
+The fitting procedure works as follows (ensuring maximum safeness against convergence errors):
 
 1) Approximate starting values are acquired from \code{model$ssfct}.\cr
-2) Starting values are refined by any of the methods available in \code{optim} or the Levenberg-Marquardt algorithm (\code{nls.lm}). 
- The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", and "SANN".
- If any of the methods successfully converged, the remaining are skipped and the refined starting values transferred to \code{\link{nls}}.  
- The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to
- each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting 
- values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default first method.\cr 
-3) The refined starting values from 2) are fitted with \code{\link{nls}} using the order "port", "default" (Gauss-Newton) and "plinear".
- Again, if any of the methods converged, the remaining are skipped.    
+2) Starting values are refined by any of the methods available in \code{optim} or the Levenberg-Marquardt algorithm (\code{nls.lm}). The default setting is \code{all}, meaning that the optimization is done in the order "LM", "BFGS", "Nelder-Mead", and "SANN". If any of the methods successfully converged, the remaining are skipped and the refined starting values transferred to \code{\link{nls}}. The \code{opt.method}s can be combined to tweak the robustness, whereby the starting parameters are passed to each succeeding method, i.e. rep("Nelder", 5) will do 5 successive Nelder-Mead optimisations or c("LM", "Nelder") will pass the starting values from "LM" to "Nelder". Levenberg-Marquardt ("LM") is very fast and reliable in many scenarios and is thus the default first method.\cr 
+3) The refined starting values from 2) are fitted with \code{\link{nls}} using the order "port", "default" (Gauss-Newton) and "plinear". Again, if any of the methods converged, the remaining are skipped.    
 
-This function is to be used at the single run level or on replicates (by giving several columns). The latter will built a model based on the replicate values,
- but only one! If many models should be built on a cohort of replicates, use \code{\link{modlist}} and \code{\link{replist}}.
+This function is to be used at the single run level or on replicates (by giving several columns). The latter will build a single model based on the replicate values. If many models should be built on a cohort of replicates, use \code{\link{modlist}} and \code{\link{replist}}.
 
 The output from the optim methods is checked by ensuring all eigenvalues from the hessian are positive, otherwise a notice will occur and the next method in queue is used.  
 
-If \code{robust = TRUE}, robust nonlinear fitting will be used. To do this, the internal function \code{qpcR:::rnls} is called
- which is a modification of the \code{nlrob} function of the 'robustbase' package. Modifications were done such that all available generic functions
-  for objects of class 'nls' can be used on the output of \code{qpcR:::rnls}, such as \code{predict}, \code{confint} etc.
+If \code{robust = TRUE}, robust nonlinear fitting will be used. To do this, the internal function \code{qpcR:::rnls} is called which is a modification of the \code{nlrob} function of the 'robustbase' package. Modifications were done such that all available generic functions for objects of class 'nls' can be used on the output of \code{qpcR:::rnls}, such as \code{predict}, \code{confint} etc.
 }
 
 \value{

@@ -2,10 +2,12 @@ pcrbatch <- function(
 x, 
 cyc = 1, 
 fluo = NULL, 
+methods = c("sigfit", "sliwin", "expfit", "LRE"),
 model = l4, 
 check = "uni2",
 checkPAR = parKOD(),
 remove = c("none", "fit", "KOD"),
+exclude = NULL, 
 type = "cpD2",
 labels = NULL, 
 norm = FALSE,
@@ -15,7 +17,6 @@ smoothPAR = list(span = 0.1),
 factor = 1,
 opt = FALSE,
 optPAR = list(sig.level = 0.05, crit = "ftest"),
-do.mak = FALSE,
 group = NULL,
 names = c("group", "first"),
 plot = TRUE,
@@ -25,13 +26,13 @@ verbose = TRUE,
   remove <- match.arg(remove)
   smooth <- match.arg(smooth)  
   names <- match.arg(names)
-        
+    
   ## make initial 'modlist'
   if (class(x) != "modlist") {  
     if (names(x)[cyc] != "Cycles") stop("Column 1 should be named 'Cycles'!")
     modLIST <- try(modlist(x = x, cyc = cyc, fluo = fluo, model = model, check = check, checkPAR = checkPAR,
-                       remove = remove, labels = labels, norm = norm, backsub = backsub, smooth = smooth,
-                       smoothPAR = smoothPAR, factor = factor, opt = opt, optPAR = optPAR, 
+                       remove = remove, exclude = exclude, labels = labels, norm = norm, backsub = backsub, 
+                       smooth = smooth, smoothPAR = smoothPAR, factor = factor, opt = opt, optPAR = optPAR, 
                        verbose = verbose, ...), silent = TRUE)   
     if (inherits(modLIST, "try-error")) stop("There was an error during 'modlist' creation.")
   } else modLIST <- x 
@@ -43,6 +44,8 @@ verbose = TRUE,
     if (inherits(repLIST, "try-error")) cat("There was an error during 'replist' creation. Continuing with original 'modlist'...\n")
     else modLIST <- repLIST
   }  
+  
+  cat("\n")
                               
   ## plot diagnostics, if selected
   if (plot) plot(modLIST, which = "single")
@@ -57,48 +60,67 @@ verbose = TRUE,
     flush.console()
     
     ## sigmoidal model
-    cat("  Calculating 'eff' and 'ct' from sigmoidal model...\n")
-    flush.console()
-    EFF <- try(efficiency(fitOBJ, plot = FALSE, type = type, ...), silent = TRUE)
-    if (!inherits(EFF, "try-error")) EFF <- c(EFF, coef(fitOBJ), model = fitOBJ$MODEL$name) else EFF <- list(eff = NA)
-    names(EFF) <- paste("sig.", names(EFF), sep = "") 
-        
-    ## sliding window method
-    cat("  Using window-of-linearity...\n")
-    SLI <- try(sliwin(fitOBJ, plot = FALSE, ...)[1:3], silent = TRUE)
-    if (inherits(SLI, "try-error")) SLI <- list(eff = NA) 
-    names(SLI) <- paste("sli.", names(SLI), sep = "")       
-            
-    ## exponential model
-    cat("  Fitting exponential model...\n")
-    EXP <- try(expfit(fitOBJ, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
-    if (inherits(EXP, "try-error")) EXP <- list(eff = NA)
-    names(EXP) <- paste("exp.", names(EXP), sep = "")
+    if ("sigfit" %in% methods) {
+      cat("  Calculating 'eff' and 'ct' from sigmoidal model...\n")
+      flush.console()
+      EFF <- try(efficiency(fitOBJ, plot = FALSE, type = type, ...), silent = TRUE)
+      if (!inherits(EFF, "try-error")) EFF <- c(EFF, coef(fitOBJ), model = fitOBJ$MODEL$name) else EFF <- list(eff = NA)
+      names(EFF) <- paste("sig.", names(EFF), sep = "") 
+    } else EFF <- NULL
     
-    ## from 1.3-4: if MAK model selected, make model to attach, added
-    if (do.mak) {
-      cat("  Fitting mak3 model...\n")
-      MAK <- try(pcrfit(fitOBJ$DATA, 1, 2, mak3, verbose = FALSE), silent = TRUE)
+    ## sliding window method
+    if ("sliwin" %in% methods) {
+      cat("  Using window-of-linearity...\n")
+      SLI <- try(sliwin(fitOBJ, plot = FALSE, verbose = FALSE, ...)[1:4], silent = TRUE)
+      if (inherits(SLI, "try-error")) SLI <- list(eff = NA) 
+      names(SLI) <- paste("sli.", names(SLI), sep = "")       
+    } else SLI <- NULL
+      
+    ## exponential model
+    if ("expfit" %in% methods) {
+      cat("  Fitting exponential model...\n")
+      EXP <- try(expfit(fitOBJ, plot = FALSE, ...)[-c(2, 4, 9)], silent = TRUE)
+      if (inherits(EXP, "try-error")) EXP <- list(eff = NA)
+      names(EXP) <- paste("exp.", names(EXP), sep = "")
+    } else EXP <- NULL
+    
+    ## LRE method
+    if ("LRE" %in% methods) {
+      cat("  Using linear regression of efficiency (LRE)...\n")
+      LRES <- try(LRE(fitOBJ, plot = FALSE, verbose = FALSE, ...)[1:3], silent = TRUE)
+      if (inherits(LRES, "try-error")) LRES <- list(eff = NA) 
+      names(LRES) <- paste("LRE.", names(LRES), sep = "")       
+    } else LRES <- NULL    
+      
+    ## from 1.3-4: attach any of the MAK models 
+    if (length(pos <- grep("mak", methods))) {
+      TEXT <- methods[pos]
+      TEXT <- match.arg(TEXT, c("mak2", "mak3", "mak3n"))
+      MODEL <- get(TEXT)
+      cat("  Fitting", TEXT, "model...\n")
+      MAK <- try(pcrfit(fitOBJ$DATA, 1, 2, MODEL, verbose = FALSE), silent = TRUE)
       if (inherits(MAK, "try-error")) {
-        cat("There was an error in buidling the mak3 model. Continuing without...\n")
+        cat("There was an error in buidling the", TEXT, "model. Continuing without...\n")
         flush.console()
         MAK <- list(D0 = NA)
       } else {
         MAK <- coef(MAK)
-        names(MAK) <- paste("mak3.", names(MAK), sep = "")
+        names(MAK) <- paste(TEXT, ".", names(MAK), sep = "")
       }  
     } else MAK <- NULL
-           
-    outALL <- c(EFF, SLI, EXP, MAK)     
+  
+    outALL <- c(EFF, SLI, EXP, LRES, MAK)     
     outLIST[[i]] <- outALL
+    
+    cat("\n")
   }
   
-  allNAMES <- unique(unlist(lapply(outLIST, function(x) names(x))))
+  allNAMES <- unique(unlist(lapply(outLIST, function(x) names(x))))  
   resMAT <- matrix(nrow = length(allNAMES), ncol = length(outLIST) + 1)
   resMAT <- as.data.frame(resMAT)
   resMAT[, 1] <- allNAMES
      
-  ## aggregate all results into a dataframe by 'merge'
+  ## aggregate all results into a dataframe by 'matching'
   for (i in 1:length(outLIST)) {
     tempDAT <- t(as.data.frame(outLIST[[i]]))
     m <- match(resMAT[, 1], rownames(tempDAT))
