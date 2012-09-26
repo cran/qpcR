@@ -30,13 +30,13 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-## single model
-m1 <- pcrfit(reps, 1, 2, l5)
+## Single model.
+m1 <- pcrfit(reps, 1, 2, l7)
 Rsq.ad(m1)
 
-## compare different models with increasing
-## number of parameters
-ml1 <- lapply(list(l3, l4, l5), function(x) pcrfit(reps, 1, 2, x))
+## Compare different models with increasing
+## number of parameters.
+ml1 <- lapply(list(l4, l5, l6), function(x) pcrfit(reps, 1, 2, x))
 sapply(ml1, function(x) Rsq.ad(x)) 
 }
 

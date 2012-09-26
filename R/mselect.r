@@ -16,13 +16,13 @@ do.all = FALSE,
   mtype <- object$MODEL$name     
 
   if (is.null(fctList)) {
-    if (mtype %in% c("b3", "b4", "b5", "b6", "b7")) fctLIST <- list(b3, b4, b5, b6, b7)
-    if (mtype %in% c("l3", "l4", "l5", "l6", "l7")) fctLIST <- list(l3, l4, l5, l6, l7)
+    if (mtype %in% c("b4", "b5", "b6", "b7")) fctLIST <- list(b4, b5, b6, b7)
+    if (mtype %in% c("l4", "l5", "l6", "l7")) fctLIST <- list(l4, l5, l6, l7)
     if (mtype == "mak2" || mtype == "mak3") fctLIST <- list(mak2, mak3)
   } else fctLIST <- fctList
   
   if (do.all) {
-      fctLIST <- list(l3, l4, l5, l6, l7, b3, b4, b5, b6, b7)
+      fctLIST <- list(l4, l5, l6, l7, b4, b5, b6, b7)
       crit <- "weights"
   }
   

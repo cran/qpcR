@@ -14,7 +14,7 @@ ratioPar(group = NULL, effVec = NULL, cpVec = NULL,
 }
 
 \arguments{
-  \item{group}{a character vector defining the replicates (if any) of control/treatment samples and reference genes/genes-of-interest. See 'Details'}.
+  \item{group}{a character vector defining the replicates (if any) of control/treatment samples and reference genes/genes-of-interest. See 'Details'.}
   \item{effVec}{a vector of efficiency values with the same length of \code{group}.}
   \item{cpVec}{a vector of threshold cycle values with the same length of \code{group}.}
   \item{type.eff}{type of efficiency averaging used. Same as in \code{\link{ratiocalc}}.}
@@ -46,8 +46,8 @@ Without reference genes:  \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls
 With reference genes: \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls_j)}}/\frac{E(r_kc_i)^{cp(r_kc_i)}}{E(r_ks_j)^{cp(r_ks_j)}}}
 For the mechanistic models \code{makX/cm3} the following is calculated:\cr
 
-Without reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}} 
-With reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}/\frac{D0(r_ks_j)}{D0(r_kc_i)}}
+Without reference genes: \deqn{\frac{D_0(g_ls_j)}{D_0(g_lc_i)}} 
+With reference genes: \deqn{\frac{D_0(g_ls_j)}{D_0(g_lc_i)}/\frac{D_0(r_ks_j)}{D_0(r_kc_i)}}
 
 Efficiencies can be taken from the individual samples or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}. Different settings in \code{type.eff} can yield very different results in ratio calculation. We observed a relatively stable setup which minimizes the overall variance using the \code{type.eff = "mean.single"}.   
 
@@ -100,13 +100,13 @@ RES1 <- ratioPar(group = GROUP1, effVec = EFF1, cpVec= CP1, refmean = FALSE)
 
 \dontrun{
 ## Same as above, but now we average the two
-## reference genes, so that we have 2 ratios
+## reference genes, so that we have 2 ratios.
 RES2 <- ratioPar(group = GROUP1, effVec = EFF1, cpVec= CP1, refmean = TRUE)
 
 ## Two control samples, one treatment sample, 
 ## one gene-of-interest, one reference gene, 
 ## no replicates. Reference gene has efficiency = 1.8,
-## gene-of-interest has efficiency = 1.9
+## gene-of-interest has efficiency = 1.9.
 GROUP3 <- c("r1c1", "r1c2", "g1c1", "g1c2", 
             "r1s1", "g1s1") 
 EFF3 <- c(1.8, 1.8, 1.9, 1.9, 1.8, 1.9)

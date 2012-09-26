@@ -1,12 +1,43 @@
+qpcR 1.3 - 8 (01-04-2014) 
+
+New functions: 
+	* included 'expSDM' as a new model that fits an exponential model from 1...SDM. The parameters obtained are => a = N0, Eff = exp(b).
+	* added 8 different smoothers for smoothing qPCR data prior to fitting. 
+	These are are implemented in 'modlist' with parameters to be set with "smoothPAR":
+	"lowess": Lowess smoothing, see lowess, parameter in smoothPAR: f.
+	"supsmu": Friedman's SuperSmoother, see supsmu, parameter in smoothPAR: span.
+	"spline": Smoothing spline, see smooth.spline, parameter in smoothPAR: spar.
+	"savgol": Savitzky-Golay smoother, qpcR:::savgol, parameter in smoothPAR: none.
+	"kalman": Kalman smoother, see arima, parameter in smoothPAR: none.
+	"runmean": Running mean, see qpcR:::runmean, parameter in smoothPAR: wsize.
+	"whit": Whittaker smoother, see qpcR:::whittaker, parameter in smoothPAR: lambda.
+	"ema": Exponential moving average, see qpcR:::EMA, parameter in smoothPAR: alpha.
+	Whittaker (taken from the 'ptw' package) and EMA are recursive filters that have been implemented in C and are found in /src/smth.c
+	It can be debated if smoothers are of any avail. The author of this package advocates the use of "spline", "savgol" or "whit" because these three smoothers have the least influence on overall curve structure.
+
+Changes and bug-fixes in functions:
+	* 'modlist' now sets check = NULL when nonlinear models such as cm3/makX/spl3/lin2 are used.
+	* 'propagate' has a new second-order Taylor expansion implemented which (partly) compensates for nonlinearities in error propagation.
+	* fixed a bug in 'ratiobatch' and 'ratioPar' when sample sizes > 10 and single runs were supplied.
+	* fixed a bug in 'getPar' when first run did not fit, added cm3 as model.
+	* changed rlm to lm for starting parameters in all sigmoidal models (problems with 0 baseline).
+	* included conversion of data.frame into matrix in 'ratiocalc' to eliminate strange behavior in case of no replicates (bug kindly provided by Lucy Ternent).
+	* covariance matrix calculation within 'propagate' is now based on "pairwise.complete.obs", because "complete.obs" resulted in inconsistent results depending on sample order (bug kindly provided by Gottfried Martin). As this can result in covariance matrices that are not positive definite, a transformation using Matrix:::nearPD() has been included.
+	* fixed a bug in 'ratiocalc' that resulted in unrealistic Monte Carlo Simulations when using mak/cm3 models.
+  * removed assignments to global environment from some functions.
+	
+Removals:
+	* removed 'batchstat', 'curvemean', 'rep2mod', b3/l3 models, 'calib' function with "tilted threshold curve" (and renamed 'calib2' to 'calib'), 'HQIC', 'meanlist', 'neill.test' and 'pcropt2' because they were of more or less academic value but in practice barely useful.
+  
 qpcR 1.3 - 7 (24-09-2012) 
 
 Gargantuan update! 
 
 New functions:
     *pcrfit has been revamped and is now based solely on the nlsLM function of the "minpack.lm" package. Fitting by this Levenberg-Marquardt implementation is so fast and robust in its convergence characteristics that pre-optimization of starting values by optim could safely be removed.
-    *pcrfit can also now use a "weighting expression" to obtain weighted fits. So in addition to using a vector with weights (such as "weights = 1:10"), five different expressions can be used to obtain specific weights: "x" reflects the predictor values (cycles), "y" the response (fluorescence) values, "error" the error (standard deviation) of replicates, "fitted" the fitted values and "resid" the residual values of the fit. In the latter two cases the data is fit unweighted, fitted/residual values are extracted and the data refit with these values as weights. Example (weighting by inverse variance): pcrfit(reps, 1, 2, model = l4, weights = "1/error^2"). See 'Details' of this function in the qpcR manual. The expression can also be used in a batch format with modlist.
+    *pcrfit can also now use a "weighting expression" to obtain weighted fits. So in addition to using a vector with weights (such as "weights =?1:10"), five different expressions can be used to obtain specific weights:?"x" reflects the predictor values?(cycles), "y" the response (fluorescence) values, "error" the error (standard deviation) of replicates, "fitted" the fitted values and "resid" the residual values of the fit. In the latter two cases the data is fit unweighted, fitted/residual values are extracted and the data refit with these values as weights. Example (weighting by inverse variance): pcrfit(reps, 1, 2, model = l4, weights =?"1/error^2"). See 'Details' of this function in the qpcR?manual. The expression can also be used in a batch format with modlist.
     *mak2/mak3 models have been redesigned so that they fit without a grid-search over the parameters. This was made possible with the new pcrfit version. The older versions that conduct a grid-search have been renamed to mak2i/mak3i and should be used in cases where mak2/mak3 give convergence errors. They have also been optimized in respect to their starting parameters.
-    *Added four new models: lin2 is a bilinear model (two linear models connected by an exponential) from Peter Buchwald (see here) and which is fit from cycle 1 to first derivative max (FDM). The range can also be tweaked by the "offset" argument in pcrfit. cm3 is a recent model developed by Carr & Moore (see here) which, like mak2/mak3, belongs to the family of mechanistic models (no estimation of Cq/efficiency values but direct calculation of initial template fluorescence (D0) from the fit). In contrast to mak2/mak3, cm3 fits the complete sigmoid and not a subset thereof. It can also be used as a model within ratiocalc/pcrbatch. spl3 is a new cubic spline function, which like all cubic splines treats every point in the curve as exact (gives zero residual value). It was implemented for comparison purposes. Finally, linexp was implemented, a linear-exponential model with a sloped baseline: a * exp(b * x) + k * x + c. This model can also be used in exponential fitting by expfit, by setting model = "linexp". 
+    *Added four new models: lin2 is a bilinear model (two linear models connected by an exponential) from Peter Buchwald (see here) and which is fit from cycle 1 to first derivative max (FDM). The range can also be tweaked by the "offset" argument in pcrfit. cm3 is a recent model developed by Carr &?Moore (see here) which, like mak2/mak3, belongs to the family of mechanistic models (no estimation of Cq/efficiency values but direct calculation of initial template fluorescence (D0) from the fit). In contrast to mak2/mak3, cm3 fits the complete sigmoid and not a subset thereof. It can also be used as a model within ratiocalc/pcrbatch. spl3 is a new cubic spline function, which like all cubic splines treats every point in the curve as exact (gives zero residual value). It was implemented for comparison purposes. Finally, linexp was implemented, a linear-exponential model with a sloped baseline: a * exp(b?*?x) + k * x + c. This model can also be used in exponential fitting by expfit, by setting model =?"linexp". 
     *propagate can now do Monte-Carlo simulations based on a truncated multivariate normal distribution. For each of the input variables, a 95% confidence interval is calculated. The bounds of these intervals are plugged into function qpcR:::tmvrnorm (taken from tmvtnorm:::rtmvnorm.rejection) and a truncated multivariate distribution is obtained which is then processed in the usual way. The reason for using a truncated form is that the distribution of the result will have less extreme values (that affect the confidence interval) and also often less skewness.
     *Added ratioPar, which is effectively a version of ratiobatch for external data (Cq/efficiency values). It conducts the complete batch ratio calculation and error propagation approach as ratiobatch, but is specifically tailored to work with vectors of external Cq and efficiency values, as obtained from many qPCR softwares.
     *Added 6 new datasets in the package and on the 'Datasets' page: karlen1, karlen2, karlen3 => dilution data from Karlen et al. (2007). reps384 (a 380-replicate set), dil4reps94 (four 10-fold dilutions with 94 replicates each) and competimer (a setup with 7 concentrations of inhibitor) from Ruijter et al. (2012).
@@ -14,15 +45,15 @@ New functions:
 Changes and bug-fixes in functions:
     *pcrfit has a new argument "offset", which defines an offset cycle from the second derivative max (SDM) and defines the cut-off value for fitting mak2/mak3 models. It replaces the parMAK function, which has been removed.
     *qpcR:::fetchData has been revamped so PRESS can be run on models with several predictor variables.
-    *efficiency has a new "baseline" method ("baseline = TRUE") which fits the sigmoidal model, extracts the baseline parameter ("c"), subtracts this value from the data and then refits the model. This is useful for qPCR runs with significant baseline values (TaqMan etc...) since this has substantial impact on efficiency estimation. "baseline" is now also present as an argument in modlist and pcrbatch and substitutes the former "backsub".
-    *efficiency argument "type" has been renamed to "method", which makes it compatible within the efficiency function (avoids double argument collision). 
+    *efficiency has a new "baseline" method ("baseline =?TRUE") which fits the sigmoidal model, extracts the baseline parameter ("c"), subtracts this value from the data and then refits the model. This is useful for qPCR runs with significant baseline values (TaqMan etc...) since this has substantial impact on efficiency estimation. "baseline" is now also present as an argument in modlist and pcrbatch and substitutes the former "backsub".
+    *efficiency argument?"type" has been renamed to "method", which makes it compatible within the efficiency function (avoids double argument collision). 
     *expGrowth model has been tweaked to add a small value (1E-12) to zero fluorescence data which avoids -Inf errors when logarithmizing.
     *A bug was removed in efficiency that resulted in Inf's and wrong positions for SDM. 
     *resplot now displays standardized residuals by default.
-    *expfit now fits an exponential model between cycle 1 and SDM per default, and not between outlier cycle/SDM as before. This can be changed with argument "method", however.
-    *Argument "refmean" has been set to FALSE in function ratiobatch, so reference gene averaging is per default switched off.
-    *A terminating check for 1 < Efficiency < 2  has been removed from ratiocalc, as some curves gave efficiencies of 2.02 or so...
-    *Added the "basefac" argument to modlist/pcrbatch/efficiency. It is useful in tweaking the baseline value obtained from averaging the baseline cycles. Example: "baseline = 1:10" & "basefac = 0.95" will calculate 0.95 * mean(F1:F10).
+    *expfit now fits an exponential model between cycle 1 and SDM?per default, and not between outlier cycle/SDM as before. This can be changed with argument "method", however.
+    *Argument?"refmean" has been set to FALSE in function ratiobatch, so reference gene averaging is per default switched off.
+    *A terminating check for 1?< Efficiency < 2  has been removed from ratiocalc, as some curves gave efficiencies of 2.02 or so...
+    *Added the "basefac" argument to modlist/pcrbatch/efficiency. It is useful in tweaking the baseline value obtained from averaging the baseline cycles. Example: "baseline =?1:10" & "basefac =?0.95" will calculate 0.95 * mean(F1:F10).
     *Modified predict.pcrfit so that predictions from mak2/mak3/cm3/spl3 models don't give gradient errors (because they are not differentiable).
 
 qpcR 1.3 - 6 (21-02-2012)
@@ -30,7 +61,7 @@ qpcR 1.3 - 6 (21-02-2012)
 Gigantomaniac update!
 
 New functions:
-    *After many requests, a function for multiple reference gene normalization has been added (although I'm not really a fan of this approach): refmean. This function averages the expression of several reference genes for the same sample according to the method described by Vandesompele et al. (2002). The implementation in this package is based on ARITHMETIC averaging of the threshold cycles prior to ratio calculation, as opposed to the published method which conducts GEOMETRIC averaging of relative expression values (quantities). Both methods result in the same, due to logarithmic identity of the arithmetic and geometric mean: (prod(Exi))^(1/n) = (1/n) * logE(prod(E^xi)) = (1/n) * sum(xi). See here and the extensive documentation and 'Examples' in the manual that compare this implementation with results from the 'geNorm' software. Essentially, reference genes for the same sample such as "r1c1, r1c1, r2c1, r2c1" are replaced by a vector of same length and equidistant values which have the overall grand mean and standard deviation obtained from the reference set. This is done by internal function qpcR:::makeStat, which calculates a shifted and scaled Z-transformation. This resulting averaged vector is then used in ratiocalc to calculate ratios, hence a complete error propagation treatment is included in the reference gene averaging and ratio calculation (as advocated in Nordgard et al., 2006). The refmean function has been integrated into ratiobatch with refmean = TRUE, so by default reference gene averaging per sample is turned on.
+    *After many requests, a function for multiple reference gene normalization has been added (although I'm not really a fan of this approach): refmean. This function averages the expression of several reference genes for the same sample according to the method described by Vandesompele et al. (2002). The implementation in this package is based on ARITHMETIC averaging of the threshold cycles prior to ratio calculation, as opposed to the published method which conducts GEOMETRIC averaging of relative expression values (quantities). Both methods result in the same, due to logarithmic identity of the arithmetic and geometric mean: (prod(Exi))^(1/n) = (1/n) * logE(prod(E^xi)) = (1/n) * sum(xi). See here and the extensive documentation and 'Examples' in the manual that compare this implementation with results from the 'geNorm' software. Essentially, reference genes for the same sample such as "r1c1, r1c1, r2c1, r2c1" are replaced by a vector of same length and equidistant values which have the overall grand mean and standard deviation obtained from the reference set. This is done by internal function qpcR:::makeStat, which calculates a shifted and scaled Z-transformation. This resulting averaged vector is then used in ratiocalc to calculate ratios, hence a complete error propagation treatment is included in the reference gene averaging and ratio calculation (as advocated in Nordgard et al., 2006). The refmean function has been integrated into ratiobatch with refmean =?TRUE, so by default reference gene averaging per sample is turned on.
     *Added LRE, a function to analyze qPCR data by the "linear regression of efficiency" method from Rutledge et al. (2008). This is an iterative method similar to sliwin, but while sliwin regresses cycle number versus log(fluorescence), LRE regresses fluorescence versus efficiency. Hence, the former is based on assuming constant efficiency, while the latter assumes cycle-dependent efficiency.
     *Added the Hannan-Quinn Information Criterion as function HQIC. This function penalizes n more than BIC: -2 * logLik(model) + 2 * k * log(log(n)). This is just for comparison purposes...
     *Added 5 new datasets in the package and on the 'Datasets' page: vermeulen1 & vermeulen2 => High-throughput data (1280 runs of 64 genes) and the corresponding dilution data for calibration curves, taken from Vermeulen et al. (2009). lievens1, lievens2, lievens3 => 5-fold dilution and inhibition experiments with 18 replicates each from Lievens et al. (2012). 
@@ -98,7 +129,7 @@ qpcR 1.3 - 3 (03-11-2010)
     *Implemented a function for the import of data obtained from ABI instruments (qpcR:::ABImport()). This is still experimental, hence no documentation.
     *nls.lm has now increase default iterations (1000). This might solve some convergence problems.
     *mselect has been changed to include the l6 and b6 six-parameter models.
-    *data.frame.na has now default 'stringsAsFactors = FALSE' to not automatically convert character vectors to factors.
+    *data.frame.na has now default 'stringsAsFactors =?FALSE' to not automatically convert character vectors to factors.
     *ratiocalc has been altered to a less verbose output.
     *efficiency has been simplified in its code.
     *Added a function for melting curve analysis (meltcurve). It can automatically analyze melting fluorescence data from a dataframe containing temperature and corresponding fluorescence values. The melting curves are smoothed, first derivatives are calculated and peaks automatically detected. A graphical output is given as a plot matrix of the single runs and the Tm values of the products are returned as a list.
@@ -107,29 +138,29 @@ qpcR 1.3 - 3 (03-11-2010)
 qpcR 1.3 - 2 (07-09-2010) 
 
     *Fixed a bug in pcrfit when NA's are present in the fluorescence values. The new version can now handle datasets with unequal number of fluorescence values (i.e. two qPCR runs with 40 and 45 cycles).
-    *In order to handle unequal length data, I have implemented the functions cbind.na, rbind.na and data.frame.na, which can create and bind matrices from unequal length vectors. Instead of the R generic functions cbind, rbind and     data.frame which replicate the vector values to length or give a stop, these three new functions fill to maximum     occuring length with NA's before calling the generics. Actually, I think these are quite useful outside of     qPCR analysis...
+    *In order to handle unequal length data, I have implemented the functions cbind.na, rbind.na and data.frame.na, which can create and bind matrices from unequal length vectors. Instead of the R generic functions cbind, rbind and     data.frame which replicate the vector values to length or give a stop, these three new functions fill to maximum     occuring length with NA's before calling the generics. Actually, I think these are quite useful outside of     qPCR?analysis...
     *Added function baseline which, if a six-parameter model of type l6 or b6 was used, subtracts the shift (parameter c) and baseline slope (parameter k) value from the original data and also optionally refits the baselined data with a new model. This is experimental...
     *Added function qpcR.news() which displays the latest changes (the same as written here).
 
 qpcR 1.3 - 1 (19-08-2010) 
 
-    *Fast update! Added 'minqa' (minimum quadratic approximation) as a new option for pcrfit. This is essentially a derivative free optimization method that might succeed in fitting curves where other methods fail...
+    *Fast update! Added 'minqa'?(minimum quadratic approximation) as a new option for pcrfit. This is essentially a derivative free optimization method that might succeed in fitting curves where other methods fail...
     *modlist now tags the names of runs in case of failed fitting (*name*) and can also optionally remove them. In addition, SOD also tags the names (**name**) in case that the runs lack sigmoidal curvature. 
-    *plot.pcrfit has been revamped, so that all graphical parameters can be tweaked. It now also displays failed fitting with RED names and outliers as defined by KOD or SOD with BLUE names.
+    *plot.pcrfit has been revamped, so that all graphical parameters can be tweaked. It now also displays failed fitting with RED names and outliers as defined by KOD or SOD with BLUE?names.
 
 qpcR 1.3 - 0 (16-08-2010) 
 
-    *Added more functionality in respect to 'outlier detection'. Function SOD identifies 'bad' runs (those that failed to really amplify) by inspecting if the amplification curve has any sigmoidal structure. It does so by checking if the first derivative maximum of the curve is within the next 10 cycles of the second derivative maximum. I had a look at several hundered curves and noticed that the FDM is usually never more than 3 cycles away from the SDM if amplification occurs (have a look at the documentation to this function!). It is unpublished, but works well anyhow. rep2mod is a new function to convert an object of class 'replist' back to a 'modlist' preserving the grouping structure as an attribute. This can be useful sometimes...
+    *Added more functionality in respect to 'outlier detection'. Function SOD identifies 'bad' runs (those that failed to really amplify) by inspecting if the amplification curve has any sigmoidal structure. It does so by checking if the first derivative maximum of the curve is within the next 10 cycles of the second derivative maximum. I had a look at several hundered curves and noticed that the FDM is usually never more than 3 cycles away from the SDM if amplification occurs (have a look at the documentation to this function!). It is unpublished, but works well anyhow. rep2mod is a new function to convert an object of class 'replist' back to a 'modlist'?preserving the grouping structure as an attribute. This can be useful sometimes...
     *To handle the new SOD function, modlist, replist, is.outlier and plot.pcrfit have been modified to show information on those runs that were tagged as 'outlier'.
 
 qpcR 1.2 - 9 (26-07-2010) 
 
-    *sliwin failed when some fluorescence values were 0 (because of log(0) = -Inf).  This was fixed.
+    *sliwin failed when some fluorescence values were 0 (because of log(0)?=?-Inf).  This was fixed.
     *ratiocalc now delivers an error message if propagate fails.
     *modlist has been modified so that functions such as PRESS or pcrboot which use an update function work in a batch format with 'lapply'. 
     *Weighted nonlinear fitting has been added to pcrfit. This is useful as only the baseline region and cycles up to the second derivative cycle number (cpD2) are the really relevant parts of the curve. I am in the process of investigating the benefit of weighting in qPCR analysis...
     *Rsq now returns R2 for weighted fits (of class 'nls', 'lm', 'glm', 'nlme', 'drc' etc).
-    *Added l6 and b6 as six-parameter log-logistic and logistic models. The additional term k * x is supposed to model the baseline region better. See under ?b6. Again, I'm investigating this... 
+    *Added l6 and b6 as six-parameter log-logistic and logistic models. The additional term k?* x is supposed to model the baseline region better. See under ?b6. Again, I'm investigating this... 
 
 qpcR 1.2 - 8 (18-06-2010) 
 

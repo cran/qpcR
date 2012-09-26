@@ -21,7 +21,7 @@ The \eqn{R^2} value of the fit.
 
 \details{
 Uses the most general definition of \eqn{R^2}: \deqn{R^2 \equiv 1 - \frac{RSS}{TSS}} where
- \deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2} and \deqn{TSS = \sum_{i=1}^{n}w_i \cdot (y_i - \bar{y})^2} using the weighted mean \deqn{\bar{y} = \frac{\sum_{i=1}^{n}w_ix_i}{\sum_{i=1}^{n}w_i}} 
+ \deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y}_i)^2} and \deqn{TSS = \sum_{i=1}^{n}w_i \cdot (y_i - \bar{y})^2} using the weighted mean \deqn{\bar{y} = \frac{\sum_{i=1}^{n}w_ix_i}{\sum_{i=1}^{n}w_i}} 
 }
 
 \author{

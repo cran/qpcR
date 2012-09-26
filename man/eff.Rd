@@ -4,7 +4,7 @@
 \title{The amplification efficiency curve of a fitted object}
 
 \description{
-Calculates the efficiency curve from the fitted object by \eqn{E_n = \frac{F(n)}{F(n-1)}}, with \eqn{E} = efficiency, \eqn{F} = raw fluorescence, \eqn{n} = Cycle number. Alternatively, a cubic spline interpolation can be used on the raw data as in Shain \emph{et al}. (2008). 
+Calculates the efficiency curve from the fitted object by \eqn{E_n = \frac{F_n}{F_{n-1}}}, with \eqn{E} = efficiency, \eqn{F} = raw fluorescence, \eqn{n} = Cycle number. Alternatively, a cubic spline interpolation can be used on the raw data as in Shain \emph{et al}. (2008). 
 }
 
 \usage{
@@ -44,16 +44,15 @@ Shain EB & Clemens JM.\cr
 }  
 
 \examples{
-## with default 100 points per cycle
+## With default 100 points per cycle.
 m1 <- pcrfit(reps, 1, 7, l5)
 eff(m1, plot = TRUE) 
 
-## not all data and only 10 points per cycle
+## Not all data and only 10 points per cycle.
 eff(m1, sequence = c(5, 35, 0.1), plot = TRUE) 
 
-## using cubic splines
-## it is preferred to use the
-## smoothing option 
+## When using cubic splines it is preferred 
+## to use the smoothing option.
 eff(m1, method = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
 }
 

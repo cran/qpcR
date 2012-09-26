@@ -14,7 +14,7 @@ verbose = TRUE,
   if (class(object) != "pcrfit") stop("Use only with objects of class 'pcrfit'!")   
     
   ## get data from object
-  fetchDATA <- qpcR:::fetchData(object)
+  fetchDATA <- fetchData(object)
   DATA <- fetchDATA$data
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
@@ -33,7 +33,7 @@ verbose = TRUE,
     newDATA <- DATA   
     
     if (verbose) {
-      qpcR:::counter(i) 
+      counter(i) 
       flush.console()
     }
   

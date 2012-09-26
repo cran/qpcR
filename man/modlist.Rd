@@ -11,8 +11,7 @@ Essential function to create a list of nonlinear models from the columns (runs) 
 modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2", 
         checkPAR = parKOD(), remove = c("none", "fit", "KOD"), 
         exclude = NULL, labels = NULL, norm = FALSE, baseline = FALSE,
-        basefac = 1, smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
-        smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
+        basefac = 1, smooth = NULL, smoothPAR = NULL, factor = 1, opt = FALSE,
         optPAR = list(sig.level = 0.05, crit = "ftest"), verbose = TRUE, ...)
 }
 
@@ -30,7 +29,7 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
   \item{baseline}{type of baseline subtraction. Same as in \code{\link{efficiency}}.}
   \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
   \item{smooth}{which curve smoothing method to use. See 'Details'.}
-  \item{smoothPAR}{parameters to be supplied to the smoothing functions. See 'Details'.}
+  \item{smoothPAR}{parameters to be supplied to the smoothing functions, supplied as a list. See 'Details'.}
   \item{factor}{a multiplication factor for the fluorescence response values (barely useful, but who knows...).}
   \item{opt}{logical. Should model selection be applied to each model?}
   \item{optPAR}{parameters to be supplied to \code{\link{mselect}}.}
@@ -43,8 +42,18 @@ A list with each item containing the model from each column. A \code{names} item
 }
 
 \details{
-The following smoothing methods are available for the fluorescence values:\cr
-\code{\link{smooth}}, \code{\link{lowess}}, \code{\link{supsmu}} and \code{\link{spline}}. See documentation there. The author of this package favorizes \code{"supsmu"} with \code{span = 0.1}. In case of unsuccessful model fitting and if \code{remove = "none"} (default), the original data is included in the output, albeit with no fitting information. This is useful since using \code{plot.pcrfit} on the 'modlist' shows the non-fitted runs. If \code{remove = "fit"}, the non-fitted runs are automatically removed and will thus not be displayed. If \code{remove = "KOD"}, by default all runs without sigmoidal structure are removed likewise. If a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. This way, an initial labeling vector for all samples can be supplied, bad runs and their labels automatically removed and these transfered to downstream analysis (i.e. to \code{\link{ratiobatch}}) without giving errors. \code{exclude} offers an option to exclude samples from the modlist by some regular expression or by using \code{""} for samples with empty column names. See 'Examples'. 
+From version 1.3-8, the following smoothing methods are available for the fluorescence values:\cr
+\code{"lowess"}: Lowess smoothing, see \code{\link{lowess}}, parameter in \code{smoothPAR}: f.\cr
+\code{"supsmu"}: Friedman's SuperSmoother, see \code{\link{supsmu}}, parameter in \code{smoothPAR}: span.\cr
+\code{"spline"}: Smoothing spline, see \code{\link{smooth.spline}}, parameter in \code{smoothPAR}: spar.\cr
+\code{"savgol"}: Savitzky-Golay smoother, \code{qpcR:::savgol}, parameter in \code{smoothPAR}: none.\cr
+\code{"kalman"}: Kalman smoother, see \code{\link{arima}}, parameter in \code{smoothPAR}: none.\cr
+\code{"runmean"}: Running mean, see \code{qpcR:::runmean}, parameter in \code{smoothPAR}: wsize.\cr
+\code{"whit"}: Whittaker smoother, see \code{qpcR:::whittaker}, parameter in \code{smoothPAR}: lambda.\cr
+\code{"ema"}: Exponential moving average, see \code{qpcR:::EMA}, parameter in \code{smoothPAR}: alpha.\cr
+The author of this package advocates the use of \code{"spline"}, \code{"savgol"} or \code{"whit"} because these three smoothers have the least influence on overall curve structure.\cr
+
+In case of unsuccessful model fitting and if \code{remove = "none"} (default), the original data is included in the output, albeit with no fitting information. This is useful since using \code{plot.pcrfit} on the 'modlist' shows the non-fitted runs. If \code{remove = "fit"}, the non-fitted runs are automatically removed and will thus not be displayed. If \code{remove = "KOD"}, by default all runs without sigmoidal structure are removed likewise. If a \code{labels} vector \code{lab} is supplied, the labels from the failed fits are removed and a new label vector \code{lab_mod} is written to the global environment. This way, an initial labeling vector for all samples can be supplied, bad runs and their labels automatically removed and these transfered to downstream analysis (i.e. to \code{\link{ratiobatch}}) without giving errors. \code{exclude} offers an option to exclude samples from the modlist by some regular expression or by using \code{""} for samples with empty column names. See 'Examples'. 
 }
 
 \seealso{
@@ -56,49 +65,53 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## calculate efficiencies and ct values 
+## Calculate efficiencies and ct values 
 ## for each run in the 'reps' data, 
 ## subtract baseline using the 
 ## first 8 cycles.
 ml1 <- modlist(reps, model = l5, baseline = 1:8)
 getPar(ml1, type = "curve")
 
-## 'crossing points' for the first 3 runs (normalized)
-##  and using best model from Akaike weights
+## 'Crossing points' for the first 3 runs (normalized)
+##  and using best model from Akaike weights.
 ml2 <- modlist(reps, 1, 2:5, model = l5, norm = TRUE, 
                opt = TRUE, optPAR = list(crit = "weights"))
 sapply(ml2, function(x) efficiency(x, plot = FALSE)$cpD2)
 
-## convert a single run to a 'modlist'
+## Convert a single run to a 'modlist'.
 m <- pcrfit(reps, 1, 2, l5)
 ml3 <- modlist(m)
 
-## using the 'testdat' set
-## include failed fits
+## Using the 'testdat' set
+## include failed fits.
 ml4 <- modlist(testdat, 1, 2:9,  model = l5)
 plot(ml4, which = "single")
 
-## remove failed fits and update a label vector
+## Remove failed fits and update a label vector.
 GROUP <- c("g1s1", "g1s2", "g1s3", "g1s4", "g1c1", "g1c2", "g1c3", "g1c4") 
 ml5 <- modlist(testdat, 1, 2:9,  model = l5, labels = GROUP, remove = "KOD")
 plot(ml5, which = "single")
-GROUP_mod
+
+## Smoothing by EMA and alpha = 0.8.
+ml6 <- modlist(reps, model = l5, smooth = "ema",
+               smoothPAR = list(alpha = 0.5))
+plot(ml6)
 
 \dontrun{
-## use one of the mechanistic models
-## get D0 values
-ml6 <- modlist(reps, model = mak3)
-sapply(ml6, function(x) coef(x)[1])
+## Use one of the mechanistic models
+## get D0 values.
+ml7 <- modlist(reps, model = mak3)
+sapply(ml7, function(x) coef(x)[1])
 
-## exclude first sample in each 
-## replicate group of dataset 'reps'
-ml7 <- modlist(reps, exclude = ".1")
-plot(ml7, which = "single")
-
-## using weighted fitting:
-## weighted by inverse residuals
-ml8 <- modlist(reps, weights = "1/abs(resid)")
+## Exclude first sample in each 
+## replicate group of dataset 'reps'.
+ml8 <- modlist(reps, exclude = ".1")
 plot(ml8, which = "single")
+
+## Using weighted fitting:
+## weighted by inverse residuals.
+ml9 <- modlist(reps, weights = "1/abs(resid)")
+plot(ml9, which = "single")
 }
 }
 

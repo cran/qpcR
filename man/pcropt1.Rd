@@ -40,8 +40,7 @@ Rutledge RG.\cr
 
 \examples{
 \dontrun{
-## optimize fit and display
-## bubbleplot of R-square
+## Optimize fit and display bubbleplot of R-square.
 m1 <- pcrfit(reps, 1, 2, l4)
 res1 <- pcropt1(m1, plot = FALSE, bubble = "Rsq")
 }

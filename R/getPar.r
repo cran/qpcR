@@ -5,7 +5,11 @@ getPar <- function(x, type = c("fit", "curve"), cp = "cpD2", eff = "sigfit", ...
   
   if (class(x)[1] == "pcrfit") x <- modlist(x)
   if (class(x)[1] != "modlist") stop("'x' must be either of class 'pcrfit' or 'modlist'!")
-  if (x[[1]]$MODEL$name %in% c("mak2", "mak3", "chag")) type <- "fit"
+  
+  ## extract unique model names
+  modNAMES <- sapply(x, function(x) x$MODEL$name)
+  modNAMES <- unique(modNAMES[!is.na(modNAMES)])
+  if (modNAMES %in% c("mak2", "mak3", "chag", "cm3")) type <- "fit"
   
   ## rownames and their length
   if (type == "fit") {
@@ -23,7 +27,7 @@ getPar <- function(x, type = c("fit", "curve"), cp = "cpD2", eff = "sigfit", ...
   NAMES <- sapply(x, function(a) a$name)
   
   for (i in 1:length(x)) {
-    qpcR:::counter(i)
+    counter(i)
     flush.console()
     tempMOD <- x[[i]]     
     

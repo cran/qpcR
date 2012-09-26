@@ -1,7 +1,5 @@
 takeoff <- function(object, pval = 0.05, nsig = 3)
 {
-      require(MASS, quietly = TRUE)
-      
       ## extract x, y values
       CYC <- object$DATA[, 1]
       FLUO <- object$DATA[, 2]

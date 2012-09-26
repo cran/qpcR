@@ -5,7 +5,7 @@ resplot <- function(object, overlay = TRUE, ylim = NULL, ...)
   if (inherits(RESID, "try-error")) stop("'object' does not have any residuals!")
   
   ## sum-up all residuals from possible replicates
-  ALL <- qpcR:::fetchData(object)
+  ALL <- fetchData(object)
   X <- ALL$data[, ALL$pred.pos]
   RESID <- tapply(RESID, X, function(x) sum(abs(x), na.rm = TRUE))  
   RESID <- as.numeric(scale(RESID))

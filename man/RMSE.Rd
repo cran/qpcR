@@ -17,7 +17,7 @@ RMSE(object, which = NULL)
 }
  
 \details{
-\deqn{RMSE = \sqrt{\overline{(y_i-\hat{y_i})^2}}}
+\deqn{RMSE = \sqrt{\overline{(y_i-\hat{y}_i)^2}}}
 }
 
 \value{
@@ -30,7 +30,7 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-## for a part of the curve
+## For a curve subset.
 m1 <- pcrfit(reps, 1, 2, l5)
 RMSE(m1, 10:15)
 }

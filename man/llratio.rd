@@ -42,7 +42,7 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## compare l5 and l4 model
+## Compare l5 and l4 model.
 m1 <- pcrfit(reps, 1, 2, l5)
 m2 <- pcrfit(reps, 1, 2, l4)
 llratio(m1, m2)

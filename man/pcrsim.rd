@@ -58,27 +58,27 @@ Andrej-Nikolai Spiess
 }  
 
 \examples{
-## generate initial model
+## Generate initial model.
 m1 <- pcrfit(reps, 1, 2, l4)
 
-## simulate homoscedastic error
-## and test l4 and l5 on data
+## Simulate homoscedastic error
+## and test l4 and l5 on data.
 res1 <- pcrsim(m1, error = 0.2, nsim = 20, 
                fitmodel = list(l4, l5))
 
 \dontrun{
-## use heteroscedastic noise typical for 
-## qPCR: more noise at lower fluorescence
+## Use heteroscedastic noise typical for 
+## qPCR: more noise at lower fluorescence.
 res2 <- pcrsim(m1, error = 0.01, errfun = function(y) 1/y,
               nsim = 20, fitmodel = list(l4, l5, l6))
 
-## get 95\% confidence interval for 
-## the models GOF in question (l4, l5, l6) 
+## Get 95\% confidence interval for 
+## the models GOF in question (l4, l5, l6).
 res3 <- pcrsim(m1, error = 0.2, nsim = 20, fitmodel = list(l4, l5, l6),
               statfun = function(y) quantile(y, c(0.025, 0.975)))
 res3$statList  
 
-## count the selection of the 'true' model (l4)
+## Count the selection of the 'true' model (l4)
 ## for each of the GOF measures,
 ## use PRESS statistic => SLOW!
 ## BIC wins!!

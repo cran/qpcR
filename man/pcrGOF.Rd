@@ -18,7 +18,7 @@ pcrGOF(object, PRESS = FALSE)
 }
 
 \value{
-A list with all implemented Information criteria (\code{AIC, AICc, BIC, HQIC}), residual variance, root-mean-squared-error, the p-value from \code{\link{neill.test}} (if no replicates), the reduced \eqn{\chi_{\nu}^2} from \code{\link{fitchisq}} (if replicates) and the \code{\link{PRESS}} \eqn{P^2} value (if \code{PRESS = TRUE}).  
+A list with all implemented Information criteria (\code{AIC, AICc, BIC}), residual variance, root-mean-squared-error, the reduced \eqn{\chi_{\nu}^2} from \code{\link{fitchisq}} (if replicates) and the \code{\link{PRESS}} \eqn{P^2} value (if \code{PRESS = TRUE}).  
 }
 
 \author{
@@ -27,12 +27,12 @@ Andrej-Nikolai Spiess
 
 
 \examples{
-## single fit without replicates
-## including PRESS statistic
+## Single fit without replicates
+## including PRESS statistic.
 m1 <- pcrfit(reps, 1, 2, l5)
 pcrGOF(m1, PRESS = TRUE)
 
-## fit containing replicates:
+## Fit containing replicates:
 ## calculation of reduced 
 ## chi-square included!
 m2 <- pcrfit(reps, 1, 2:5, l5)

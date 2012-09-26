@@ -28,20 +28,22 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## analyze in respect to amplification
-## efficiency outliers
-ml1 <- modlist(reps)
+## Analyze in respect to amplification
+## efficiency outliers.
+ml1 <- modlist(reps, 1, 2:5)
 res1 <- KOD(ml1, check = "uni2")
 
-## which runs are outliers?
+## Which runs are outliers?
 outl <- is.outlier(res1)
 outl
 which(outl)
 
-## test for sigmoidal outliers
-## with the 'testdat' dataset
+\dontrun{
+## Test for sigmoidal outliers
+## with the 'testdat' dataset.
 ml2 <- modlist(testdat, model = l5, check = "uni2")
 is.outlier(ml2)    
+}
 }
 
 \keyword{models}

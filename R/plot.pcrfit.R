@@ -12,7 +12,6 @@ parCI = list(),
 parSD = list(), 
 ...) 
 {
-  require(rgl, quietly = TRUE)
   confband <- match.arg(confband)
   errbar <- match.arg(errbar)
   which <- match.arg(which)    
@@ -26,9 +25,9 @@ parSD = list(),
   allFLUO <- lapply(modLIST, function(x) x$DATA[, 2])
   vecCYC <- do.call(c, allCYC)
   vecFLUO <- do.call(c, allFLUO)
-
+  
   ## make unique cycles  
-  CYC <- unique(as.numeric(vecCYC), fromLast = TRUE)  
+  CYC <- unique(as.numeric(vecCYC))  
   CYC <- CYC[!is.na(CYC)]    
   
   ## calculate min and max fluo values for defining ylim 
@@ -92,10 +91,10 @@ parSD = list(),
   for (i in 1:LEN) {
     DATA <- modLIST[[i]]$DATA    
     DATA <- na.omit(DATA)      
-    FITTED <- fitted(modLIST[[i]])   
+    FITTED <- fitted(modLIST[[i]])       
     m <- match(CYC, DATA[, 1])
     m <- na.omit(m)
-        
+          
     ## plot 3D curves
     if (which == "3D") {
       do.call(points3d, modifyList(list(x = DATA[, 1], y = i, z = DATA[, 2], color = COL[i]), par3D))
@@ -130,8 +129,7 @@ parSD = list(),
     
     ## error bars and confidence intervals
     if (errbar != "none") {      
-      if (class(object)[2] != "replist") stop("Error bars only possible on a 'replist'!")
-      #DATA <- as.data.frame(DATA)     
+      if (class(object)[2] != "replist") stop("Error bars only possible on a 'replist'!")      
       STAT <- switch(errbar, sd = tapply(DATA[, 2], DATA[, 1], function(x) sd(x, na.rm = TRUE)),
                      se = tapply(DATA[, 2], DATA[, 1], function(x) sd(x, na.rm = TRUE)/sqrt(length(na.omit(x)))),
                      conf = predict(modLIST[[i]], interval = "conf", ...))

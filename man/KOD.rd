@@ -26,14 +26,14 @@ KOD(object, method = c("uni1", "uni2", "multi1", "multi2", "multi3"),
 \details{
 \bold{The following methods for the detection of kinetic outliers are implemented}\cr
 \code{uni1}: KOD method according to Bar et al. (2003). Outliers are defined by removing the sample efficiency from the replicate group and testing it against the remaining samples' efficiencies using a Z-test:
-\deqn{P = 2 * \left[1 - \Phi\left(\frac{e_i - \mu_{train}}{\sigma_{train}}\right)\right] < 0.05}
+\deqn{P = 2 \cdot \left[1 - \Phi\left(\frac{e_i - \mu_{train}}{\sigma_{train}}\right)\right] < 0.05}
 
 \code{uni2}: This method from the package author is more or less a test on sigmoidal structure for the individual curves. It is different in that there is no comparison against other curves from a replicate set. The test is simple: The difference between first and second derivative maxima should be less than 10 cycles:
 \deqn{\left(\frac{\partial^3 F(x;a,b,...)}{\partial x^3} = 0\right) - \left(\frac{\partial^2 F(x;a,b...)}{\partial x^2} = 0\right) < 10}
 Sounds astonishingly simple, but works: Runs are defines as 'outliers' that really failed to amplify, i.e. have no sigmoidal structure or are very shallow. It is the default setting in \code{\link{modlist}}.\cr
 
 \code{multi1}: KOD method according to Tichopad et al. (2010). Assuming two vectors with first and second derivative maxima \eqn{t_1} and \eqn{t_2} from a 4-parameter sigmoidal fit within a window of points around the first derivative maximum, a linear model \eqn{t_2 = t_1 \cdot b + a + \tau} is made. Both \eqn{t_1} and the residuals from the fit \eqn{\tau = t_2 - \hat{t_2}} are Z-transformed:
-\deqn{{t_1}_{norm} = \frac{t_1 - \bar{t_1}}{{\sigma_t}_1}, {\tau_1}_{norm} = \frac{\tau_1 - \bar{\tau_1}}{{\sigma_\tau}_1}} 
+\deqn{t_1(norm) = \frac{t_1 - \bar{t}_1}{{\sigma_t}_1}, \; {\tau_1}_{norm} = \frac{\tau_1 - \bar{\tau}_1}{{\sigma_\tau}_1}} 
 Both \eqn{t_1} and \eqn{\tau} are used for making a robust covariance matrix. The outcome is plugged into a \code{\link{mahalanobis}} distance analysis using the 'adaptive reweighted estimator' from package 'mvoutlier' and p-values for significance of being an 'outlier' are deduced from a \eqn{\chi^2} distribution. If more than two parameters are supplied, \code{\link{princomp}} is used instead.
 
 \code{multi2}: Second KOD method according to Tichopad et al. (2010), mentioned in the paper. Uses the same pipeline as \code{multi1}, but with the slope at the first derivative maximum and maximum fluorescence as parameters:
@@ -80,20 +80,19 @@ ml1 <- modlist(reps, 1, c(2:5, 28), model = l5)
 res1 <- KOD(ml1, method = "uni1", par = parKOD(eff = "sliwin", alpha = 0.01))
 plot(res1)
 
-## sigmoidal outliers:
-## remove runs without sigmoidal structure
+## Sigmoidal outliers:
+## remove runs without sigmoidal structure.
 ml2 <- modlist(testdat, model = l5)
 res2 <- KOD(ml2, method = "uni2", remove = TRUE)
 plot(res2, which = "single")
 
 \dontrun{
-## multivariate outliers:
-## a few runs are identified
+## Multivariate outliers:
+## a few runs are identified.
 ml3 <- modlist(reps, model = l5)
 res3 <- KOD(ml3, method = "multi1")
 
-## on a 'replist',
-## several outliers identified
+## On a 'replist', several outliers identified.
 rl3 <- replist(ml3, group = gl(7, 4))
 res4 <- KOD(rl3, method = "uni1")
 }

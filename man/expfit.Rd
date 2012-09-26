@@ -60,14 +60,14 @@ Zhao S & Fernald RD.\cr
 }
 
 \examples{
-## using default SDM method
+## Using default SDM method.
 m1 <- pcrfit(reps, 1, 2, l5)
 expfit(m1)
 
-## using 'outlier' method
+## Using 'outlier' method.
 expfit(m1, method = "outlier")
 
-## linear exponential model
+## Linear exponential model.
 expfit(m1, model = "linexp")
 }
 

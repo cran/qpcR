@@ -31,13 +31,13 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## create l5 model and plot 
-## standardized residuals
+## Create l5 model and plot 
+## standardized residuals.
 m1 <- pcrfit(reps, 1, 2, l5)
 resplot(m1)
 
 \dontrun{
-## using replicates
+## Using replicates.
 m2 <- pcrfit(reps, 1, 2:5, l5)
 resplot(m2)
 }

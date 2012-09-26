@@ -20,11 +20,11 @@ Cy0(object, plot = FALSE, add = FALSE, ...)
 
 \details{
 The function calculates the first derivative maximum (cpD1) of the curve and the slope and fluorescence \eqn{F_{cpD2}} at that point.
- Cy0 is then calculated by \eqn{Cy0 = cpD1 - \frac{F_{cpD2}}{slope}}.
+ Cy0 is then calculated by \eqn{Cy_0 = cpD1 - \frac{F_{cpD2}}{slope}}.
 }
 
 \value{
-The Cy0 value.  
+The \eqn{Cy_0} value.  
 }
 
 \author{
@@ -38,15 +38,15 @@ Guescini M, Sisti D, Rocchi MB, Stocchi L & Stocchi V.\cr
 }
           
 \examples{
-## single curve with plot
+## Single curve with plot.
 m1 <- pcrfit(reps, 1, 2, l5)
 Cy0(m1, plot = TRUE)
 
-## add to 'efficiency' plot
+## Add to 'efficiency' plot.
 efficiency(m1)
 Cy0(m1, add = TRUE)
 
-## compare s.d. of replicates between
+## Compare s.d. of replicates between
 ## Cy0 and cpD2 method. cpD2 wins!
 ml1 <- modlist(reps, model = l4)
 cy0 <- sapply(ml1, function(x) Cy0(x))

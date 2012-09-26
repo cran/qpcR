@@ -91,51 +91,50 @@ Three parameter models ('b3' or 'l3') do not work very well in calculating the P
 }
 
 \examples{
-## Fitting initial model
+## Fitting initial model.
 m1 <-  pcrfit(reps, 1, 2, l4)
 efficiency(m1)
  
 ## Using one cycle 'downstream'
-## of second derivative max
+## of second derivative max.
 efficiency(m1, type = "cpD2", shift = -1)
 
-## using "maxE" method, with calculation of PCR efficiency
-## 2 cycles 'upstream' from the cycle of max efficiency
+## Using "maxE" method, with calculation of PCR efficiency
+## 2 cycles 'upstream' from the cycle of max efficiency.
 efficiency(m1, type = "maxE", shift = 2)
 
-## using the exponential region
+## Using the exponential region.
 efficiency(m1, type = "expR")
 
-## using threshold cycle (i.e. 15.32) 
-## from PCR software
+## Using threshold cycle (i.e. 15.32) 
+## from PCR software.
 efficiency(m1, type = 15.32)
 
-## using Cy0 method from
-## Guescini et al. (2008),
-## add Cy0 tangent
+## Using Cy0 method from Guescini et al. (2008)
+## add Cy0 tangent. 
 efficiency(m1, type = "Cy0")
 Cy0(m1, add = TRUE)
 
-## using a defined fluorescence
-## threshold value from PCR software
+## Using a defined fluorescence
+## threshold value from PCR software.
 efficiency(m1, thresh = 1)
  
-## using the first 30 cycles and a template amount
-## (optical calibration)
+## Using the first 30 cycles and a template amount
+## (optical calibration).
 m2 <-  pcrfit(reps[1:30, ], 1, 2, l5)
 efficiency(m2, amount = 1E3)
 
-## using 'maxRatio' method from Shain et al. (2008)
+## Using 'maxRatio' method from Shain et al. (2008)
 ## baseshifting essential!
 efficiency(m1, type = "maxRatio", baseshift = 0.2)
 
-## using the efficiency from a cubic spline fit
-## of the 'eff' function
+## Using the efficiency from a cubic spline fit
+## of the 'eff' function.
 efficiency(m1, method = "spline")
 
 \dontrun{
-## on a modlist with plotting
-## of the efficiencies
+## On a modlist with plotting
+## of the efficiencies.
 ml1 <- modlist(reps, model = l5)
 res <- sapply(ml1, function(x) efficiency(x)$eff)
 barplot(as.numeric(res))

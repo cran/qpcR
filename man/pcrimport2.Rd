@@ -44,11 +44,11 @@ See \code{\link{pcrimport}} for an enhanced version offering formatting in the p
 }
 
 \examples{
-## paste some Excel data into the clipboard ###
+## Paste some Excel data into the clipboard.
 \dontrun{
 temp <- pcrimport2()
 }
-## from a tab-delimited text file ###
+## From a tab-delimited text file.
 \dontrun{
 temp <- pcrimport2("c:\\temp\\foo.txt")
 }

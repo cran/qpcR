@@ -54,7 +54,7 @@ After these steps, a 'Cycles' column is prepended to the data which should then 
 One major advantage of this function is that the formatting parameters are stored in a file and can be reused with new data, most conveniently when doing a batch analysis of several files in a directory. When \code{needFirst = TRUE}, the alphabetically first run in the directory is used for defining the formatting parameters, and if \code{usePars = TRUE} these are applied on all remaining datasets. If the initial definition of formatting parameters is not needed, then setting \code{needFirst = FALSE} will apply the last stored parameters on all datasets. By using different \code{dirPars}, one can establish different formatting options for different qPCR systems.\cr
 
 The function will query (if \code{needFirst = TRUE}) all parameters that are defined as \code{NA}. For example, using
-\code{res <- pcrimport(file = "c:/temp", sep = "\t", dec = ".", delCol = c(1, 3), delRow = 1:2, ...)} will result in these parameters not being queried.\cr
+\code{pcrimport(file = "c:/temp", sep = "\t", dec = ".", delCol = c(1, 3), ...)} will result in these parameters not being queried.\cr
 
 If reference dye data was supplied, the function checks if the data is of same dimensions than the reporter dye data. The output is then the normalized fuorescence data \eqn{\frac{F_{rep}}{F_{ref}}}.\cr
 

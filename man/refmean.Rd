@@ -9,9 +9,9 @@ This function averages the expression of several reference genes before calculat
 }
 
 \usage{
-refmean(data, group, which.eff = c("sig", "sli", "exp", "mak"),
+refmean(data, group, which.eff = c("sig", "sli", "exp", "mak", "ext"),
         type.eff = c("individual", "mean.single"), 
-        which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
+        which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0", "ext"),
         verbose = TRUE, ...)
 }
 
@@ -68,14 +68,13 @@ Vandesompele J, De Preter K, Pattyn F, Poppe B, Van Roy N, De Paepe A, Speleman 
 \emph{Genome Biol} (2002), \bold{3}: research0034-research0034.11.\cr
 
 Error propagation in relative real-time reverse transcription polymerase chain reaction quantification models: the balance between accuracy and precision.\cr
-Nordgard O, Kvaloy JT, Farmen RK, Heikkilä R.\cr
+Nordgard O, Kvaloy JT, Farmen RK, Heikkil? R.\cr
 \emph{Anal Biochem} (2006), \bold{356}: 182-193.\cr
 }
 
 \seealso{
 In \code{\link{ratiobatch}}, reference gene averaging can be done automatically by setting \code{refmean = TRUE}. See there.
 }
-
 
 \examples{
 \dontrun{
@@ -96,7 +95,7 @@ RES1 <- refmean(DAT1, GROUP1, which.eff = "sig", which.cp = "cpD2")
 ## with parameter 'refmean = TRUE'. See there.
 ## In this example, already averaged dataset and 
 ## new labeling vector are supplied to 'ratiobatch', 
-## so one has to set 'refmean = FALSE'
+## so one has to set 'refmean = FALSE'.
 DAT2 <- pcrbatch(reps, fluo = 2:9, model = l5)
 GROUP2 <- c("r1c1", "r2c1", "r3c1", "g1c1", "r1s1", "r2s1", "r3s1", "g1s1" ) 
 RES2 <- refmean(DAT2, GROUP2, which.eff = "sig", which.cp = "cpD2")

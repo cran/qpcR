@@ -27,7 +27,7 @@ meltcurve(data, temps = NULL, fluos = NULL, window = NULL,
   \item{span.peaks}{the window span for peak identification. Can be tweaked to optimize \eqn{T_m} identification. Must be an odd number.}
   \item{is.deriv}{logical. Use \code{TRUE}, if \code{data} is already in first derivative transformed format.}
   \item{Tm.opt}{a possible vector of known \eqn{T_m} values to optimize \code{span.smooth} and \code{span.peaks} against. See 'Details' and 'Examples'.}
-  \item{Tm.border}{for peak area calculation, a vector containing left and right border temperature values from the \eqn{T_m} values. Default is -1/+1 °C.}
+  \item{Tm.border}{for peak area calculation, a vector containing left and right border temperature values from the \eqn{T_m} values. Default is -1/+1 ?C.}
   \item{plot}{logical. If \code{TRUE}, a plot with the raw melting curve, derivative curve and identified \eqn{T_m} values is displayed for each sample.}
   \item{peaklines}{logical. If \code{TRUE}, lines that show the identified peaks are plotted.} 
   \item{calc.Area}{logical. If \code{TRUE}, all peak areas are calculated.} 
@@ -78,29 +78,28 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## default columns
+## Default columns.
 data(dyemelt)
 res1 <- meltcurve(dyemelt, window = c(75, 86))
 res1
 
-## selected columns and normalized fluo values
+## Selected columns and normalized fluo values.
 res2 <- meltcurve(dyemelt, temps = c(1, 3), fluos = c(2, 4), 
                   window = c(75, 86), norm = TRUE)  
 
-## removing peaks based on peak area
-## => two peaks have smaller areas and are not
-## included
+## Removing peaks based on peak area
+## => two peaks have smaller areas and are not included.
 res3 <- meltcurve(dyemelt, temps = 1, fluos = 2, window = c(75, 86),  
                   cut.Area = 0.2) 
 attr(res3[[1]], "quality")
                  
-## if all peak areas do not meet the cutoff value, meltcurve is
-## flagged as 'bad'
+## If all peak areas do not meet the cutoff value, meltcurve is
+## flagged as 'bad'.
 res4 <- meltcurve(dyemelt, temps = 1, fluos = 2, window = c(75, 86),  
                   cut.Area = 0.5) 
 attr(res4[[1]], "quality")
 
-## optimizing span and peaks values
+## Optimizing span and peaks values.
 \dontrun{
 res5 <- meltcurve(dyemelt[, 1:6], window = c(74, 88), 
                   Tm.opt = c(77.2, 80.1, 82.4, 84.8))

@@ -1,17 +1,17 @@
 ratiocalc <- function(
 data, 
 group = NULL, 
-which.eff = c("sig", "sli", "exp", "mak", "cm3"),
+which.eff = c("sig", "sli", "exp", "mak", "cm3", "ext"),
 type.eff = c("individual", "mean.single", "median.single",
               "mean.pair", "median.pair"), 
-which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
+which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0", "ext"),
 ...)
 {      
     if (class(data)[2] != "pcrbatch")
         stop("data is not of class 'pcrbatch'!")
     
-    NCOL <- ncol(data) - 1   
-        
+    NCOL <- ncol(data) - 1      
+    
     ## test for equal length of input
     if (is.null(group))
         stop("Please define 'group'!")   
@@ -24,9 +24,9 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     if (!is.numeric(which.cp)) which.cp <- match.arg(which.cp)
     type.eff <- match.arg(type.eff)
     
-    ## from 1.3-4: added option of external efficiencies or threshold cycles,
+    ## version 1.3-4: added option of external efficiencies or threshold cycles,
     ## either single value (recycled) or a vector of values.
-    if (is.numeric(which.eff)) {
+    if (is.numeric(which.eff)) {      
       if (length(which.eff) == 1) which.eff <- rep(which.eff, NCOL)
       else {
         if (length(which.eff) != NCOL) stop("Length of input efficiencies does not match number of runs!")
@@ -47,9 +47,9 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     
     ANNO <- data[, 1]
     DATA <- data[, -1]
-      
-    ## from 1.3-4: added mak3
-    ## from 1.3-7: added cm3
+                      
+    ## version 1.3-4: added mak3
+    ## version 1.3-7: added cm3
     if (which.eff == "mak") {
       GREP <- grep("mak\\w*.D0", ANNO)         
       if (length(GREP) == 0) stop("data has no 'mak' model included! Please use 'pcrbatch' with methods = 'makX'!")
@@ -62,7 +62,7 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
       ANNO <- sub("cm3.D0", "cm3.eff", ANNO)
     }    
     
-    ## from 1.3-5 : added removal of failed runs (either failed fits
+    ## version 1.3-5 : added removal of failed runs (either failed fits
     ## or SOD outlier) from DATA and 'group' by identification
     ## of *...* or **...** in sample name
     sampNAMES <- names(DATA)      
@@ -87,23 +87,26 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     cpNAMES <- effNAMES <- NULL   
     
     ## select criteria
-    cpSEL <- which(ANNO == paste("sig.", which.cp, sep = ""))
     effSEL <- which(ANNO == paste(which.eff, ".eff", sep = ""))
-      
+    cpSEL <- which(ANNO == paste("sig.", which.cp, sep = ""))
+       
+    ## version 1.3-8: convert to matrix to eliminate strange behaviour with non-replicates
+    DATA <- as.matrix(DATA)
+    
     ## for all entries 'gs', 'gc', 'rs', 'rc' do...
     for (i in 1:length(PATTERN)) {    
-      WHICH <- which(group == PATTERN[i])     
-      tempCP <- as.numeric(DATA[cpSEL, WHICH, drop = FALSE])        
+      WHICH <- which(group == PATTERN[i])  
+      tempCP <- as.numeric(DATA[cpSEL, WHICH, drop = FALSE])    
       tempEff <- as.numeric(DATA[effSEL, WHICH, drop = FALSE])        
-      cpDAT <- qpcR:::cbind.na(cpDAT, tempCP)        
-      effDAT <- qpcR:::cbind.na(effDAT, tempEff)
+      cpDAT <- cbind.na(cpDAT, tempCP)        
+      effDAT <- cbind.na(effDAT, tempEff)
       cpNAMES <- c(cpNAMES, paste("cp.", PATTERN[i], sep = ""))
       effNAMES <- c(effNAMES, paste("eff.", PATTERN[i], sep = ""))         
     }
       
     ## remove first column
     cpDAT <- cpDAT[, -1]      
-    effDAT <- effDAT[, -1]    
+    effDAT <- effDAT[, -1]      
     
     ## calculate averaged efficiencies/threshold cycles
     if (is.numeric(which.eff))
@@ -133,7 +136,8 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     ## define expressions
     if (refNo) {
       EXPR <- expression(eff.gc^cp.gc/eff.gs^cp.gs)      
-      ## added makX/cm3 option (1.3-4/1.3-7) => we only need D0 for ratio calculation
+      
+      ## version 1.3-4/1.3-7: added makX/cm3 option => we only need D0 for ratio calculation
       if (which.eff %in% c("mak", "cm3")) {
         EXPR <- expression(eff.gs/eff.gc)
         TIES <- NULL
@@ -141,7 +145,8 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
     }    
     else {
       EXPR <- expression((eff.gc^cp.gc/eff.gs^cp.gs)/(eff.rc^cp.rc/eff.rs^cp.rs))      
-      ## added makX/cm3 option (1.3-4/1.3-7) => we only need D0 for ratio calculation
+      
+      ## version 1.3-4/1.3-7: added makX/cm3 option => we only need D0 for ratio calculation
       if (which.eff %in% c("mak", "cm3")) {
         EXPR <- expression((eff.gs/eff.gc)/(eff.rs/eff.rc))
         TIES <- NULL
@@ -158,6 +163,18 @@ which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
               
     CRIT <- c("perm > init", "perm == init", "perm < init")
         
+    ## version 1.3-8: need to eliminate first two columns if mak/cm3 model
+    if (which.eff %in% c("mak", "cm3")) {
+      if (ncol(allDAT) == 4) {
+        allDAT <- allDAT[, 3:4]
+        TIES <- TIES[3:4]
+      }
+      if (ncol(allDAT) == 8) {
+        allDAT <- allDAT[, 5:8]   
+        TIES <- TIES[5:8]
+      }
+    }
+    
     PROP <- try(propagate(EXPR, allDAT, do.sim = TRUE, do.perm = TRUE, ties = TIES, perm.crit = CRIT, 
                       verbose = TRUE, logx = TRUE, ...))
 

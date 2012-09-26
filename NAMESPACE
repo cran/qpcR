@@ -3,10 +3,7 @@ export(
 
 AICc,
 akaike.weights,
-batchstat, 
 calib,
-calib2,
-curvemean,
 Cy0,
 eff,
 efficiency,
@@ -15,19 +12,16 @@ expfit,
 evidence,
 fitchisq,
 getPar,
-HQIC,
 is.outlier,
 KOD,
 llratio,
 LOF.test,
 LRE,
 maxRatio,
-meanlist,
 meltcurve,
 midpoint,
 modlist,
 mselect,
-neill.test,
 parKOD,
 pcrbatch,
 pcrboot,
@@ -36,7 +30,6 @@ pcrGOF,
 pcrimport,
 pcrimport2,
 pcropt1,
-pcropt2,
 pcrsim,
 PRESS,
 propagate,
@@ -45,7 +38,6 @@ ratiobatch,
 ratiocalc,
 ratioPar,
 refmean,
-rep2mod,
 replist,
 resplot,
 resVar,
@@ -55,15 +47,20 @@ Rsq.ad,
 RSS,
 sliwin,
 takeoff
-
 )
+
+importFrom(MASS, mvrnorm)
+importFrom(minpack.lm, nlsLM)
+importFrom(rgl, plot3d)
+importFrom(robustbase, covMcd)
+importFrom(Matrix, nearPD)
 
 ## S3 methods
 S3method(update, pcrfit)
 S3method(predict, pcrfit)
 S3method(plot, pcrfit)
 
-
+useDynLib(qpcR)
 
 
 

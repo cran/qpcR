@@ -33,8 +33,8 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## multivariate outliers,
-## adjusting the 'cut' parameter
+## Multivariate outliers,
+## adjusting the 'cut' parameter.
 ml1 <- modlist(reps, 1, 2:5, model = l5)
 res1 <- KOD(ml1, method = "multi1", par = parKOD(cut = c(-5, 2)))
 }

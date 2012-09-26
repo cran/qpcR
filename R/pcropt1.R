@@ -16,7 +16,7 @@ pcropt1 <- function (object, fact = 3, opt = FALSE, plot = TRUE, bubble = NULL, 
   counter <- 1
     
   for (i in seqLOWER) {
-    qpcR:::counter(i)
+    counter(i)
     for (j in seqUPPER) {      
       ## data subset
       newDAT <- object$DATA[i:j, ]   

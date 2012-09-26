@@ -23,7 +23,7 @@ verbose = TRUE,
   
   ## from 1.3-7: added option of external efficiencies or threshold cycles,
   ## either single value (recycled) or a vector of values.  
-  if (is.numeric(which.eff)) {
+  if (is.numeric(which.eff)) {    
     if (length(which.eff) == 1) which.eff <- rep(which.eff, NCOL)
     else {
       if (length(which.eff) != NCOL) stop("Length of input efficiencies does not match number of runs!")
@@ -42,9 +42,9 @@ verbose = TRUE,
     extCP <- TRUE
   } else extCP <- FALSE
   
-  ANNO <- data[, 1]
-  DATA <- data[, -1]  
-  
+  ANNO <- data[, 1, drop = FALSE]  
+  DATA <- data[, -1, drop = FALSE] 
+    
   if (verbose) cat("\nChecking if sample number and 'group' length are equal...")
   if (length(group) != NCOL) stop("Length of 'group' and 'data' do not match!")
   
@@ -58,16 +58,6 @@ verbose = TRUE,
   if (verbose) cat("\nChecking that 'group' is of class <character>...")
   CLASS <- sapply(group, function(x) class(x))
   if (!all(CLASS == "character")) stop("'group' definition must be of class <character> (i.e. r1g1)")
-  
-  ## check for (g/r/c/s)(N) structure in 'group'
-  if (verbose) cat("\nChecking for (g/r/c/s)(N) 'group' definitions...")  
-  groupLIST <- strsplit(group, "")
-  nNUM <- sapply(groupLIST, function(x) length(grep("\\d", x, perl = TRUE)))
-  selNUM <- which(nNUM != 2)
-  if (length(selNUM) > 0) stop("Improper 'group' entries: ", group[selNUM])
-  nCHAR <- sapply(groupLIST, function(x) length(grep("\\D", x, perl = TRUE)))
-  selCHAR <- which(nCHAR != 2)
-  if (length(selCHAR) > 0) stop("Improper 'group' entries: ", group[selCHAR])
   
   ## check for number of control samples, treatment samples, genes-of-interest and reference genes, 
   if (verbose) cat("\nChecking for number of control samples, treatment samples, \ngenes-of-interest and reference genes:\n")
@@ -186,16 +176,17 @@ verbose = TRUE,
       selEFF <- which(ANNO == "extEFF")
       which.eff <- as.numeric(finalDATA[selEFF, -1])
     }    
-    if (extCP) which.cp <- as.numeric(finalDATA[nrow(finalDATA), -1])      
+    if (extCP) which.cp <- as.numeric(finalDATA[nrow(finalDATA), -1])  
     
-    finalNAME <-  as.vector(unlist(COMBS[i, ]))
+    ## Naming by 'rs' type
+    finalNAME <-  rev(as.vector(unlist(COMBS[i, ])))
     finalNAME <- paste(finalNAME, collapse = ":")      
     if (verbose) cat("Calculating ", finalNAME, " (", counter, " of ", ncomb, ")...\n", sep = "")
     flush.console()
     class(finalDATA) <- c("data.frame", "pcrbatch")
     if (hasRef) finalGROUP <- c(rep("gc", ncol(GCdat)), rep("gs", ncol(GSdat)), rep("rc", ncol(RCdat)), rep("rs", ncol(RSdat)))
-    else finalGROUP <- c(rep("gc", ncol(GCdat)), rep("gs", ncol(GSdat)))       
-        
+    else finalGROUP <- c(rep("gc", ncol(GCdat)), rep("gs", ncol(GSdat)))    
+            
     ## do ratio calculation for all combinations       
     outALL <- ratiocalc(finalDATA, finalGROUP, plot = plot, type.eff = type.eff, 
                         which.cp = which.cp, which.eff = which.eff, ...)
@@ -204,7 +195,7 @@ verbose = TRUE,
     if (!is.null(nrow(outALL$data.Perm))) PERMS <- outALL$data.Perm[, "resPERM"] else PERMS <- NULL
     
     PROPS <- outALL$data.Prop    
-    outDATA[[counter]] <- qpcR:::cbind.na(SIMS, PERMS, PROPS)
+    outDATA[[counter]] <- cbind.na(SIMS, PERMS, PROPS)
     outLIST[[counter]] <- outALL$summary
     nameLIST[[counter]] <- finalNAME
     counter <- counter + 1 

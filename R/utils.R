@@ -614,8 +614,7 @@ uni2 <- function(object, cp.crit, verbose = FALSE,  ...) {
 #########################################################################
 ######### MOD1 as defined in Tichopad et al. (2010) ##################### 
 multi1 <- function(object, cut, alpha, verbose = FALSE, ...) {
-  library(robustbase)
-    
+  
   ## initialize result matrix for cpD1 and cpD2
   PAR <- matrix(nrow = length(object), ncol = 2)
   
@@ -956,5 +955,109 @@ verbose = TRUE)
   
   ## return evaluation: vector of weights 
   OUT <- eval(parse(text = expr))  
+  return(OUT)
+}
+
+############ Savitzky-Golay filter => smoothit #############################
+## https://stat.ethz.ch/pipermail/r-help/2004-February/045568.html #########
+savgol <- function(x, ...)
+{
+  DOTS <- list(...)
+  if (is.null(DOTS$p)) p <- 3 else p <- DOTS$p
+  if (is.null(DOTS$n)) n <- p + 3 - p %% 2 else n <- DOTS$n
+  if (is.null(DOTS$d)) d <- 0 else d <- DOTS$d
+  
+  m <- length(x)
+  d <- d + 1
+  
+  pinv <- function(A)
+  {
+    s <- svd(A)
+    s$v %*% diag(1/s$d) %*% t(s$u)
+  }
+    
+  ## calculate filter coefficients
+  fc <- ceiling((n - 1)/2)
+  X  <- outer(-fc:fc, 0:p, FUN = "^")
+  Y  <- pinv(X)        
+ 
+  ## filter via convolution and take care of the end points by padding n %/% 2
+  PAD <- n %/% 2
+  x2 <- as.numeric(c(head(x, PAD), x, tail(x, PAD)))
+  CONV <- convolve(x2, rev(Y[d, ]), type = "f")    
+  OUT <- CONV #[fc:(length(CONV) - fc)]
+  
+  return(OUT)
+}
+
+##################### Running mean => smoothit #################
+runmean <- function(x, wsize = 3)
+{
+  PAD <- wsize %/% 2
+  x <- x[!is.na(x)]
+  x2 <- as.numeric(c(rep(x[1], PAD), x, rep(x[length(x)], PAD)))
+  OUT <- sapply(1:length(x2), function(a) mean(x2[a:(a + wsize - 1)]))[1:length(x)]
+  return(OUT)
+}
+
+############# Whittaker filter => smoothit ###################
+############# taken from the 'ptw' package ###################
+whittaker <- function(y, lambda)
+{
+  ny <- length(y)
+  w = rep(1, ny)
+  z <- d <- e <- rep(0, length(y))
+  
+  OUT <- .C("whittaker",
+            w = as.double(w),
+            y = as.double(y),
+            z = as.double(z),
+            lamb = as.double(lambda),
+            mm = as.integer(length(y)),
+            d = as.double(d),
+            e = as.double(e),
+            PACKAGE = "qpcR")$z
+  
+  return(OUT)  
+}
+
+############# EMA: exponential moving average ###################
+EMA <- function(y, alpha)
+{
+  ny <- length(y)
+  z <- numeric(ny)
+  
+  OUT <- .C("EMA",
+            y = as.double(y),
+            z = as.double(z),
+            alph = as.double(alpha),
+            ny = as.integer(ny),
+            PACKAGE = "qpcR")$z  
+  
+  return(OUT)
+}
+
+##################################################
+## smoothing function => modlist ##################
+smoothit <- function(x, selfun, pars)
+{
+  pars <- as.numeric(pars)
+      
+  ## smoothing function definitions
+  FCT <- switch(selfun, "lowess" = function(a, f = 0.1) lowess(a, f = f)$y,
+                        "supsmu" = function(a, span = "cv") supsmu(1:length(a), a, span = span)$y,
+                        "spline" = function(a, spar = NULL) smooth.spline(1:length(a), a, spar = spar)$y,
+                        "savgol" = function(a) savgol(a),
+                        "kalman" = function(a, order = c(3, 0, 0)) a - arima(a, order = order)$residuals,
+                        "runmean" =  function(a, wsize = 3) runmean(a, wsize = wsize),
+                        "whit" = function(a, lambda = 10) whittaker(a, lambda = lambda),
+                        "ema" = function(a, alpha) EMA(a, alpha = alpha)
+  )                
+ 
+  ## apply on columns or return original, if error  
+  if (length(pars) > 0) OUT <- try(FCT(x, pars), silent = TRUE)
+  else OUT <- try(FCT(x), silent = TRUE)    
+  if (inherits(OUT, "try-error")) OUT <- x
+  
   return(OUT)
 }

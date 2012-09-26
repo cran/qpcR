@@ -2,63 +2,76 @@
 \alias{propagate}
 \encoding{latin1}
 
-\title{General error analysis function using different methods}
+\title{Error propagation using different methods}
 
 \description{
-A general function for the calculation of errors. Can be used for qPCR data, but any data that should be subjected to error analysis will do. The different error types can be calculated for any given expression from either replicates or from statistical summary data (mean & standard deviation). 
+A general function for the calculation of error propagation by Monte Carlo simulation, permutation and first/second-order Taylor expansion including covariances. Can be used for qPCR data, but any data that should be subjected to error propagation analysis will do. The different methods can be used for any expression based on either replicate or summary data (mean & standard deviation). 
 }
 
 \usage{
-propagate(expr, data, type = c("raw", "stat"), do.sim = FALSE, 
-          dist.sim = c("norm", "tnorm"), use.cov = FALSE, nsim = 10000, 
-          do.perm = FALSE, perm.crit = NULL, ties = NULL, nperm = 2000, 
-          alpha = 0.05, plot = TRUE, logx = FALSE, verbose = FALSE, ...)  
+propagate(expr, data, type = c("raw", "stat"), second.order = TRUE,
+          do.sim = FALSE, dist.sim = c("norm", "tnorm"), use.cov = FALSE, 
+          nsim = 10000, do.perm = FALSE, perm.crit = NULL, ties = NULL, 
+          nperm = 2000, alpha = 0.05, plot = TRUE, logx = FALSE, 
+          verbose = FALSE, ...)  
 }
 
 \arguments{
   \item{expr}{an expression, such as \code{expression(x/y)}.}
   \item{data}{a dataframe or matrix containing either a) the replicates in columns or b) the means in the first row and the standard deviations in the second row. The variable names must be defined in the column headers.}
   \item{type}{either \code{raw} if replicates are given, or \code{stat} if means and standard deviations are supplied.}
-  \item{do.sim}{logical. Should Monte Carlo error analysis be applied?}
+  \item{second.order}{logical. If \code{TRUE}, error propagation will be calculated with first AND second-order Taylor expansion. See 'Details'.}
+  \item{do.sim}{logical. Should Monte Carlo simulation be applied?}
   \item{dist.sim}{\code{"norm"} will use a multivariate normal distribution, \code{"tnorm"} a multivariate truncated normal distribution. See 'Details'.}
-  \item{use.cov}{logical or variance-covariance matrix with the same column descriptions and column order as \code{data}. If \code{TRUE} together with replicates, the covariances are calculated from these and used within the Monte-Carlo simulation and error propagation. If \code{type = "stat"}, a square variance-covariance matrix can be supplied in the right dimensions (n x n, n = number of variables). If \code{FALSE}, the Monte-Carlo simulation and error propagation use only the diagonal (variances).}
+  \item{use.cov}{logical or variance-covariance matrix with the same column descriptions and column order as \code{data}. If \code{TRUE} together with replicates, the covariances are calculated from these and used within Monte Carlo simulation and error propagation. If \code{type = "stat"}, a square variance-covariance matrix can be supplied in the right dimensions (n x n, n = number of variables). If \code{FALSE}, Monte Carlo simulation and error propagation use only the diagonal (variances).}
   \item{nsim}{the number of simulations to be performed, minimum is 5000.}  
   \item{do.perm}{logical. Should permutation error analysis be applied?}     
   \item{perm.crit}{a character string of one or more criteria defining the null hypothesis for the permutation p-value. See 'Details'.}
   \item{ties}{a vector defining the columns that should be tied together for the permutations. See 'Details'.}
   \item{nperm}{the number of permutations to be performed.}  
   \item{alpha}{the confidence level.}
-  \item{plot}{logical. Should histograms with confidence intervals (in blue) be plotted for all analyses?}
+  \item{plot}{logical. Should histograms with confidence intervals (in blue) be plotted for all methods?}
   \item{logx}{logical. Should the x-axis of the graphs have logarithmic scale?}
-  \item{verbose}{logical. If \code{TRUE}, a longer output is given including the simulated data, derivatives, covariance matrix etc.}
+  \item{verbose}{logical. If \code{TRUE}, a longer output is given including the simulated data, derivatives, covariance matrix, etc.}
   \item{...}{other parameters to be supplied to \code{hist}, \code{boxplot} or \code{abline}.}
 }
 
 \details{
 The implemented methods are:\cr\cr
-1) \bold{Monte-Carlo simulation:}\cr
-For each variable in the dataset, simulated data with \code{nsim} samples is generated from a multivariate normal distribution using the mean \eqn{\mu} and standard deviation \eqn{\sigma} of each variable. All data is coerced into a new dataset that has the same covariance structure as the initial dataset. Each row of the simulated dataset is evaluated and statistics are calculated from the \code{nsim} evaluations. In scenarios that are nonlinear in nature (i.e. exponential setups) the distribution of the result values can be extremely skewed, mainly due to the simulated values at the extreme end of the normal distribution. Setting \code{dist.sim = "tnorm"} will fit a multivariate normal distribution,  calculate the lower/upper 2.5\% quantile on each side for each input variable and use these as bounds for simulating from a multivariate truncated normal distribution. This will (in part) remove some of the skewness in the result distribution. 
+1) \bold{Monte Carlo simulation:}\cr
+For each variable in \code{data}, simulated data with \code{nsim} samples is generated from a multivariate (truncated) normal distribution using mean \eqn{\mu} and standard deviation \eqn{\sigma} of each variable. All data is coerced into a new dataset that has the same covariance structure as the initial \code{data}. Each row of the simulated dataset is evaluated and summary statistics are calculated. In scenarios that are nonlinear in nature the distribution of the result values can be skewed, mainly due to the simulated values at the extreme end of the normal distribution. Setting \code{dist.sim = "tnorm"} will fit a multivariate normal distribution, calculate the lower/upper 2.5\% quantile on each side for each input variable and use these as bounds for simulating from a multivariate truncated normal distribution. This will (in part) remove some of the skewness in the result distribution. 
 
 2) \bold{Permutation approach:}\cr
-The data of the original dataset is permutated \code{nperm} times by binding observations together according to \code{ties}. The \code{ties} bind observations that can be independent measurements from the same sample. In qPCR terms, this would be a real-time PCR for two different genes on the same sample. If \code{ties} is omitted, the observations are shuffled independently. In detail, two datasets are created for each permutation: Dataset1 samples the rows (replicates) of the data according to \code{ties}. Dataset2 is obtained by sampling the columns (samples), also binding columns as in \code{ties}. For both datasets, the permutations are evaluated and statistics are collected. The confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all permutations that follow \code{perm.crit}, whereby \code{init} reflects the permutations of the initial data and \code{perm} the permutations of the randomly reallocated samples. Thus, the p-value gives a measure against the null hypothesis that the result in the initial group is just by chance. See also 'Examples'.\cr
-The criterium for the permutation p-value (\code{perm.crit}) has to be defined by the user. For example, let's say we calculate some value 0.2 which is a ratio between two groups. We would hypothesize that by randomly reallocating the values between the groups the mean values are not equal or smaller than in the initial data. We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). The default (\code{NULL}) is to test all three variants "perm > init", "perm == init" and "perm < init".
+The original \code{data} is permutated \code{nperm} times by binding observations together according to \code{ties}. The \code{ties} bind observations that can be independent measurements from the same sample. In qPCR terms, this would be a real-time PCR for two different genes on the same sample. If \code{ties} are omitted, the observations are shuffled independently. In detail, two datasets are created for each permutation: Dataset1 samples the rows (replicates) of the data according to \code{ties}. Dataset2 is obtained by sampling the columns (samples), also binding columns as defined in \code{ties}. For both datasets, the permutations are evaluated and statistics are collected. A confidence interval is calculated from all evaluations of Dataset1. A p-value is calculated from all permutations that follow \code{perm.crit}, whereby \code{init} reflects the permutations of the initial \code{data} and \code{perm} the permutations of the randomly reallocated samples. Thus, the p-value gives a measure against the null hypothesis that the result in the initial group is just by chance. See also 'Examples'.\cr
+The criterion for the permutation p-value (\code{perm.crit}) has to be defined by the user. For example, let's say we calculate some value 0.2 which is a ratio between two groups. We would hypothesize that by randomly reallocating the values between the groups, the mean values are not equal or smaller than in the initial data. We would thus define \code{perm.crit} as "perm < init" meaning that we want to test if the mean of the initial data (\code{init}) is frequently smaller than by the randomly allocated data (\code{perm}). The default (\code{NULL}) is to test all three variants "perm > init", "perm == init" and "perm < init".
  
 3) \bold{Error propagation:}\cr
-The propagated error is calculated by gaussian error propagation (first-order Taylor expansion) using a matrix approach. Often omitted, but important in models where the variables are dependent (i.e. linear regression), is the second covariance term.
-\deqn{\sigma_Y^2 = \sum_{i}\left(\frac{\partial f}{\partial X_i} \right)^2 \sigma_i^2 + \sum_{i \neq j}\sum_{j \neq i}\left(\frac{\partial f}{\partial X_i} \right)\left(\frac{\partial f}{\partial X_j} \right) \sigma_{ij}} 
-\code{propagate} calculates the propagated error either with or without covariances by using the matrix representation \deqn{C_Y = F_XC_XF_X^T} with \eqn{C_Y} = the propagated error, \eqn{F_X} = the p x n matrix with the results from the partial derivatives, \eqn{C_X} = the p x p variance-covariance matrix and \eqn{F_X^T} = the n x p transposed matrix of \eqn{F_X}. Depending on the input formula, the error propagation may result in an error that is not normally distributed. The Monte Carlo simulation, starting with normal distributions of the variables, can clarify this. The plots obtained from this function will also clarify this potential caveat. A high tendency from deviation of normality is encountered in formulas where the error of the denominator is relatively high or in exponential models where the exponent has a high error. This is one of the problems that is inherent in real-time PCR analysis, as the classical ratio calculation with efficiencies (i.e. by the delta-ct method) is usually of the exponential type.  
+The propagated error is calculated by first and second-order Taylor expansion using matrix algebra. Often omitted, but important in models where the variables are correlated, is the second covariance term:
+\deqn{\sigma_y^2 = \underbrace{\sum_{i=1}^N\left(\frac{\partial f}{\partial x_i} \right)^2 \sigma_i^2}_{\rm{variance}} + \underbrace{2\sum_{i=1\atop i \neq j}^N\sum_{j=1\atop j \neq i}^N\left(\frac{\partial f}{\partial x_i} \right)\left(\frac{\partial f}{\partial x_j} \right) \sigma_{ij}}_{\rm{covariance}}}
+\code{propagate} calculates the propagated error either with or without covariances using matrix algebra for first- and second-order (since version 1.3-8) Taylor expansion.\cr
+\bold{First-order:}\cr
+\eqn{\mathrm{E}(y) = f(\bar{x}_i)}\cr
+\eqn{\mathbf{C}_y = \nabla_x\mathbf{C}_x\nabla_x^T}\cr
+\bold{Second-order:}\cr
+\eqn{\mathrm{E}(y) = f(\bar{x}_i) + \frac{1}{2}[tr(\mathbf{H}_{xx}\mathbf{C}_x)]}\cr
+\eqn{\mathbf{C}_y = \nabla_x\mathbf{C}_x\nabla_x^T + \frac{1}{2}[tr(\mathbf{H}_{xx}\mathbf{C}_x\mathbf{H}_{xx}\mathbf{C}_x)]}\cr
+
+with \eqn{\mathrm{E}(y)} = expectation of \eqn{y}, \eqn{\mathbf{C}_y} = variance of \eqn{y}, \eqn{\nabla_x} = the p x n gradient matrix with all partial first derivatives, \eqn{\mathbf{C}_x} = the p x p covariance matrix, \eqn{\mathbf{H}_{xx}} the Hessian matrix with all partial second derivatives and \eqn{tr(\cdot)} = the trace (sum of diagonal) of the matrix. For a detailed derivation, see 'References'.\cr 
+The second-order Taylor expansion (\code{second.order = TRUE}) corrects for bias in nonlinear expressions as the first-order Taylor expansion assumes linearity around \eqn{\bar{x}_i}.\cr
+Depending on the input formula, the error propagation may result in an error that is not normally distributed. The Monte Carlo simulation, starting with normal distributions of the variables, can clarify this. A high tendency from deviation of normality is encountered in formulas in which the error of the denominator is relatively high or in exponential models where the exponent has a high error. This is one of the problems that is inherent in real-time PCR analysis, as the classical ratio calculation with efficiencies (i.e. by the delta-ct method) is of an exponential type.  
 }
 
 \value{
-A plot containing the histograms of the Monte-Carlo simulation, the permutation values and histogram of the error propagation. Additionally inserted in the plots are a boxplot, the median values in red and the confidence intervals as blue borders. 
+A plot containing histograms of the Monte Carlo simulation, the permutation values and error propagation. Additionally inserted are a boxplot, median values in red and confidence intervals as blue borders. 
 
 A list with the following components (if \code{verbose = TRUE}):   
-  \item{data.Sim}{the Monte Carlo simulated data with the evaluations in the last column.}       
-  \item{data.Perm}{the data of the permutated observations and samples with the corresponding evaluations and the decision according to \code{perm.crit}.}      
-  \item{data.Prop}{\code{nsim} values taken from a normal distribution with mean and s.d. calculated from the propagated error.}   
-  \item{derivs}{a list containing the partial derivatives expressions for each variable.}   
-  \item{covMat}{the covariance matrix used for the Monte-Carlo simulation and error propagation.}    
-  \item{summary}{a summary of the collected statistics, given as a dataframe. These are: mean, s.d. median, mad, lower/upper confidence interval and permutation p-value(s).} 
+  \item{data.Sim}{the Monte Carlo simulated data with evaluations in the last column.}       
+  \item{data.Perm}{the data of the permutated observations and samples with corresponding evaluations and the decision according to \code{perm.crit}.}      
+  \item{data.Prop}{\code{nsim} values generated from a normal distribution with mean and s.d. as calculated from the propagated error.}   
+  \item{gradient}{the evaluated gradient vector \eqn{\nabla_x} of partial first derivatives.}   
+  \item{hessian}{the evaluated hessian matrix \eqn{\mathbf{H}_{xx}} of partial second derivatives.}  
+  \item{covMat}{the covariance matrix \eqn{\mathbf{C}_x} used for Monte Carlo simulation and error propagation.}    
+  \item{summary}{a summary of the collected statistics, given as a dataframe. These are: mean, s.d. median, mad, lower/upper confidence interval and permutation p-values.} 
 }
 
 \author{
@@ -71,20 +84,35 @@ An Introduction to error analysis.\cr
 Taylor JR.\cr
 University Science Books (1996), New York.\cr
 
-A very good technical paper describing error propagation by matrix calculation can be found under \url{www.nada.kth.se/~kai-a/papers/arrasTR-9801-R3.pdf}.\cr
-
 Evaluation of measurement data - Guide to the expression of uncertainty in measurement.\cr
 JCGM 100:2008 (GUM 1995 with minor corrections).\cr
 \url{http://www.ifcc.org/pdf/GUM_JCGM_100_2008_E.pdf}.\cr
 
+\bold{Higher-order Taylor expansion:}\cr
+On higher-order corrections for propagating uncertainties.\cr
+Wang CM & Iyer HK.\cr
+\emph{Metrologia} (2005), \bold{42}: 406-410.\cr
+
+Accuracy of error propagation exemplified with ratios of random variables.\cr
+Winzer PJ.\cr
+\emph{Rev Sci Instrum} (2000), \bold{72}: 1447-1454.\cr
+
+\bold{Matrix algebra for error propagation:}\cr
+An Introduction to Error Propagation: Derivation, Meaning and Examples of Equation Cy = FxCxFx^t.\cr
+\url{www.nada.kth.se/~kai-a/papers/arrasTR-9801-R3.pdf}.\cr
+
+Second order nonlinear uncertainty modeling in strapdown integration using MEMS IMUs.\cr
+Zhang M, Hol JD, Slot L, Luinge H.\cr
+2011 Proceedings of the 14th International Conference on Information Fusion (FUSION) (2011).\cr
+
 \bold{Error propagation (in qPCR):}\cr
 Error propagation in relative real-time reverse transcription polymerase chain reaction quantification models: The balance between accuracy and precision.\cr
 Nordgard O, Kvaloy JT, Farmen RK, Heikkila R.\cr
-\emph{Analytical Biochemistry} (2006), \bold{356}: 182-193.\cr
+\emph{Anal Biochem} (2006), \bold{356}: 182-193.\cr
 
 qBase relative quantification framework and software for management and analysis of real-time quantitative PCR data.\cr
 Hellemans J, Mortier G, De Paepe A, Speleman F, Vandesompele J.\cr
-\emph{Genome Biology} (2007), \bold{8}: R19.\cr 
+\emph{Genome Biol} (2007), \bold{8}: R19.\cr 
 
 \bold{Multivariate normal distribution:}\cr
 Stochastic Simulation.\cr
@@ -98,7 +126,7 @@ Marcel Dekker (2002), New York.\cr
 
 Approximating the Shapiro-Wilk W-test for non-normality.\cr
 Royston P.\cr 
-\emph{Statistics and Computing} (1992), \bold{2}: 117-119.\cr
+\emph{Stat Comp} (1992), \bold{2}: 117-119.\cr
 }
 
 \seealso{
@@ -135,21 +163,6 @@ RES2 <- propagate(EXPR, DF, type = "raw", do.perm = TRUE,
                  do.sim = TRUE, verbose = TRUE)
 RES2$summary
 
-## Example in Annex H.1 from the GUM manual
-## (see 'References'), an end gauge calibration
-## study
-EXPR <- expression(ls + d - ls * (da * the + as * dt))
-ls <- c(50000623, 25)
-d <- c(215, 9.7)
-da <- c(0, 0.58E-6)
-the <- c(-0.1, 0.41)
-as <- c(11.5E-6, 1.2E-6)
-dt <- c(0, 0.029)
-DF <- cbind(ls, d, da, the, as, dt)
-propagate(expr = EXPR, data = DF, type = "stat", 
-                    do.sim = TRUE, verbose = TRUE)
-## => u = 31.71 (GUM says 32).  
-
 ## For replicate data, using relative 
 ## quantification ratio from qPCR.
 ## How good is the estimation of the propagated error?
@@ -167,7 +180,7 @@ E2 <-  c(1.72,1.68,1.65)
 cp2 <- c(33.84,34.04,33.33)
 DF <- cbind(E1, cp1, E2, cp2)
 RES3 <- propagate(EXPR, DF, type = "raw", do.sim = TRUE,
-                 do.perm = FALSE, verbose = TRUE, logx = TRUE)                 
+                 do.perm = TRUE, verbose = TRUE, logx = TRUE)                 
 ## STRONG deviation from normality!
 shapiro.test(RES3$data.Sim[1:5000, 5])
 qqnorm(RES3$data.Sim[, 5])
@@ -188,41 +201,10 @@ RES4$summary
               
 ## Proof that covariance of Monte-Carlo
 ## simulated dataset is the same as from 
-## initial data
+## initial data.
 RES4$covMat
 cov(RES4$data.Sim[, 1:4])
 all.equal(RES4$covMat, cov(RES4$data.Sim[, 1:4]))
-
-## Error propagation in a linear model 
-## using the covariance matrix from summary.lm
-## Estimate error of y for x = 7
-x <- 1:10	
-set.seed(123)
-y <- x + rnorm(10, 0, 1) ##generate random data	
-mod <- lm(y ~ x)
-summ <- summary(mod)
-## make matrix of parameter estimates and standard error
-DF <- t(coef(summ)[, 1:2]) 
-colnames(DF) <- c("b", "m")
-CM <- vcov(mod) ## take var-cov matrix
-colnames(CM) <- c("b", "m")
-RES5 <- propagate(expression(m*7 + b), DF, type = "stat", use.cov = CM)
-RES5
-
-## In a x/y regime, when does the propagated error start to
-## deviate from normality if error of denominator increases?
-## Watch increasing deviation in qqnorm-plot!
-\dontrun{
-x <- c(5, 1)
-for (i in seq(0, 0.2, by = 0.01)) {
-  y <- c(1, i)
-  DF <- cbind(x, y)
-  RES6  <-  propagate(expression(x/y), DF, type = "stat", 
-                      do.sim = TRUE, plot = FALSE, verbose = TRUE,
-                      logx = TRUE)
-  qqnorm(RES6$data.Sim[, 3])        
-}
-}
 }   
 
 \keyword{distribution}

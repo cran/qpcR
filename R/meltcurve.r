@@ -53,7 +53,7 @@ cut.Area = 0,
     }       
     
     ### optionally normalize fluo values
-    if (norm) FLUO <- qpcR:::rescale(FLUO, 0, 1)    
+    if (norm) FLUO <- rescale(FLUO, 0, 1)    
     
     ### define result matrix 
     resMAT <- matrix(nrow = nrow(GRID), ncol = 3)
@@ -61,8 +61,8 @@ cut.Area = 0,
     ### iterate over GRID and get result for best parameters
     ### (lowest RSS) 
     for (j in 1:nrow(GRID)) {
-      qpcR:::counter(j)
-      RES <- try(qpcR:::TmFind(TEMP = TEMP, FLUO = FLUO, span.smooth = GRID[j, 1], span.peaks = GRID[j, 2], is.deriv = is.deriv, Tm.opt = Tm.opt), silent = TRUE)
+      counter(j)
+      RES <- try(TmFind(TEMP = TEMP, FLUO = FLUO, span.smooth = GRID[j, 1], span.peaks = GRID[j, 2], is.deriv = is.deriv, Tm.opt = Tm.opt), silent = TRUE)
       if (inherits(RES, "try-error")) next
       resMAT[j, ] <- c(RES$Pars[1:2], RES$RSS[1])      
     }
@@ -70,7 +70,7 @@ cut.Area = 0,
     if (!is.null(Tm.opt)) {
       resMAT <- resMAT[order(resMAT[, 3]), ]        
       bestPAR <- resMAT[1, 1:2]
-      RES <- try(qpcR:::TmFind(TEMP = TEMP, FLUO = FLUO, span.smooth = bestPAR[1], span.peaks = bestPAR[2], is.deriv = is.deriv, Tm.opt = Tm.opt), silent = TRUE)
+      RES <- try(TmFind(TEMP = TEMP, FLUO = FLUO, span.smooth = bestPAR[1], span.peaks = bestPAR[2], is.deriv = is.deriv, Tm.opt = Tm.opt), silent = TRUE)
       if (inherits(RES, "try-error")) RES <- NA
     }   
     
@@ -88,7 +88,7 @@ cut.Area = 0,
         WHICH <- which(tempDATA > TMs[k] - Tm.border[1] & tempDATA < TMs[k] + Tm.border[2])
         X <- tempDATA[WHICH]
         Y <- derivDATA[WHICH]           
-        PEAKAREA <- try(qpcR:::peakArea(X, Y), silent = TRUE)
+        PEAKAREA <- try(peakArea(X, Y), silent = TRUE)
         if (!inherits(PEAKAREA, "try-error")) {
           PA[k] <- PEAKAREA$area
           BL <- PEAKAREA$baseline
@@ -140,7 +140,7 @@ cut.Area = 0,
       baseDATA <- outLIST[[i]]$baseline       
       TMs <- outLIST[[i]]$Tm        
              
-      qpcR:::xyy.plot(tempDATA, meltDATA, if (!is.deriv) derivDATA, main = NAMES[i], 
+      xyy.plot(tempDATA, meltDATA, if (!is.deriv) derivDATA, main = NAMES[i], 
                       y1.par = list(xlab = "", ylab = "", type = "l", lwd = 2),
                       y2.par = list(xlab = "", ylab = "", type = ifelse(is.deriv, "n", "l"), lwd = 2, main = "", text = ""),
                       first = par(mar = c(3, 2, 2, 3)), 

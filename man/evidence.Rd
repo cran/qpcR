@@ -30,13 +30,13 @@ Andrej-Nikolai Spiess
 }
 
 \examples{
-## compare two four-parameter and five-parameter
-## log-logistic models
+## Compare two four-parameter and five-parameter
+## log-logistic models.
 m1 <- pcrfit(reps, 1, 2, l4)
 m2 <- pcrfit(reps, 1, 2, l5)
 evidence(m2, m1)
 
-## ratio of two AIC's
+## Ratio of two AIC's.
 evidence(-120, -123)
 }
 

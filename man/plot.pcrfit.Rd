@@ -45,57 +45,56 @@ Andrej-Nikolai Spiess
 }
         
 \examples{
-## single plot
+## Single plot.
 m1 <- pcrfit(reps, 1, 2, l5)
 plot(m1)
 
-## add another plot in blue
-## with 99\% confidence interval
+## Add another plot in blue
+## with 99\% confidence interval.
 m2 <- pcrfit(reps, 1, 12, l5)
 plot(m2, add = TRUE, col = 4, confband = "confidence", level = 0.99)
 
-## plot a 'modlist' batch with coloring of replicates
+## Plot a 'modlist' batch with coloring of replicates.
 ml1 <- modlist(reps, 1, 2:13, model = l4)
 plot(ml1, col = gl(3,4))   
 
-## subset of data
+## Subset of data.
 plot(ml1, type = "n", col = rep(1:3, each = 4), 
      par2D = list(xlim = c(10, 30)))
 
-## plot a 'replist'
+## Plot a 'replist'.
 rl1 <- replist(ml1, group = gl(3, 4))
 plot(rl1)
 
-## standard deviation instead of 
+## Standard deviation instead of 
 ## replicate points; suppress plotting
-## of point symbols
+## of point symbols.
 plot(rl1, type = "l", errbar = "sd",
      par2D = list(pch = ""))
 
-## 95\% confidence values
+## 95\% confidence values.
 plot(rl1, errbar = "conf", 
      par2D = list(pch = ""))
 
-## plot single curves.
-## good for diagnostics...
+## Plot single curves for diagnostics.
 plot(ml1, which = "single", col = rep(1:3, each = 4))
 
-## 3D plots of 'modlist's or 'replist's
+## 3D plots of 'modlist's or 'replist's.
 plot(ml1, which = "3D", col = rep(1:3, each = 4))
 rgl.close()
 plot(rl1, which = "3D")
 rgl.close()
 
 \dontrun{
-## example for "image" type when
-## using large data
+## Example for "image" type when
+## using large data.
 ml2 <- modlist(vermeulen2)
 plot(ml2, which = "image")
 
-## example for outlier identification:
+## Example for outlier identification:
 ## RED/*name* indicates failed fitting,
 ## BLUE/**name** indicates sigmoidal outlier
-## using 'testdat' set
+## using 'testdat' set.
 ml3 <- modlist(testdat, model = l5)
 plot(ml3, which = "single") 
 }

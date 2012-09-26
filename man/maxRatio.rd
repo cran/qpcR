@@ -22,8 +22,7 @@ maxRatio(x, method = c("spline", "sigfit"), baseshift = NULL,
 }
 
 \details{                   
-In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{F_n = F_n + baseshift} (baseline shifting).
- Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{F_n}{F_{n-1}}-1)}. \eqn{FCN} is then calculated as the cycle number at \eqn{MR} and from this additionally an adjusted \eqn{FCNA = FCN -log_2(MR)}. Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated. This must be resolved by tweaking the \code{baseshift} value.  
+In a first step, the raw fluorescence data can be smoothed by a 5-point convolution filter. This is optional but feasible for many qPCR setups with significant noise in the baseline region, and therefore set to \code{TRUE} as default. If \code{baseshift} is a numeric value, this is added to each response value \eqn{F_n = F_n + baseshift} (baseline shifting). Finally, a cubic spline is fit with a resolution of 0.01 cycles and the maximum ratio (efficiency) is calculated by \eqn{MR = max(\frac{F_n}{F_{n-1}}-1)}. \eqn{FCN} is then calculated as the cycle number at \eqn{MR} and from this the adjusted \eqn{FCNA = FCN -log_2(MR)}. Sometimes problems are encountered in which, due to high noise in the background region, randomly high efficiency ratios are calculated. This must be resolved by tweaking the \code{baseshift} value.  
 }
 
 \value{
@@ -50,13 +49,11 @@ Shain EB & Clemens JM.\cr
 }
 
 \examples{
-## on single curve
-## using baseline shifting
+## On single curve using baseline shifting.
 m1 <- pcrfit(reps, 1, 2, l5)
 maxRatio(m1, baseshift = 0.3)     
 
-## on a 'modlist'
-## using 'baseline shifting' 
+## On a 'modlist' using baseline shifting.
 \dontrun{
 ml1 <- modlist(reps, model = l5) 
 maxRatio(ml1, baseshift = 0.5)

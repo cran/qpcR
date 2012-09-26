@@ -15,9 +15,8 @@ pcrbatch(x, cyc = 1, fluo = NULL,
          model = l4, check = "uni2", checkPAR = parKOD(), 
          remove = c("none", "fit", "KOD"), exclude = NULL, 
          type = "cpD2", labels = NULL, norm = FALSE, baseline = FALSE, 
-         basefac = 1, smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
-         smoothPAR = list(span = 0.1), factor = 1, opt = FALSE,
-         optPAR = list(sig.level = 0.05, crit = "ftest"), 
+         basefac = 1, smooth = NULL, smoothPAR = NULL, factor = 1, 
+         opt = FALSE, optPAR = list(sig.level = 0.05, crit = "ftest"), 
          group = NULL, names = c("group", "first"), plot = TRUE, 
          verbose = TRUE, ...)
 }
@@ -37,8 +36,8 @@ pcrbatch(x, cyc = 1, fluo = NULL,
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
   \item{baseline}{type of baseline subtraction. Same as in \code{\link{efficiency}}.}
   \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
-  \item{smooth}{which curve smoothing method to use. See 'Details'.}
-  \item{smoothPAR}{parameters to be supplied to the smoothing functions. See 'Details'.}
+  \item{smooth}{which curve smoothing method to use. See \code{\link{modlist}}.}
+  \item{smoothPAR}{parameters to be supplied to the smoothing functions, supplied as a list. See \code{\link{modlist}}.}
   \item{factor}{a multiplication factor for the fluorescence response values (barely useful, but who knows...).}
   \item{opt}{logical. Should model selection be applied to each model?}
   \item{optPAR}{parameters to be supplied to \code{\link{mselect}}.}
@@ -66,28 +65,28 @@ Andrej-Nikolai Spiess
 }
 
 \note{
-IMPORTANT: When subsequent use of \code{\link{ratiocalc}} is desired, use \code{pcrbatch} on the single run level with \code{group = NULL} and \code{remove = FALSE}, so that \code{\link{ratiocalc}} can automatically delete the failed runs from its \code{group} definition. Otherwise error propagation will fail.
+IMPORTANT: When subsequent use of \code{\link{ratiocalc}} is desired, use \code{pcrbatch} on the single run level with \code{group = NULL} and \code{remove = "none"}, so that \code{\link{ratiocalc}} can automatically delete the failed runs from its \code{group} definition. Otherwise error propagation will fail.
 }
      
      
 \examples{
-## first 4 runs and return parameters of fit
-## do background subtraction using the first 8 cycles
-res1 <- pcrbatch(reps, fluo = 2:5, baseline = 1:8)
-
-##  first 8 runs, with 4 replicates each, l5 model
-res2 <- pcrbatch(reps, fluo = 2:9, model = l5, group = c(1,1,1,1,2,2,2,2))
-
-## using model selection (Akaike weights) 
-## on the first 4 runs, runs 1 and 2 are replicates
-res3 <- pcrbatch(reps, fluo = 2:5, group = c(1,1,2,3), 
-                 opt = TRUE, optPAR = list(crit = "weights"))
+## First 4 runs and return parameters of fit
+## do background subtraction using the first 8 cycles.
+pcrbatch(reps, fluo = 2:5, baseline = 1:8)
 
 \dontrun{
-## fitting a sigmoidal and 'mak3' mechanistic model
+##  First 8 runs, with 4 replicates each, l5 model.
+pcrbatch(reps, fluo = 2:9, model = l5, group = c(1,1,1,1,2,2,2,2))
+
+## Using model selection (Akaike weights) 
+## on the first 4 runs, runs 1 and 2 are replicates.
+pcrbatch(reps, fluo = 2:5, group = c(1,1,2,3), 
+         opt = TRUE, optPAR = list(crit = "weights"))
+
+## Fitting a sigmoidal and 'mak3' mechanistic model.
 res4 <- pcrbatch(reps, methods = c("sigfit", "mak3"))
 
-## converting a 'modlist' to 'pcrbatch'
+## Converting a 'modlist' to 'pcrbatch'.
 ml5 <- modlist(reps, 1, 2:5, b3)
 res5 <- pcrbatch(ml5)
 }    

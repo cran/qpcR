@@ -49,35 +49,33 @@ Andrej-Nikolai Spiess
 }
 
 \examples{    
-## convert 'modlist' into 'replist'
+## Convert 'modlist' into 'replist'.
 ml1 <- modlist(reps, model = l4)
 rl1 <- replist(ml1, group = gl(7, 4))
 plot(rl1)
 summary(rl1[[1]])
 
-## optimize model based on Akaike weights
+## Optimize model based on Akaike weights.
 rl2 <- replist(ml1, group = gl(7, 4), opt = TRUE, 
                optPARS = list(crit = "weights"))
 plot(rl2)
 
-## remove kinetic outliers,
-## use first replicate name for output 
+\dontrun{
+## Remove kinetic outliers,
+## use first replicate name for output.
 ml3 <- modlist(reps, model = l4)
 rl3 <- replist(ml3, group = gl(7, 4), check = "uni1", 
                remove = "KOD", names = "first")
 plot(rl3, which = "single")
 
-\dontrun{
-## just aggregation and no
-## refitting
+## Just aggregation and no refitting.
 ml4 <- modlist(reps, model = l4)
 rl4 <- replist(ml4, group = gl(7, 4), doFit = FALSE)
 plot(rl4, which = "single")
 
 ## Scenario 1:
 ## automatic removal of runs that failed to
-## fit during 'modlist' by using
-## 'testdat' set
+## fit during 'modlist' by using 'testdat' set.
 ml5 <- modlist(testdat, model = l5)
 rl5 <- replist(ml5, gl(6, 4))
 plot(rl5, which = "single")

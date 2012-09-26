@@ -1,7 +1,7 @@
 PRESS <- function(object, verbose = TRUE)
 {
   ## fetch data and predictor/response columns
-  fetchDATA <- qpcR:::fetchData(object)
+  fetchDATA <- fetchData(object)
   DATA <- fetchDATA$data
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos
@@ -11,7 +11,7 @@ PRESS <- function(object, verbose = TRUE)
   ## calculate PRESS by Leave-One-Out refitting
   for (i in 1:nrow(DATA)) {
     if (verbose) {
-      qpcR:::counter(i)  
+      counter(i)  
       flush.console()
     }
      

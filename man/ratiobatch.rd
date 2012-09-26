@@ -49,8 +49,8 @@ Without reference genes:  \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls
 With reference genes: \deqn{\frac{E(g_lc_i)^{cp(g_lc_i)}}{E(g_ls_j)^{cp(g_ls_j)}}/\frac{E(r_kc_i)^{cp(r_kc_i)}}{E(r_ks_j)^{cp(r_ks_j)}}}
 For the mechanistic models \code{makX/cm3} the following is calculated:\cr
 
-Without reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}} 
-With reference genes: \deqn{\frac{D0(g_ls_j)}{D0(g_lc_i)}/\frac{D0(r_ks_j)}{D0(r_kc_i)}}
+Without reference genes: \deqn{\frac{D_0(g_ls_j)}{D_0(g_lc_i)}} 
+With reference genes: \deqn{\frac{D_0(g_ls_j)}{D_0(g_lc_i)}/\frac{D_0(r_ks_j)}{D_0(r_kc_i)}}
 
 Efficiencies can be taken from the individual curves or averaged from the replicates as described in the documentation to \code{\link{ratiocalc}}. It is also possible to give external efficiencies (i.e. acquired by some calibration curve) to the function. See 'Examples'. The different combinations of \code{type.eff}, \code{which.eff} and \code{which.cp} can yield very different results in ratio calculation. We observed a relatively stable setup which minimizes the overall variance using the combination
   
@@ -93,6 +93,7 @@ Vandesompele J, De Preter K, Pattyn F, Poppe B, Van Roy N, De Paepe A, Speleman 
 }
 
 \examples{
+\dontrun{
 ## One reference gene, one gene of interest,
 ## one control and one treatment sample with 
 ## 4 replicates each => 1 x Ratio = 1.
@@ -101,9 +102,8 @@ GROUP1 <- c("g1c1", "g1c1", "g1c1", "g1c1",
             "g1s1", "g1s1", "g1s1", "g1s1", 
             "r1c1", "r1c1", "r1c1", "r1c1",
             "r1s1", "r1s1", "r1s1", "r1s1") 
-RES1 <- ratiobatch(DAT1, GROUP1, refmean = FALSE)  
+ratiobatch(DAT1, GROUP1, refmean = FALSE)  
 
-\dontrun{
 ## One reference gene, one gene of interest,
 ## two control and two treatment samples with 
 ## 2 replicates each => 4 x Ratio = 1.
@@ -112,7 +112,7 @@ GROUP2 <- c("g1c1", "g1c1", "g1c2", "g1c2",
             "g1s1", "g1s1", "g1s2", "g1s2", 
             "r1c1", "r1c1", "r1c2", "r1c2",
             "r1s1", "r1s1", "r1s2", "r1s2") 
-RES2 <- ratiobatch(DAT2, GROUP2, refmean = FALSE)
+ratiobatch(DAT2, GROUP2, refmean = FALSE)
 
 ## Two reference genes, one gene of interest,
 ## one control and one treatment samples with 
@@ -124,7 +124,7 @@ GROUP3 <- c("g1c1", "g1c1", "g1c1", "g1c1",
             "r1s1", "r1s1", "r1s1", "r1s1",
             "r2c1", "r2c1", "r2c1", "r2c1",
             "r2s1", "r2s1", "r2s1", "r2s1") 
-RES3 <- ratiobatch(DAT3, GROUP3, refmean = FALSE)
+ratiobatch(DAT3, GROUP3, refmean = FALSE)
 
 ## Two reference genes, one gene of interest,
 ## one control and one treatment samples with 
@@ -137,10 +137,10 @@ GROUP4 <- c("g1c1", "g1c1", "g1c1", "g1c1",
             "r1s1", "r1s1", "r1s1", "r1s1",
             "r2c1", "r2c1", "r2c1", "r2c1",
             "r2s1", "r2s1", "r2s1", "r2s1") 
-RES4 <- ratiobatch(DAT4, GROUP4, refmean = TRUE)
+ratiobatch(DAT4, GROUP4, refmean = TRUE)
 
 ## Same as above, but use same efficiency E = 2.         
-RES5 <- ratiobatch(DAT4, GROUP4, which.eff = 2) 
+ratiobatch(DAT4, GROUP4, which.eff = 2) 
                    
 ## No reference genes, two genes-of-interest, 
 ## two control and two treatment samples with
@@ -150,7 +150,7 @@ GROUP6 <- c("g1s1", "g1s1", "g1s2", "g1s2",
             "g2s1", "g2s1", "g2s2", "g2s2",
             "g1c1", "g1c1", "g1c2", "g1c2",
             "g2c1", "g2c1", "g2c2", "g2c2")            
-RES6 <- ratiobatch(DAT6, GROUP6, which.eff = "sig")
+ratiobatch(DAT6, GROUP6, which.eff = "sig")
 
 ## Same as above, but using a mechanistic model (mak3).
 ## BEWARE: type.eff must be "individual"!
@@ -160,22 +160,21 @@ GROUP7 <- c("g1s1", "g1s1", "g1s2", "g1s2",
             "g2s1", "g2s1", "g2s2", "g2s2",
             "g1c1", "g1c1", "g1c2", "g1c2",
             "g2c1", "g2c1", "g2c2", "g2c2")
-RES7 <- ratiobatch(DAT7, GROUP7, which.eff = "mak", 
-                   type.eff = "individual")
+ratiobatch(DAT7, GROUP7, which.eff = "mak", 
+           type.eff = "individual")
 
 ## Using external efficiencies from a 
 ## calibration curve. Can be supplied by the
 ## user from external calibration (or likewise),
 ## but in this example acquired by function 'calib'.
-ml1 <- modlist(reps, model = l5)
-DIL <- rep(10^(6:0), each = 4) 
+ml1 <- modlist(reps, fluo = 2:25, model = l5)
+DIL <- rep(10^(5:0), each = 4) 
 EFF <- calib(refcurve = ml1, dil = DIL)$eff   
-pba <- pcrbatch(ml1)
+DAT8 <- pcrbatch(ml1)
 GROUP8 <- c(rep("g1s1", 4), rep("g1s2", 4),
             rep("g1s3", 4), rep("g1s4", 4), 
-            rep("g1s5", 4), rep("g1s6", 4), 
-            rep("g1c1", 4)) 
-RES8 <- ratiobatch(pba, GROUP8, which.eff = EFF)
+            rep("g1s5", 4), rep("g1c1", 4)) 
+ratiobatch(DAT8, GROUP8, which.eff = EFF)
 }
 }
 

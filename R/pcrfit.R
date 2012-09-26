@@ -9,9 +9,9 @@ weights = NULL,
 verbose = TRUE,  
 ...)
 {            
-  require(minpack.lm, quietly = TRUE)       
   options(warn = -1)   
-
+  if (!exists("control")) control <- nls.lm.control(maxiter = 1000, maxfev = 10000)
+  
   ## version 1.3-4: create (stacked) data, depending on replicates
   if (length(fluo) == 1) {
     CYC <- data[, cyc]
@@ -46,18 +46,15 @@ verbose = TRUE,
     }
   } else ssVal <- start
   
-  ## get attribute 'subset' transferred from ssFct
-  ## (as is the case in mak2/mak3 model, when only curve
-  ## up till second derivative max is taken)  
-  ## version 1.3-4: offset parameter from SDM of curve
-  SUB <- attr(ssVal, "subset")
+  ## get attribute 'cutoff' transferred from ssFct
+  ## version 1.3-4: offset parameter for 'cutoff' (usually SDM)
+  SUB <- attr(ssVal, "cutoff")
   if (!is.null(SUB)) {  
-    if (offset < 0) SUB <- head(SUB, offset)
-    else if (offset > 0) SUB <- c(SUB, max(SUB) + (1:offset))
-    m <-which(CYC %in% SUB)
-    CYC <- CYC[m]    
-    FLUO <- FLUO[m]
-    WEIGHTS <- WEIGHTS[m]
+    SUB <- SUB + offset
+    SEL <- 1:SUB 
+    CYC <- CYC[SEL]    
+    FLUO <- FLUO[SEL]
+    WEIGHTS <- WEIGHTS[SEL]
   }
   
   ## initialize parameter matrix
@@ -71,7 +68,7 @@ verbose = TRUE,
       
   ## make nlsModel using 'nlsLM' from package 'minpack.lm'
   NLS <- nlsLM(as.formula(model$expr), data = DATA, start = as.list(ssVal), model = TRUE, 
-              algorithm = "LM", control = nls.lm.control(maxiter = 1000, maxfev = 10000), weights = WEIGHTS, ...)
+              algorithm = "LM", control = control, weights = WEIGHTS, ...)
      
   ## attach parameter values to matrix
   ssValMat <- rbind(ssValMat, c(class(NLS), coef(NLS)))      
@@ -87,7 +84,6 @@ verbose = TRUE,
   CALL$start <- ssVal
   NLS$call <- as.call(CALL)
   NLS$call2 <- match.call()
-  assign("DATA", DATA, envir = globalenv())
   NLS$names <- names(data)[fluo]
   
   class(NLS) <- c("pcrfit", "nls")    

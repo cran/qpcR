@@ -56,7 +56,7 @@ verbose = TRUE,
   
   ## iterate over all wsize/base and sliding window combinations
   for (i in 1:nrow(GRID)) {
-    if (verbose) qpcR:::counter(i)     
+    if (verbose) counter(i)     
     
     ## subtract baseline value
     modY <- Y - GRID[i, 3]        

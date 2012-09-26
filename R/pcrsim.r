@@ -53,12 +53,12 @@ PRESS = FALSE,
 
       ## preallocate matrix dimensions for increased speed
       coefMAT <- matrix(nrow = length(fitMODEL[[k]]$parnames), ncol = nsim)
-      gofMAT <- matrix(nrow = ifelse(PRESS, 11, 10), ncol = nsim)
+      gofMAT <- matrix(nrow = ifelse(PRESS, 9, 8), ncol = nsim)
             
       ## for all simulated data do...
       for (i in 1:nsim) {        
         FIT <- pcrfit(fluoMAT, 1, i + 1, fitMODEL[[k]], verbose = FALSE, ...)        
-        qpcR:::counter(i)
+        counter(i)
         
         ## plot fitted curve
         lines(CYCS, fitted(FIT), col = colVEC[k], ...)

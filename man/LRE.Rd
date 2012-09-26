@@ -56,17 +56,16 @@ Rutledge RG & Stewart D.\cr
 }
 
 \examples{
-## sliding window of size 5
-## between take-off point and 3 cycles 
-## upstream of the upper asymtote turning point,
-## no baseline optimization
+## Sliding window of size 5 between take-off point 
+## and 3 cycles upstream of the upper asymptote 
+## turning point, no baseline optimization.
 m1 <- pcrfit(reps, 1, 2, l4)
 LRE(m1, wsize = 5, border = c(0, 3), base = 0)
 
 \dontrun{
-## optimizing with window sizes of 4 to 6,
+## Optimizing with window sizes of 4 to 6,
 ## between 0/+2 from lower/upper border, 
-## and baseline up to 2 standard deviations
+## and baseline up to 2 standard deviations.
 LRE(m1, wsize = 4:6, border = c(0, 2), base = 2)
 }
 }

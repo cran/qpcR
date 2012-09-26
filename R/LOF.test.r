@@ -2,7 +2,7 @@ LOF.test <- function(object)
 {
   if (any(class(object) == "replist")) object <- object[[1]] else object <- object
 
-  fetchDATA <- qpcR:::fetchData(object)  
+  fetchDATA <- fetchData(object)  
   DATA <- fetchDATA$data   
   PRED.pos <- fetchDATA$pred.pos
   RESP.pos <- fetchDATA$resp.pos

@@ -1,13 +1,12 @@
 refmean <- function(
 data, 
 group = NULL, 
-which.eff = c("sig", "sli", "exp", "mak"),
+which.eff = c("sig", "sli", "exp", "mak", "ext"),
 type.eff = c("individual", "mean.single"), 
-which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0"),
+which.cp = c("cpD2", "cpD1", "cpE", "cpR", "cpT", "Cy0", "ext"),
 verbose = TRUE,
 ...)
 {
-  
   if (class(data)[2] != "pcrbatch") stop("data must be of class 'pcrbatch'!")
   if (is.null(group)) stop("Please define 'group'!")
   if (length(group) != ncol(data) - 1) stop("Length of 'group' and 'data' do not match!")
@@ -90,7 +89,7 @@ verbose = TRUE,
     if (verbose) cat("  => error propagation for", colnames(statEFF), "(efficiencies)...\n")
     colnames(statEFF) <- paste("a", 1:ncol(statEFF), sep = "")    
     propEFF <- propagate(EXPR, statEFF, type = "stat", plot = FALSE, ...)    
-    newEFF <- qpcR:::makeStat(length(allSEL), propEFF$summary[1, "Prop"], propEFF$summary[2, "Prop"])
+    newEFF <- makeStat(length(allSEL), propEFF$summary[1, "Prop"], propEFF$summary[2, "Prop"])
     if (verbose) cat("  => replacing with new values...\n")
     DATA[selEFF, allSEL] <- round(newEFF, 6)
     
@@ -102,7 +101,7 @@ verbose = TRUE,
     if (verbose) cat("  => error propagation for", colnames(statCP), "(threshold cycles)...\n")
     colnames(statCP) <- paste("a", 1:ncol(statCP), sep = "")    
     propCP <- propagate(EXPR, statCP, type = "stat", plot = FALSE, ...)
-    newCP <- qpcR:::makeStat(length(allSEL), propCP$summary[1, "Prop"], propCP$summary[2, "Prop"])
+    newCP <- makeStat(length(allSEL), propCP$summary[1, "Prop"], propCP$summary[2, "Prop"])
     if (verbose) cat("  => replacing with new values...\n")
     DATA[selCP, allSEL] <- round(newCP, 2)
     
@@ -117,11 +116,6 @@ verbose = TRUE,
   }
   }
   
-  ## writing modified 'group' to global environment
-  if (verbose) cat("Updating", GROUPNAME, "and writing", paste(GROUPNAME, "_mod", sep = ""), "to global environment...\n\n", sep = " ")
-  flush.console()
-  assign(paste(GROUPNAME, "_mod", sep = ""), group, envir = .GlobalEnv)
-    
   DATA <- cbind(ANNO, DATA)
   class(DATA) <- c("data.frame", "pcrbatch")
   

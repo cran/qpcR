@@ -29,7 +29,7 @@ y-values (Fluorescence) are estimated from \code{object$MODEL$expr}, x-values (C
 
 \value{
 A dataframe containing the estimated values and (if chosen) standard error/upper confidence limit/lower confidence limit. 
-The gradient is attached to the dataframe and can be accessed with \code{attr(..., "gradient")}. 
+The gradient is attached to the dataframe and can be accessed with \code{attr}. 
 }
 
 \note{
@@ -44,13 +44,13 @@ Andrej-Nikolai Spiess
 \examples{
 m1 <- pcrfit(reps, 1, 2, l5)
 
-## which raw fluorescence value at cycle number = 17?
+## Which raw fluorescence value at cycle number = 17?
 predict(m1, newdata = data.frame(Cycles = 17))
 
-## cycle numbers 20:25, with 95\% confidence?
+## Cycle numbers 20:25, with 95\% confidence?
 predict(m1, newdata = data.frame(Cycles = 20:25), interval = "confidence")
 
-## which cycle at Fluo = 4, with 95\% prediction?
+## Which cycle at Fluo = 4, with 95\% prediction?
 predict(m1, newdata = data.frame(Fluo = 4), which = "x", interval = "prediction")
 }
 

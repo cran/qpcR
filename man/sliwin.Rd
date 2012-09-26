@@ -53,16 +53,16 @@ Ruijter JM, Ramakers C, Hoogaars WM, Karlen Y, Bakker O, van den Hoff MJ, Moorma
 }
 
 \examples{
-## sliding window of size 5 between 
-## take-off point and upper 
-## asymptote, no baseline optimization
+## Sliding window of size 5 between 
+## take-off point and upper asymptote, 
+## no baseline optimization.
 m1 <- pcrfit(reps, 1, 2, l4)
 sliwin(m1, wsize = 5)
 
 \dontrun{
-## optimizing with window sizes of 4 to 6,
+## Optimizing with window sizes of 4 to 6,
 ## between 0/+2 from lower/upper border, 
-## and baseline up to 2 standard deviations
+## and baseline up to 2 standard deviations.
 sliwin(m1, wsize = 4:6, border = c(0, 2), base = 2)
 }
 }

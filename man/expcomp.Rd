@@ -20,7 +20,7 @@ expcomp(object, ...)
 
 \details{
 The following sigmoidal models are fitted:
-b3, b4, b5, b6, b7, l3, l4, l5, l6, l7
+b4, b5, b6, b7, l4, l5, l6, l7
 }
 
 

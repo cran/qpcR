@@ -30,7 +30,7 @@ pcrboot(object, type = c("boot", "jack"), B = 100, njack = 1,
 
 \details{
 Non-parametric bootstrapping is applied using the centered residuals.\cr
-1) Obtain the residuals from the fit: \deqn{\hat{\varepsilon_{t}} = y_t - f(x_t, \hat{\theta})}
+1) Obtain the residuals from the fit: \deqn{\hat{\varepsilon}_t = y_t - f(x_t, \hat{\theta})}
 2) Draw bootstrap pseudodata: \deqn{y_{t}^{\ast} = f(x_t, \hat{\theta}) + \epsilon_{t}^{\ast}}
 where \eqn{\epsilon_{t}^{\ast}} are i.i.d. from distribution \eqn{\hat{F}}, where the residuals from the original fit are centered at zero.\cr
 3) Fit \eqn{\hat\theta^\ast} by nonlinear least-squares.\cr
@@ -68,14 +68,14 @@ Roy T.\cr
 }
           
 \examples{
-## simple bootstrapping with
+## Simple bootstrapping with
 ## too less iterations...
 par(ask = FALSE)
 m1 <- pcrfit(reps, 1, 2, l4)
 pcrboot(m1, B = 20)
 
-## jackknifing with leaving
-## 5 datapoints out
+## Jackknifing with leaving
+## 5 datapoints out.
 m2 <- pcrfit(reps, 1, 2, l4)
 pcrboot(m2, type = "jack", njack = 5, B = 20)
 }

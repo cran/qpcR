@@ -16,7 +16,7 @@ RSS(object)
 }
 
 \details{
-\deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y_i})^2}
+\deqn{RSS = \sum_{i=1}^{n}w_i \cdot (y_i-\hat{y}_i)^2}
 }
 
 \value{

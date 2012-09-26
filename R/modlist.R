@@ -11,8 +11,8 @@ labels = NULL,
 norm = FALSE,
 baseline = FALSE,
 basefac = 1,
-smooth = c("none", "smooth", "lowess", "supsmu", "spline"), 
-smoothPAR = list(span = 0.1), 
+smooth = NULL, 
+smoothPAR = NULL, 
 factor = 1,
 opt = FALSE,
 optPAR = list(sig.level = 0.05, crit = "ftest"),
@@ -21,8 +21,7 @@ verbose = TRUE,
 )
 {
   options(expressions = 50000)  
-  remove <- match.arg(remove)
-  smooth <- match.arg(smooth) 
+  remove <- match.arg(remove) 
         
   ## convert from single fit 
   if (class(x)[1] == "pcrfit") {
@@ -32,7 +31,7 @@ verbose = TRUE,
   
   if (is.null(fluo)) fluo <- 2:ncol(x) 
     
-  ## from 1.3-5: define label vector
+  ## version 1.3-5: define label vector
   if (!is.null(labels)) {
     LABNAME <- deparse(substitute(labels))     
     LABELS <- labels
@@ -46,7 +45,7 @@ verbose = TRUE,
   allFLUO <- x[, fluo, drop = FALSE]  
   NAMES <- colnames(x)[fluo]
   
-  ## from 1.3-6: exclude columns with no (default) or specific column names
+  ## version 1.3-6: exclude columns with no (default) or specific column names
   if (!is.null(exclude)) {
     if (exclude == "") SEL <- which(NAMES == "") 
     else SEL <- grep(exclude, NAMES)  
@@ -66,7 +65,7 @@ verbose = TRUE,
     ## normalization
     if (norm) FLUO <- rescale(FLUO, 0, 1)    
     
-    ## from 1.3-7: baseline correction by average of first cycles or single value
+    ## version 1.3-7: baseline correction by average of first cycles or single value
     if (is.numeric(baseline)) {
       if (length(baseline) == 1) BASE <- baseline 
       else if (length(baseline > 1)) {
@@ -77,12 +76,10 @@ verbose = TRUE,
     FLUO <- FLUO - BASE
     }    
           
-    ## smoothing
-    if (smooth != "none") {
-      if (smooth == "smooth") FLUO <- as.numeric(smooth(FLUO))
-      if (smooth == "lowess") FLUO <- lowess(FLUO, f = smoothPAR$span)$y
-      if (smooth == "supsmu") FLUO <- supsmu(1:length(FLUO), FLUO, span = smoothPAR$span)$y
-      if (smooth == "spline") FLUO <- spline(1:length(FLUO), FLUO, n = length(FLUO))$y         
+    ## version 1.3-8: smoothing
+    if (!is.null(smooth)) {    
+      smooth <- match.arg(smooth, c("lowess", "supsmu", "spline", "savgol", "kalman", "runmean", "whit", "ema"))
+      FLUO <- smoothit(FLUO, smooth, smoothPAR)
     }
       
     ## changing magnitude
@@ -96,7 +93,7 @@ verbose = TRUE,
     
     fitOBJ <- try(pcrfit(DATA, 1, 2, model, verbose = FALSE, ...), silent = TRUE)
     
-    ## from 1.3-7: baseline by 'c' parameter of sigmoidal model
+    ## version 1.3-7: baseline by 'c' parameter of sigmoidal model
     if (!is.numeric(baseline) && baseline) {
       BASE <- coef(fitOBJ)["c"]    
       newDATA <- fitOBJ$DATA
@@ -148,14 +145,21 @@ verbose = TRUE,
     modLIST[[i]]$names <- NAME    
   }  
          
-  ## from 1.3-5: sigmoidal outlier detection by KOD
-  if (!is.null(check)) {
+  ## version 1.3-5: sigmoidal outlier detection by KOD
+  ## version 1.3-8: turn off check with several models that are not sigmoid
+  nsMODELS <- c("linexp", "mak2", "mak2i", "mak3", "mak3i", "lin2", "cm3", "spl3")
+  if (model$name %in% nsMODELS) {
+    isNS <- TRUE 
+    cat("Model '", model$name, "' can not be checked by outlier methods. Setting 'check = NULL'...\n", sep = "")
+  } else isNS <- FALSE
+  
+  if (!is.null(check) & !isNS) {
     class(modLIST) <- c("modlist", "pcrfit")
     OUTL <- KOD(modLIST, method = check, par = checkPAR, plot = FALSE)   
     modLIST <- OUTL
   }
   
-  ## from 1.3-5: remove failed fits, update label vector, assign new vector to global environment
+  ## version 1.3-5: remove failed fits and update label vector
   if (remove != "none") {
     logVEC <- vector("numeric", length = length(modLIST))
     
@@ -180,8 +184,7 @@ verbose = TRUE,
       modLIST <- modLIST[-SEL]      
       if (verbose) cat(" => Updating", LABNAME, "and writing", paste(LABNAME, "_mod", sep = ""), "to global environment...\n\n", sep = " ")
       flush.console()    
-      LABELS <- LABELS[-SEL]    
-      assign(paste(LABNAME, "_mod", sep = ""), LABELS, envir = .GlobalEnv)        
+      LABELS <- LABELS[-SEL]               
     } 
   }
  

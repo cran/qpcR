@@ -234,17 +234,17 @@ Swerts K, Bravo S, Scaruffi P, et. al.\cr
 
 \examples{
 \dontrun{
-## 'reps' dataset
+## 'reps' dataset.
 g1 <- gl(7, 4)
 ml1 <- modlist(reps, model = l5)
 plot(ml1, col = g1)
 
-## 'rutledge' dataset
+## 'rutledge' dataset.
 g2 <- gl(6, 20)
 ml2 <- modlist(rutledge, model = l5)
 plot(ml2, col = g2)
 
-## 'lievens1' dataset
+## 'lievens1' dataset.
 g3 <- gl(5, 18)
 ml3 <- modlist(lievens1, model = l5)
 plot(ml3, col = g3)

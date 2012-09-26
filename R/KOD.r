@@ -29,11 +29,11 @@ plot = TRUE,
     NAMES <- sapply(tempOBJ, function(x) x$names) 
             
     ## methods selection
-    if (method == "uni1") DATA <- qpcR:::uni1(tempOBJ, eff = EFF, train = TRAIN, alpha = ALPHA, verbose = verbose, ...)
-    if (method == "uni2") DATA <- qpcR:::uni2(tempOBJ, cp.crit = CPCRIT, verbose = verbose, ...)
-    if (method == "multi1") DATA <- qpcR:::multi1(tempOBJ, cut = CUT, alpha = ALPHA, verbose = verbose, ...)    
-    if (method == "multi2") DATA <- qpcR:::multi2(tempOBJ, verbose = verbose, ...)
-    if (method == "multi3") DATA <- qpcR:::multi3(tempOBJ, verbose = verbose, ...)      
+    if (method == "uni1") DATA <- uni1(tempOBJ, eff = EFF, train = TRAIN, alpha = ALPHA, verbose = verbose, ...)
+    if (method == "uni2") DATA <- uni2(tempOBJ, cp.crit = CPCRIT, verbose = verbose, ...)
+    if (method == "multi1") DATA <- multi1(tempOBJ, cut = CUT, alpha = ALPHA, verbose = verbose, ...)    
+    if (method == "multi2") DATA <- multi2(tempOBJ, verbose = verbose, ...)
+    if (method == "multi3") DATA <- multi3(tempOBJ, verbose = verbose, ...)      
     
     ## get outliers from univariate outlier tests
     if (!is.na(pmatch("uni", method))) OUTL <- DATA   
