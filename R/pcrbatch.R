@@ -25,7 +25,6 @@ verbose = TRUE,
 ...) 
 {
   remove <- match.arg(remove)
-  smooth <- match.arg(smooth)  
   names <- match.arg(names)
     
   ## make initial 'modlist'

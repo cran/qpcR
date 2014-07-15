@@ -87,8 +87,11 @@ pcrbatch(reps, fluo = 2:5, group = c(1,1,2,3),
 res4 <- pcrbatch(reps, methods = c("sigfit", "mak3"))
 
 ## Converting a 'modlist' to 'pcrbatch'.
-ml5 <- modlist(reps, 1, 2:5, b3)
+ml5 <- modlist(reps, 1, 2:5, b5)
 res5 <- pcrbatch(ml5)
+
+## Using Whittaker smoothing.
+res6 <- pcrbatch(reps, smooth = "whit")
 }    
 }
 

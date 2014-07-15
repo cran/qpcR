@@ -1,3 +1,12 @@
+qpcR 1.3 - 9 (16-07-2014) 
+
+New functions: 
+
+Changes and bug-fixes in functions:
+	* fixed a bug in 'pcrbatch' that gave an error when using threshold fluorescence values for Eff/Cq estimation.
+	* fixed a wrong example in the doc to 'pcrbatch' with an obsolete model (b3).
+  * fixed a bug that threw an error when setting smoothing methods in 'pcrbatch' and added an example for usage (thanks to Dan Tenenbaum).
+
 qpcR 1.3 - 8 (01-04-2014) 
 
 New functions: 

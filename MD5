@@ -1,6 +1,6 @@
-61408e0c88c42e8dbc1cf236763255b3 *DESCRIPTION
+238cfb7d6ec2d18c4db81427f4966767 *DESCRIPTION
 82b5faf3e8916df88cc11051a64d1bea *NAMESPACE
-124001c3d7ca1d9ab56fc1311823ed75 *NEWS
+32dbfbe76f1465aa51203856127053e5 *NEWS
 131bf95c2acdee8811689d3f6801ba16 *R/AICc.R
 912f4f4939985da1cd5eb55dd37f6b85 *R/Cy0.R
 a5c5032293d509f4df65af713a97f073 *R/KOD.r
@@ -28,7 +28,7 @@ fb8941d74d075c49dbbeedc5e84aa6bb *R/midpoint.R
 21bac7a824484a2d7af1bf0daa0d166f *R/modlist.r
 4a0a696bc3d2ee6ef2917e0a05f565c6 *R/mselect.r
 bac7d3549f2c7879248a7e051043b0ba *R/pcrGOF.R
-dd03e94876b257d64fb29388665aba7d *R/pcrbatch.r
+5bd3ded6270c4065cfcd73f5ca2ea8cd *R/pcrbatch.r
 e85ce05ea1396e4a6b89dfa588f5eb38 *R/pcrboot.r
 5e458d438388b73edd5eec7983a127c2 *R/pcrfit.r
 93254538fc1d06b28630922e7356eec9 *R/pcrimport.R
@@ -112,7 +112,7 @@ a507c66f9821bfbd9eaa18f9999859b8 *man/modlist.Rd
 6b4ec4ee3e0caf3dbdbb2a0df870e3d9 *man/mselect.Rd
 a68f7c6240f0b635da1cca2606808649 *man/parKOD.rd
 4616b44d9df64e2a4fd275d229f2bd9c *man/pcrGOF.Rd
-7ecd9612fecb6219ec134530cfcb04c8 *man/pcrbatch.Rd
+61cb2970b5e42633f458e40d7bda51ea *man/pcrbatch.Rd
 c32370f468648f2af6b6db2f34eb4697 *man/pcrboot.rd
 be8438f6118c90aff45bdf496cd56cbb *man/pcrfit.Rd
 62ce77c134215833ae66824a1638dcd0 *man/pcrimport.Rd
