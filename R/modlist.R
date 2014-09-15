@@ -1,28 +1,30 @@
 modlist <- function(
-x, 
-cyc = 1, 
-fluo = NULL, 
-model = l4, 
-check = "uni2",
-checkPAR = parKOD(),
-remove = c("none", "fit", "KOD"),
-exclude = NULL,
-labels = NULL, 
-norm = FALSE,
-baseline = FALSE,
-basefac = 1,
-smooth = NULL, 
-smoothPAR = NULL, 
-factor = 1,
-opt = FALSE,
-optPAR = list(sig.level = 0.05, crit = "ftest"),
-verbose = TRUE,
-...
+  x, 
+  cyc = 1, 
+  fluo = NULL, 
+  model = l4, 
+  check = "uni2",
+  checkPAR = parKOD(),
+  remove = c("none", "fit", "KOD"),
+  exclude = NULL,
+  labels = NULL, 
+  norm = FALSE,
+  baseline = c("none", "mean", "median", "lin", "quad", "parm"),
+  basecyc = 1:8,
+  basefac = 1,
+  smooth = NULL, 
+  smoothPAR = NULL, 
+  factor = 1,
+  opt = FALSE,
+  optPAR = list(sig.level = 0.05, crit = "ftest"),
+  verbose = TRUE,
+  ...
 )
 {
   options(expressions = 50000)  
   remove <- match.arg(remove) 
-        
+  if (!is.numeric(baseline)) baseline <- match.arg(baseline)  
+  
   ## convert from single fit 
   if (class(x)[1] == "pcrfit") {
     model <- x$MODEL
@@ -30,7 +32,7 @@ verbose = TRUE,
   }                         
   
   if (is.null(fluo)) fluo <- 2:ncol(x) 
-    
+  
   ## version 1.3-5: define label vector
   if (!is.null(labels)) {
     LABNAME <- deparse(substitute(labels))     
@@ -40,7 +42,7 @@ verbose = TRUE,
     LABELS <- 1:length(fluo)
     LABNAME <- "lab"
   }
-    
+  
   CYCLES <- x[, cyc]
   allFLUO <- x[, fluo, drop = FALSE]  
   NAMES <- colnames(x)[fluo]
@@ -57,50 +59,40 @@ verbose = TRUE,
   
   ## pre-allocate model list
   modLIST <- vector("list", length = ncol(allFLUO))
-    
+  
   for (i in 1:ncol(allFLUO)) {
     FLUO  <- allFLUO[, i]      
     NAME <- NAMES[i]
-  
+    
+    ## version 1.4-0: baselining with first cycles using 'baseline' function
+    if (baseline != "none" & baseline != "parm") { 
+      FLUO <- baseline(cyc = CYCLES, fluo = FLUO, model = NULL, baseline = baseline, 
+                       basecyc = basecyc, basefac = basefac)
+    }
+    
     ## normalization
     if (norm) FLUO <- rescale(FLUO, 0, 1)    
     
-    ## version 1.3-7: baseline correction by average of first cycles or single value
-    if (is.numeric(baseline)) {
-      if (length(baseline) == 1) BASE <- baseline 
-      else if (length(baseline > 1)) {
-        amatch <- function(x, y) as.numeric(sapply(x, function(z) which(z == y)))
-        SEL <- amatch(baseline, CYCLES)
-        BASE <- mean(FLUO[SEL], na.rm = TRUE) * basefac        
-      }   
-    FLUO <- FLUO - BASE
-    }    
-          
     ## version 1.3-8: smoothing
     if (!is.null(smooth)) {    
       smooth <- match.arg(smooth, c("lowess", "supsmu", "spline", "savgol", "kalman", "runmean", "whit", "ema"))
       FLUO <- smoothit(FLUO, smooth, smoothPAR)
     }
-      
+    
     ## changing magnitude
     if (factor != 1) FLUO <- FLUO * factor                
-        
+    
     ## fit model
     DATA <- data.frame(Cycles = CYCLES, Fluo = FLUO)    
-      
+    
     if (verbose) cat("Making model for ", NAME, " (", model$name, ")\n", sep= "")  
     flush.console()
     
     fitOBJ <- try(pcrfit(DATA, 1, 2, model, verbose = FALSE, ...), silent = TRUE)
     
-    ## version 1.3-7: baseline by 'c' parameter of sigmoidal model
-    if (!is.numeric(baseline) && baseline) {
-      BASE <- coef(fitOBJ)["c"]    
-      newDATA <- fitOBJ$DATA
-      newDATA[, 2] <- newDATA[, 2] - BASE
-      fitOBJ <- try(update(fitOBJ, data = newDATA, cyc = 1, fluo = 2), silent = TRUE)
-    }
-       
+    ## version 1.4-0: baselining with 'c' parameter using 'baseline' function
+    if (baseline == "parm") fitOBJ <- baseline(model = fitOBJ, baseline = baseline)
+    
     ## tag names if fit failed
     if (inherits(fitOBJ, "try-error")) {  
       fitOBJ <- list()     
@@ -120,7 +112,7 @@ verbose = TRUE,
     
     ## optional model selection  
     if (opt) {
- 	    fitOBJ2 <- try(mselect(fitOBJ, verbose = FALSE, sig.level = optPAR$sig.level, crit = optPAR$crit), silent = TRUE)             
+      fitOBJ2 <- try(mselect(fitOBJ, verbose = FALSE, sig.level = optPAR$sig.level, crit = optPAR$crit), silent = TRUE)             
       if (inherits(fitOBJ2, "try-error")) {
         if (verbose) cat(" => Model selection failed! Using original model...\n", sep = "")
         fitOBJ$isFitted <- TRUE
@@ -140,11 +132,11 @@ verbose = TRUE,
     if (verbose) cat("\n")    
     
     fitOBJ$call2$model <- fitOBJ$MODEL
-               
+    
     modLIST[[i]] <- fitOBJ
     modLIST[[i]]$names <- NAME    
   }  
-         
+  
   ## version 1.3-5: sigmoidal outlier detection by KOD
   ## version 1.3-8: turn off check with several models that are not sigmoid
   nsMODELS <- c("linexp", "mak2", "mak2i", "mak3", "mak3i", "lin2", "cm3", "spl3")
@@ -187,8 +179,7 @@ verbose = TRUE,
       LABELS <- LABELS[-SEL]               
     } 
   }
- 
+  
   class(modLIST) <- c("modlist", "pcrfit")
   invisible(modLIST)
 }
-

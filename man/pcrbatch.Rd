@@ -14,9 +14,10 @@ pcrbatch(x, cyc = 1, fluo = NULL,
          methods = c("sigfit", "sliwin", "expfit", "LRE"),
          model = l4, check = "uni2", checkPAR = parKOD(), 
          remove = c("none", "fit", "KOD"), exclude = NULL, 
-         type = "cpD2", labels = NULL, norm = FALSE, baseline = FALSE, 
-         basefac = 1, smooth = NULL, smoothPAR = NULL, factor = 1, 
-         opt = FALSE, optPAR = list(sig.level = 0.05, crit = "ftest"), 
+         type = "cpD2", labels = NULL, norm = FALSE, 
+         baseline = c("none", "mean", "median", "lin", "quad", "parm"),
+         basecyc = 1:8, basefac = 1, smooth = NULL, smoothPAR = NULL, 
+         factor = 1, opt = FALSE, optPAR = list(sig.level = 0.05, crit = "ftest"), 
          group = NULL, names = c("group", "first"), plot = TRUE, 
          verbose = TRUE, ...)
 }
@@ -34,7 +35,8 @@ pcrbatch(x, cyc = 1, fluo = NULL,
   \item{type}{the point on the amplification curve from which the efficiency is estimated. See \code{\link{efficiency}}.}  
   \item{labels}{a vector containing labels, i.e. for defining replicate groups prior to \code{\link{ratiobatch}}.}  
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
-  \item{baseline}{type of baseline subtraction. Same as in \code{\link{efficiency}}.}
+  \item{baseline}{type of baseline subtraction. See 'Details' in \code{\link{modlist}}.}
+  \item{basecyc}{cycle range to be used for baseline subtraction, i.e. \code{1:5}.}
   \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
   \item{smooth}{which curve smoothing method to use. See \code{\link{modlist}}.}
   \item{smoothPAR}{parameters to be supplied to the smoothing functions, supplied as a list. See \code{\link{modlist}}.}
@@ -71,8 +73,8 @@ IMPORTANT: When subsequent use of \code{\link{ratiocalc}} is desired, use \code{
      
 \examples{
 ## First 4 runs and return parameters of fit
-## do background subtraction using the first 8 cycles.
-pcrbatch(reps, fluo = 2:5, baseline = 1:8)
+## do background subtraction using mean the first 5 cycles.
+pcrbatch(reps, fluo = 2:5, baseline = "mean", basecyc = 1:5)
 
 \dontrun{
 ##  First 8 runs, with 4 replicates each, l5 model.
@@ -84,14 +86,14 @@ pcrbatch(reps, fluo = 2:5, group = c(1,1,2,3),
          opt = TRUE, optPAR = list(crit = "weights"))
 
 ## Fitting a sigmoidal and 'mak3' mechanistic model.
-res4 <- pcrbatch(reps, methods = c("sigfit", "mak3"))
+pcrbatch(reps, methods = c("sigfit", "mak3"))
 
 ## Converting a 'modlist' to 'pcrbatch'.
 ml5 <- modlist(reps, 1, 2:5, b5)
 res5 <- pcrbatch(ml5)
 
 ## Using Whittaker smoothing.
-res6 <- pcrbatch(reps, smooth = "whit")
+pcrbatch(reps, smooth = "whit")
 }    
 }
 

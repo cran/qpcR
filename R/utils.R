@@ -1061,3 +1061,39 @@ smoothit <- function(x, selfun, pars)
   
   return(OUT)
 }
+
+####################################################
+###### baseline => modlist #########################
+baseline <- function(cyc = NULL, fluo = NULL, model = NULL,
+                     baseline = NULL, basecyc = NULL, basefac = NULL) 
+{  
+  if (is.numeric(baseline) & length(baseline == 1)) BASE <- baseline
+  if (baseline == "mean") BASE <- mean(fluo[basecyc], na.rm = TRUE) 
+  if (baseline == "median") BASE <- median(fluo[basecyc], na.rm = TRUE) 
+  
+  if (baseline == "lin") {
+    fluo2 <- fluo[basecyc]
+    cyc2 <- cyc[basecyc]
+    LM <- lm(fluo2 ~ cyc2)
+    BASE <- predict(LM, newdata = data.frame(cyc2 = cyc))    
+  }
+  
+  if (baseline == "quad") {
+    fluo2 <- fluo[basecyc]
+    cyc2 <- cyc[basecyc]
+    LM <- lm(fluo2 ~ cyc2 + I(cyc2^2))
+    BASE <- predict(LM, newdata = data.frame(cyc2 = cyc))    
+  }
+  
+  if (baseline == "parm") {
+    BASE <- coef(model)["c"]    
+    newDATA <- model$DATA
+    newDATA[, 2] <- newDATA[, 2] - BASE
+    newMODEL <- try(pcrfit(cyc = 1, fluo = 2, data = newDATA, model = model$MODEL), silent = TRUE)
+    if (inherits(newMODEL, "try-error")) return()    
+  }
+  BASE <- BASE * basefac  
+  
+  if (baseline != "parm") return(fluo - BASE) else return(newMODEL)
+}
+

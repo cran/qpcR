@@ -5,8 +5,6 @@ type = "cpD2",
 thresh = NULL, 
 shift = 0, 
 amount = NULL,
-baseline = FALSE,
-basefac = 1,
 ...) 
 {  
     if (!is.numeric(type)) type <- match.arg(type, c("cpD2", "cpD1", "maxE", "expR", "Cy0", "CQ", "maxRatio"))
@@ -18,25 +16,6 @@ basefac = 1,
     if (is.numeric(type) && (type < min(object$DATA[, 1], na.rm = TRUE) || type > max(object$DATA[, 1], na.rm = TRUE))) stop("'type' must be within Cycles range!")
     if (is.numeric(thresh) && (thresh < min(object$DATA[, 2], na.rm = TRUE) || thresh > max(object$DATA[, 2], na.rm = TRUE))) stop("'thresh' must be within fluorescence range!")
     
-    ## from 1.3-7: baseline correction either by 'c' parameter of sigmoidal model (default),
-    ## average of first cycles or single value.
-    if (baseline != FALSE) {
-      if (is.numeric(baseline)) {
-        if (length(baseline) == 1) BASE <- baseline 
-        else if (length(baseline > 1)) {
-          amatch <- function(x, y) as.numeric(sapply(x, function(z) which(z == y)))
-          SEL <- amatch(baseline, object$DATA[, 1])
-          BASE <- mean(object$DATA[SEL, 2], na.rm = TRUE) * basefac      
-        }
-      } else if (baseline == TRUE) {
-        BASE <- coef(object)["c"] * basefac      
-        if (is.na(BASE)) stop("Need a model with a 'c' parameter!")
-      }
-      newDATA <- object$DATA     
-      newDATA[, 2] <- newDATA[, 2] - BASE
-      object <- update(object, data = newDATA, cyc = 1, fluo = 2)        
-    }
-        
     CYCS <- object$DATA[, 1]    
     EFFobj<- eff(object, ...)
     SEQ <- EFFobj$eff.x      

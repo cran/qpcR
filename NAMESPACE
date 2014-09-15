@@ -49,11 +49,11 @@ sliwin,
 takeoff
 )
 
-importFrom(MASS, mvrnorm)
-importFrom(minpack.lm, nlsLM)
-importFrom(rgl, plot3d)
-importFrom(robustbase, covMcd)
-importFrom(Matrix, nearPD)
+importFrom("MASS", mvrnorm)
+importFrom("minpack.lm", nlsLM, nls.lm.control)
+importFrom("rgl", plot3d, points3d, axis3d, mtext3d, lines3d)
+importFrom("robustbase", covMcd)
+importFrom("Matrix", nearPD)
 
 ## S3 methods
 S3method(update, pcrfit)

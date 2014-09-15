@@ -11,7 +11,8 @@ exclude = NULL,
 type = "cpD2",
 labels = NULL, 
 norm = FALSE,
-baseline = FALSE,
+baseline = c("none", "mean", "median", "lin", "quad", "parm"),
+basecyc = 1:8, 
 basefac = 1,
 smooth = NULL, 
 smoothPAR = NULL, 
@@ -26,14 +27,15 @@ verbose = TRUE,
 {
   remove <- match.arg(remove)
   names <- match.arg(names)
-    
+  if (!is.numeric(baseline)) baseline <- match.arg(baseline)  
+      
   ## make initial 'modlist'
   if (class(x) != "modlist") {  
     if (names(x)[cyc] != "Cycles") stop("Column 1 should be named 'Cycles'!")
     modLIST <- try(modlist(x = x, cyc = cyc, fluo = fluo, model = model, check = check, checkPAR = checkPAR,
-                       remove = remove, exclude = exclude, labels = labels, norm = norm, baseline = baseline, 
-                       basefac = basefac, smooth = smooth, smoothPAR = smoothPAR, factor = factor, 
-                       opt = opt, optPAR = optPAR, verbose = verbose, ...), silent = TRUE)   
+                           remove = remove, exclude = exclude, labels = labels, norm = norm, baseline = baseline,
+                           basecyc = basecyc, basefac = basefac, smooth = smooth, smoothPAR = smoothPAR, 
+                           factor = factor, opt = opt, optPAR = optPAR, verbose = verbose, ...), silent = TRUE)   
     if (inherits(modLIST, "try-error")) stop("There was an error during 'modlist' creation.")
   } else modLIST <- x 
                            

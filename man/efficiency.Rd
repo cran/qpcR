@@ -10,7 +10,7 @@ This function calculates the PCR efficiency of a model of class 'pcrfit', includ
 
 \usage{
 efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL, 
-           shift = 0, amount = NULL, baseline = FALSE, basefac = 1, ...)
+           shift = 0, amount = NULL, ...)
 }
 
 \arguments{
@@ -20,8 +20,6 @@ efficiency(object, plot = TRUE, type = "cpD2", thresh = NULL,
   \item{thresh}{an (optional) numeric value for a fluorescence threshold border. Overrides \code{type}.}
   \item{shift}{a user defined shift in cycles from the values defined by \code{type}. See 'Examples'.}
   \item{amount}{the template amount or molecule number for quantitative calibration.}
-  \item{baseline}{type of baseline subtraction. See 'Details'.}
-  \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
   \item{...}{other parameters to be passed to \code{\link{eff}} or \code{\link{plot.pcrfit}}.}
 }
 
@@ -40,8 +38,6 @@ a numeric value taken from the fluorescence threshold output of the PCR software
 The initial fluorescence \eqn{F_0} for relative or absolute quantification is either calculated by setting \eqn{x = 0} in the sigmoidal model of \code{object} giving \code{init1} or by calculating an exponential model down (\code{init2}) with \eqn{F_0 = \frac{F_n}{E^n}}, with \eqn{F_n} = raw fluorescence, \eqn{E} = PCR efficiency and \eqn{n} = the cycle number defined by \code{type}. If a template amount is defined, a conversion factor \eqn{cf = \frac{amount}{F_0}} is given. The different measures for goodness-of-fit give an overview for the validity of the efficiency estimation. First and second derivatives are calculated from the fitted function and the maxima of the derivatives curve and the efficiency curve are obtained. 
 
 If \code{type = "maxRatio"}, the maximum efficiency is calculated from the cubic spline interpolated raw fluorescence values and therefore NOT from the sigmoidal fit. This is a different paradigm and will usually result in fairly the same threshold cycles as with \code{type = "cpD2"}, but the efficiencies are generally lower. See documentation to \code{\link{maxRatio}}. This method is usually not applied for calculating efficiencies that are to be used for relative quantification, but one might try...  
-
-\code{baseline} subtraction is done by either subtracting the baseline parameter 'c' of the sigmoidal model and refitting (\code{"TRUE"}), using a single value (i.e. \code{0.5}) or the averaged values from a defined range of cycles, i.e. \code{1:8}. It is switched off by default, but in case of data with a high baseline (such as in TaqMan PCR), it should be turned on as otherwise this will give highly underestimated efficiencies and hence wrong \code{init2} values.
 }
 
 \value{

@@ -1,6 +1,20 @@
+qpcR 1.4 - 0 (15-09-2014) 
+Small update for a scientific paper (=> to comply to reviewer comments...)!
+
+New functions: none
+
+Changes and bug-fixes in functions:
+  * 'modlist' and 'pcrbatch' have acquired new baselining functionality. Baseline values can now be subtracted with several new methods as defined in "baseline" and cycles defined in "basecyc":
+a) a numeric value such as baseline = 0.2 for subtracting from each F_i.
+b) "mean": subtracts the mean of all "basecyc" cycles from each F_i.
+"median": subtracts the median of all "basecyc" cycles from each F_i.
+"lin": creates a linear model of all "basecyc" cycles, predicts P_i over all cycles i from this model, and subtracts F_i - P_i.
+"quad": creates a quadratic model of all "basecyc" cycles, predicts P_i over all cycles i from this model, and subtracts F_i - P_i.
+"parm": extracts the 'c' parameter from the fitted sigmoidal model, subtracts this value from all F_i, and then refits.
+
 qpcR 1.3 - 9 (16-07-2014) 
 
-New functions: 
+New functions: none
 
 Changes and bug-fixes in functions:
 	* fixed a bug in 'pcrbatch' that gave an error when using threshold fluorescence values for Eff/Cq estimation.

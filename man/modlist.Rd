@@ -10,8 +10,10 @@ Essential function to create a list of nonlinear models from the columns (runs) 
 \usage{
 modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2", 
         checkPAR = parKOD(), remove = c("none", "fit", "KOD"), 
-        exclude = NULL, labels = NULL, norm = FALSE, baseline = FALSE,
-        basefac = 1, smooth = NULL, smoothPAR = NULL, factor = 1, opt = FALSE,
+        exclude = NULL, labels = NULL, norm = FALSE, 
+        baseline = c("none", "mean", "median", "lin", "quad", "parm"),
+        basecyc = 1:8, basefac = 1, smooth = NULL, smoothPAR = NULL, 
+        factor = 1, opt = FALSE, 
         optPAR = list(sig.level = 0.05, crit = "ftest"), verbose = TRUE, ...)
 }
 
@@ -26,8 +28,9 @@ modlist(x, cyc = 1, fluo = NULL, model = l4, check = "uni2",
   \item{exclude}{either \code{""} for samples with missing column names or a regular expression defining columns (samples) to be excluded from \code{modlist}. See 'Details'.} 
   \item{labels}{a vector containing labels, i.e. for defining replicate groups prior to \code{\link{ratiobatch}}.}
   \item{norm}{logical. Should the raw data be normalized within [0, 1] before model fitting?}
-  \item{baseline}{type of baseline subtraction. Same as in \code{\link{efficiency}}.}
-  \item{basefac}{a factor when using averaged baseline cycles, such as \code{0.95}.}
+  \item{baseline}{type of baseline subtraction. See 'Details'.}
+  \item{basecyc}{cycle range to be used for baseline subtraction, i.e. \code{1:5}.}
+  \item{basefac}{a factor for the baseline value, such as \code{0.95}.}
   \item{smooth}{which curve smoothing method to use. See 'Details'.}
   \item{smoothPAR}{parameters to be supplied to the smoothing functions, supplied as a list. See 'Details'.}
   \item{factor}{a multiplication factor for the fluorescence response values (barely useful, but who knows...).}
@@ -42,6 +45,15 @@ A list with each item containing the model from each column. A \code{names} item
 }
 
 \details{
+From version 1.4-0, the following baselining methods are available for the fluorescence values:\cr
+\code{baseline = numeric}: a numeric value such as \code{baseline = 0.2} for subtracting from each \eqn{F_i}.\cr
+\code{"mean"}: subtracts the mean of all \code{basecyc} cycles from each \eqn{F_i}.\cr
+\code{"median"}: subtracts the median of all \code{basecyc} cycles from each \eqn{F_i}.\cr
+\code{"lin"}: creates a linear model of all \code{basecyc} cycles, predicts \eqn{P_i} over all cycles \eqn{i} from this model, and subtracts \eqn{F_i - P_i}.\cr
+\code{"quad"}: creates a quadratic model of all \code{basecyc} cycles, predicts \eqn{P_i} over all cycles \eqn{i} from this model, and subtracts \eqn{F_i - P_i}.\cr
+\code{"parm"}: extracts the \eqn{c} parameter from the fitted sigmoidal model and subtracts this value from all \eqn{F_i}.\cr
+It is switched off by default, but in case of data with a high baseline (such as in TaqMan PCR), it should be turned on as otherwise this will give highly underestimated efficiencies and hence wrong \code{init2} values.\cr
+
 From version 1.3-8, the following smoothing methods are available for the fluorescence values:\cr
 \code{"lowess"}: Lowess smoothing, see \code{\link{lowess}}, parameter in \code{smoothPAR}: f.\cr
 \code{"supsmu"}: Friedman's SuperSmoother, see \code{\link{supsmu}}, parameter in \code{smoothPAR}: span.\cr
@@ -67,9 +79,9 @@ Andrej-Nikolai Spiess
 \examples{
 ## Calculate efficiencies and ct values 
 ## for each run in the 'reps' data, 
-## subtract baseline using the 
+## subtract baseline using mean of 
 ## first 8 cycles.
-ml1 <- modlist(reps, model = l5, baseline = 1:8)
+ml1 <- modlist(reps, model = l5, baseline = "mean")
 getPar(ml1, type = "curve")
 
 ## 'Crossing points' for the first 3 runs (normalized)
@@ -112,6 +124,15 @@ plot(ml8, which = "single")
 ## weighted by inverse residuals.
 ml9 <- modlist(reps, weights = "1/abs(resid)")
 plot(ml9, which = "single")
+
+## Use linear model of the first 10
+## cycles for baselining.
+ml10 <- modlist(reps, basecyc = 1:10, baseline = "lin")
+plot(ml10)
+
+## Use a single value for baselining.
+ml11 <- modlist(reps, basecyc = 1:10, baseline = 0.5)
+plot(ml11)
 }
 }
 
