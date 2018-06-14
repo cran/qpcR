@@ -60,13 +60,13 @@ calib(refcurve = CAL, predcurve = PRED, thresh = "cpD2",
        dil = COPIES, plot = FALSE) 
 
 ## Using a defined treshold value.
-calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
+#calib(refcurve = CAL, predcurve = PRED, thresh = 0.5, dil = COPIES) 
 
 ## Using six dilutions with four replicates/dilution.
 \dontrun{
-CAL2 <- modlist(reps, fluo = 2:25)
-calib(refcurve = CAL2, predcurve = PRED, thresh = "cpD2", 
-      dil = COPIES, group = gl(6,4)) 
+#CAL2 <- modlist(reps, fluo = 2:25)
+#calib(refcurve = CAL2, predcurve = PRED, thresh = "cpD2", 
+#      dil = COPIES, group = gl(6,4)) 
 } 
 }
 

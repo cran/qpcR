@@ -6,7 +6,7 @@ plot = TRUE,
 ...)
 {
   method <- match.arg(method)
-  if (class(x) == "pcrfit") ml <- modlist(x) else ml <- x    
+  if (class(x)[1] == "pcrfit") ml <- modlist(x) else ml <- x    
   COLS <- rainbow(length(ml))   
   
   RES <- lapply(ml, function(x) eff(x, method = switch(method, spline = "spline", sigfit = "sigfit"), 

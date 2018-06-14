@@ -32,14 +32,9 @@ Andrej-Nikolai Spiess.
 }
 
 \examples{
-\dontrun{
 ## Simple example with fit parameters.
 ml1 <- modlist(rutledge, model = l5)
 getPar(ml1, type = "fit")
-
-## Simple example with plotting of threshold cycles.
-res1 <- getPar(ml1, type = "curve", cp = "cpD2", eff = "sliwin")
-barplot(res1[1, ], las = 2)
 
 ## Using a mechanistic model such as
 ## 'mak3' and extracting D0 values
@@ -47,7 +42,6 @@ barplot(res1[1, ], las = 2)
 ml2 <- modlist(rutledge, 1, 2:41, model = mak3)
 res <- getPar(ml2, type = "fit")
 barplot(log10(res[1, ]), las = 2)
-}
 }
 
 \keyword{models}

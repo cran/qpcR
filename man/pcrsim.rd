@@ -82,9 +82,9 @@ res3$statList
 ## for each of the GOF measures,
 ## use PRESS statistic => SLOW!
 ## BIC wins!!
-res4 <- pcrsim(m1, error = 0.05, nsim = 20, fitmodel = list(l3, l4, l5),
+res4 <- pcrsim(m1, error = 0.05, nsim = 10, fitmodel = list(l4, l5, l6),
                select = TRUE, PRESS = TRUE)
-apply(res4$modelMat, 2, function(x) sum(x == 2))
+apply(res4$modelMat, 2, function(x) sum(x == 1))
 } 
 }  
 

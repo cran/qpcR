@@ -1,3 +1,8 @@
+qpcR 1.4 - 1 (29-05-2018)
+Changes and bug-fixes in functions:
+  * removed a bug in 'plot.pcrfit' that would display an additional line in the graph when setting type = "l".
+  * fixed namespace issues and problems with C-registration for CRAN compatibility.
+
 qpcR 1.4 - 0 (15-09-2014) 
 Small update for a scientific paper (=> to comply to reviewer comments...)!
 

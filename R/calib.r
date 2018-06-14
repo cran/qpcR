@@ -9,8 +9,8 @@ conf = 0.95,
 B = 200
 )
 {
-  if (class(refcurve) != "modlist") stop("'refcurve' is not a 'modlist'!")
-  if (!is.null(predcurve) & class(predcurve) != "modlist") stop("'predcurve' is not a 'modlist'!")
+  if (class(refcurve)[1] != "modlist") stop("'refcurve' is not a 'modlist'!")
+  if (!is.null(predcurve) & class(predcurve)[1] != "modlist") stop("'predcurve' is not a 'modlist'!")
   if (thresh != "cpD2" && !is.numeric(thresh)) stop("'thresh' must be either 'cpD2' or numeric!")
   if (is.null(dil)) stop("Please define dilutions!")
   if (!is.null(group) && (length(dil) != length(unique(group)))) stop("Supply as many dilutions as number of PCR groups in 'refcurve'!")

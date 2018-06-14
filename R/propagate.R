@@ -24,7 +24,7 @@ verbose = FALSE,
   if (!is.expression(expr) && !is.call(expr)) stop("'expr' must be an expression")
   crit.all <- c("perm > init", "perm == init", "perm < init")
   if (is.null(perm.crit)) perm.crit <- crit.all
-  else if (!(perm.crit %in% crit.all)) stop("'perm.crit' must be one of 'perm > init', 'perm == init' or 'perm < init'!") 
+  else if (!(all(perm.crit %in% crit.all))) stop("'perm.crit' must be one of 'perm > init', 'perm == init' or 'perm < init'!") 
   if (type == "stat") do.perm <- FALSE
   if (NROW(data) == 1) plot <- FALSE          
   if (nsim > 0 && nsim < 5000) stop("Do at least 5000 simulations...")

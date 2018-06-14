@@ -843,7 +843,7 @@ peaks <- function (series, span = 3, what = c("max", "min"), do.pad = TRUE, ...)
 fetchData <- function(object)
 {
   ### 'pcrfit' object
-  if (class(object) == "pcrfit") DATA <- object$DATA
+  if (class(object)[1] == "pcrfit") DATA <- object$DATA
   
   ### any other object
   if (class(object$call$data) == "name") DATA <- eval(object$call$data)
@@ -1008,7 +1008,7 @@ whittaker <- function(y, lambda)
   w = rep(1, ny)
   z <- d <- e <- rep(0, length(y))
   
-  OUT <- .C("whittaker",
+  OUT <- .C("whittaker_C",
             w = as.double(w),
             y = as.double(y),
             z = as.double(z),
@@ -1027,7 +1027,7 @@ EMA <- function(y, alpha)
   ny <- length(y)
   z <- numeric(ny)
   
-  OUT <- .C("EMA",
+  OUT <- .C("EMA_C",
             y = as.double(y),
             z = as.double(z),
             alph = as.double(alpha),

@@ -1,14 +1,14 @@
-void whittaker(double *w, double *y, double *z, double *lamb, int *mm,
+void whittaker_C(double *w, double *y, double *z, double *lamb, int *mm,
              double *d, double *c)
 /* Smoothing and interpolation with first differences.
    Input:  weights (w), data (y): vector from 1 to m.
    Input:  smoothing parameter (lambda), length (m).
    Input:  working arrays d and c (same length as y)
-   Output: smoothed vector (z): vector from 1 to m. */
+   Output: smoothed vector (z): vector from 1 to m. 
+*/
 {
   int i, i1, m;
-  double lambda;
-  lambda = *lamb;
+  double lambda = *lamb;
   m = *mm - 1;
   d[0] = w[0] + lambda;
   c[0] = -lambda / d[0];
@@ -24,17 +24,17 @@ void whittaker(double *w, double *y, double *z, double *lamb, int *mm,
   for (i = m - 1; 0 <= i; i--) z[i] = z[i] / d[i] - c[i] * z[i + 1];
 }
 
-void EMA(double *y, double *z, double *alph, int *ny)
+void EMA_C(double *y, double *z, double *alph, int *ny)
 /* Exponential weighted moving average.
    Input:  data (y): vector from 1 to ny.
    Input:  data (z): empty vector from 1 to ny.   
    Input:  smoothing parameter (alpha).
    Input:  integer (ny): length of y.
-   */
+   Output: smoothed vector (z): vector from 1 to m. 
+*/
 {
   int i, n;
-  double alpha;
-  alpha = *alph;
+  double alpha = *alph;
   n = *ny;
   
   z[0] = y[0];

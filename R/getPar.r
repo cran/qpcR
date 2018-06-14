@@ -44,7 +44,7 @@ getPar <- function(x, type = c("fit", "curve"), cp = "cpD2", eff = "sigfit", ...
       tempRES <- tryCatch(efficiency(tempMOD, plot = FALSE, type = cp, ...), error = function(e) NA)
       tempCT <- tryCatch(tempRES[[outNAME]], error = function(e) NA)
       RES[1, i] <- tempCT 
-      RES[2, i] <- switch(eff, "sigfit" =  if (!is.na(tempRES)) tempRES$eff else NA,
+      RES[2, i] <- switch(eff, "sigfit" =  if (!all(is.na(tempRES))) tempRES$eff else NA,
                           "expfit" = tryCatch(expfit(tempMOD, plot = FALSE, ...)$eff, error = function(e) NA),
                           "sliwin" = tryCatch(sliwin(tempMOD, plot = FALSE, ...)$eff, error = function(e) NA))          
    }                       

@@ -19,7 +19,7 @@ PRESS <- function(object, verbose = TRUE)
     newDATA <- DATA[-i, ]    
     
     ## update new Model without data
-    if (class(object) == "pcrfit") newMOD <- pcrfit(newDATA, cyc = 1, fluo = 2, model = object$MODEL, verbose = FALSE) 
+    if (class(object)[1] == "pcrfit") newMOD <- pcrfit(newDATA, cyc = 1, fluo = 2, model = object$MODEL, verbose = FALSE) 
     else newMOD <- update(object, data = newDATA)
     
     newPRED <- as.data.frame(DATA[i, PRED.pos])

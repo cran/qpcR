@@ -86,7 +86,7 @@ University Science Books (1996), New York.\cr
 
 Evaluation of measurement data - Guide to the expression of uncertainty in measurement.\cr
 JCGM 100:2008 (GUM 1995 with minor corrections).\cr
-\url{http://www.ifcc.org/pdf/GUM_JCGM_100_2008_E.pdf}.\cr
+\url{https://www.bipm.org/utils/common/documents/jcgm/JCGM_100_2008_E.pdf}.\cr
 
 \bold{Higher-order Taylor expansion:}\cr
 On higher-order corrections for propagating uncertainties.\cr

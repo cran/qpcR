@@ -53,7 +53,7 @@ eff(m1, sequence = c(5, 35, 0.1), plot = TRUE)
 
 ## When using cubic splines it is preferred 
 ## to use the smoothing option.
-eff(m1, method = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
+#eff(m1, method = "spline", plot = TRUE, smooth = TRUE, baseshift = 0.3)  
 }
 
 \keyword{models}

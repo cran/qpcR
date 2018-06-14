@@ -167,7 +167,7 @@ Annotation: X.Y (X = gene name, Y = sample name) (\code{vermeulen1}), X.STD_Y.Z 
 Hardware: Lightcycler 480 (Roche).\cr
 Details:\cr
 Primers for AHCY, AKR1C1, ALUsq(Eurogentec), ARHGEF7, BIRC5, CAMTA1, CAMTA2, CD44, CDCA5, CDH5, CDKN3, CLSTN1, CPSG3, DDC, DPYSL3, ECEL1, ELAVL4, EPB41L3, EPHA5, EPN2, FYN, GNB1, HIVEP2, HMBS, HPRT1, IGSF4, INPP1, MAP2K4, MAP7, MAPT, MCM2, MRPL3, MTSS1, MYCN(4), NHLH2, NM23A, NRCAM, NTRK1, ODC1, PAICS, PDE4DIP, PIK3R1, PLAGL1, PLAT, PMP22, PRAME, PRDM2, PRKACB, PRKCZ, PTN, PTPRF, PTPRH, PTPRN2, QPCT, SCG2, SDHA(1), SLC25A5, SLC6A8, SNAPC1, TNFRSF, TYMS, UBC(2), ULK2 and WSB1. SybrGreen I dye.\cr
-Originally, raw data was available at \url{http://medgen.ugent.be/jvermeulen}, but site is down. The complete (\code{vermeulen_all}) and smaller (\code{vermeulen_sub}) datasets can be downloaded from \url{http://www.dr-spiess.de/qpcR/datasets.html}.
+Originally, raw data was available at \emph{http://medgen.ugent.be/jvermeulen}, but site is down. The complete (\code{vermeulen_all}) and smaller (\code{vermeulen_sub}) datasets can be downloaded from \url{http://www.dr-spiess.de/qpcR/datasets.html}.
 }
 
 \author{

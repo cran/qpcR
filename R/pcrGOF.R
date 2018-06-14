@@ -5,7 +5,7 @@ pcrGOF <- function(object, PRESS = FALSE)
                   RMSE = RMSE(object))    
   
   fcsq <- try(fitchisq(object), silent = TRUE)
-  if (!inherits(fcsq, "try-error") & !is.na(fcsq)) retList <- c(retList, chi2.red = fcsq$chi2.red)
+  if (!inherits(fcsq, "try-error") & !all(is.na(fcsq))) retList <- c(retList, chi2.red = fcsq$chi2.red)
             
   if (PRESS) {
     P.square <- tryCatch(PRESS(object, verbose = TRUE)$P.square, error = function(e) NA)

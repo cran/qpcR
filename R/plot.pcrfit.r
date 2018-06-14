@@ -1,24 +1,19 @@
 plot.pcrfit <- function(
 x, 
-which = c("all", "single", "3D", "image"),
+type = c("all", "single", "3D", "image"),
 fitted = TRUE, 
 add = FALSE,
 col = NULL, 
-confband = c("none", "confidence", "prediction"),
-errbar = c("none", "sd", "se", "conf"),
-par3D = list(),
 par2D = list(),
-parCI = list(),
-parSD = list(), 
+par3D = list(),
 ...) 
 {
-  confband <- match.arg(confband)
-  errbar <- match.arg(errbar)
-  which <- match.arg(which)    
-  
+  type <- match.arg(type)    
   object <- x
   
-  if (class(x) != "modlist") modLIST <- list(object) else modLIST <- object      
+  print(class(x))
+  
+  if (class(x)[1] != "modlist") modLIST <- list(object) else modLIST <- object      
     
   ## extract cycles and fluorescence values from all curves
   allCYC <- lapply(modLIST, function(x) x$DATA[, 1])
@@ -46,7 +41,7 @@ parSD = list(),
   } else COL <- rep(col, length.out = LEN)   
     
   ## 3D plot empty setup using par3D parameters
-  if (which == "3D") {
+  if (type == "3D") {
     do.call(plot3d, modifyList(list(x = CYC, y = 1:LEN, z = MAX, type = "n", axes = FALSE, box = FALSE, xlab = "", 
            ylab = "", zlab = "", zlim = c(0, 1.1 * MAX)), par3D))
     do.call(axis3d, modifyList(list('x', at = pretty(CYC), cex = 0.5), par3D))
@@ -58,19 +53,22 @@ parSD = list(),
   }   
   
   ## standard 'all' plot empty setup
-  if (which == "all" && !add)   
-    do.call(plot, modifyList(list(CYC, rep(MAX, length(CYC)), ylim = c(MIN, MAX), 
-         xlab = "Cycles", ylab = "Raw fluorescence", type = "n", las = 1), par2D)) 
+  if (type == "all" && !add) {   
+    tempLIST <- modifyList(list(CYC, rep(MAX, length(CYC)), ylim = c(MIN, MAX), 
+                           xlab = "Cycles", ylab = "Raw fluorescence", las = 1), par2D)
+    tempLIST$type <- "n"
+    do.call(plot, tempLIST)   
+  }
   
   ## plot matrix empty setup
-  if (which == "single") {
+  if (type == "single") {
     DIM <- ceiling(sqrt(LEN))
     par(mfrow = c(DIM, DIM))
     par(mar = c(0.2, 0.2, 1, 0.2))
   } 
   
   ## image plot 
-  if (which == "image") {
+  if (type == "image") {
     RUNS <- 1:length(modLIST)
     nRUNS <- length(RUNS)
     ## unique cycles
@@ -88,6 +86,7 @@ parSD = list(),
     axis(2, at = seq(0, 1, length.out = nRUNS), labels = rev(RUNS))
   }
   
+  ## iterate through all curves
   for (i in 1:LEN) {
     DATA <- modLIST[[i]]$DATA    
     DATA <- na.omit(DATA)      
@@ -96,19 +95,19 @@ parSD = list(),
     m <- na.omit(m)
           
     ## plot 3D curves
-    if (which == "3D") {
+    if (type == "3D") {
       do.call(points3d, modifyList(list(x = DATA[, 1], y = i, z = DATA[, 2], color = COL[i]), par3D))
       if (!is.null(FITTED) && fitted) do.call(lines3d, modifyList(list(x = DATA[m, 1], y = i, z = FITTED[m], color = COL[i]), par3D))      
     }
     
     ## plot 2D curves
-    if (which == "all") {
+    if (type == "all") {
       do.call(points, modifyList(list(DATA[, 1], DATA[, 2], col = COL[i]), par2D))
       if (!is.null(FITTED) && fitted) do.call(lines, modifyList(list(DATA[m, 1], FITTED[m], col = COL[i]), par2D)) 
     } 
-    
+        
     ## plot matrix curves
-    if (which == "single") {
+    if (type == "single") {
       NAME <- NAMES[i]
       ## color by failed fit or failed structure
       if (grepl("\\*\\*[[:alnum:]]*", NAME)) colMAIN <- "blue" 
@@ -118,24 +117,6 @@ parSD = list(),
                          xlab = FALSE, ylab = FALSE, xaxt = "n", yaxt = "n", col = COL[i]), par2D)), silent = TRUE)
       if (inherits(TRY, "try-error")) next      
       if (!is.null(FITTED) && fitted) do.call(lines, modifyList(list(DATA[m, 1], FITTED[m], col = COL[i]), par2D))      
-    } 
-        
-    ## confidence band
-    if (confband != "none") {      
-      CONFINT <- predict(modLIST[[i]], interval = confband, ...)
-      do.call(lines, modifyList(list(CYC, CONFINT$Lower, col = 2), parCI))
-      do.call(lines, modifyList(list(CYC, CONFINT$Upper, col = 2), parCI))
-    }
-    
-    ## error bars and confidence intervals
-    if (errbar != "none") {      
-      if (class(object)[2] != "replist") stop("Error bars only possible on a 'replist'!")      
-      STAT <- switch(errbar, sd = tapply(DATA[, 2], DATA[, 1], function(x) sd(x, na.rm = TRUE)),
-                     se = tapply(DATA[, 2], DATA[, 1], function(x) sd(x, na.rm = TRUE)/sqrt(length(na.omit(x)))),
-                     conf = predict(modLIST[[i]], interval = "conf", ...))
-      upperSTAT <- switch(errbar, sd = STAT, se = STAT, conf = STAT$Upper - FITTED[m])
-      lowerSTAT <- switch(errbar, sd = STAT, se = STAT, conf = FITTED[m] - STAT$Lower)
-      do.call(arrows, modifyList(list(DATA[m, 1], FITTED[m] - lowerSTAT, DATA[m, 1], FITTED[m] + upperSTAT, angle = 90, code = 3, col = COL[i], length = 0.05), parSD))
-    } 
+    }     
   }     
 }  

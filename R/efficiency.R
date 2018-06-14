@@ -118,7 +118,7 @@ amount = NULL,
 
     if (plot) {
         par(mar = c(5, 4, 4, 4))
-        plot(object, lwd = 1.5, main = NA, cex.main = 0.9, ...)
+        plot(object, lwd = 1.5, main = NA, cex.main = 0.9, type = "all")
         points(CYC, fluo, col = 1, pch = 16)    
         lines(SEQ, D1seq, col = 2, lwd = 1.5) 
         lines(SEQ, D2seq, col = 3, lwd = 1.5)  
@@ -132,7 +132,7 @@ amount = NULL,
         mtext(side = 4, "Efficiency", line = 2.5, col = 4)         
         abline(h = maxEFF, lwd = 1.5, col = 4)
         abline(v = cycmaxD1, lwd = 1.5, col = 2)
-                    
+        
         switch(type, maxE = abline(v = cycmaxEFF, lwd = 1.5, col = 4),
                      expR = abline(v = cycEXP, lwd = 1.5, col = 6),           
                      Cy0 = abline(v = Cy0reg, lwd = 1.5, col = "darkviolet"),
@@ -174,9 +174,6 @@ amount = NULL,
             col = 1, adj = 0.65, cex = 0.9)
         mtext(paste("Model:", object$MODEL$name), line = 3, col = 1, adj = 0.5, 
             cex = 0.9)
-        
-        par(new = TRUE)
-        plot(object, type = "n", axes = FALSE, main = "", xlab = "", ylab = "")
     }
     
     return(list(eff = maxEFF, resVar = round(resVar(object), 8), AICc = AICc(object), AIC = AIC(object), 

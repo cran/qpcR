@@ -11,7 +11,7 @@ verbose = TRUE,
 {
   type <- match.arg(type)
   
-  if (class(object) != "pcrfit") stop("Use only with objects of class 'pcrfit'!")   
+  if (class(object)[1] != "pcrfit") stop("Use only with objects of class 'pcrfit'!")   
     
   ## get data from object
   fetchDATA <- fetchData(object)

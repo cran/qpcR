@@ -11,7 +11,7 @@ PRESS = FALSE,
 ...
 )
 {
-    if (class(object) != "pcrfit") stop("object must be of class 'pcrfit'!")
+    if (class(object)[1] != "pcrfit") stop("object must be of class 'pcrfit'!")
 
     ## take fitted values as template
     CYCS <- object$DATA[, 1]
